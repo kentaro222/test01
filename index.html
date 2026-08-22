@@ -5829,4 +5829,483 @@ ${'</scr'+'ipt>'}`;
   try{for(const a of catalogList('bgm')){if(a.loopStart==null)a.loopStart=0}saveLocal()}catch(_){}
 })();
 </script>
+<style id="tatenovel-v41-ui-cleanup">
+/* Material management is a primary authoring action. */
+#openAssetManager,
+button[data-open-assets]{
+  background:var(--accent)!important;
+  color:#10141e!important;
+  border-color:transparent!important;
+  font-weight:900!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 2px 10px rgba(0,0,0,.18);
+}
+#openAssetManager:hover,
+button[data-open-assets]:hover{filter:brightness(1.06)}
+#openAssetManager:active,
+button[data-open-assets]:active{filter:brightness(.94)}
+</style>
+<script id="tatenovel-v41-command-ui-cleanup">
+(function(){
+  'use strict';
+  // V41: group/all visibility shorthands are legacy-compatible only.
+  // New UI/documentation uses individual non-blocking commands instead.
+  function refreshHelp41(){
+    const hint=document.querySelector('.left .hintBox');
+    if(!hint)return;
+    hint.innerHTML=`<b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br>
+    <b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br>
+    <b>@名前</b> 任意話者　<b>@</b> 話者名を消す<br><br>
+    <b>画像ブロックは準備・差分設定</b>です。未指定スロットは前の状態を引き継ぎます。<br>
+    <b>+a / -a</b> Aを表示 / 非表示　<b>+b / -b</b> B　<b>+c / -c</b> C　<b>+d / -d</b> D<br>
+    <b>+bg / -bg</b> 背景を表示 / 非表示　<b>+il a / -il a</b> イラストAを表示 / 非表示<br>
+    <span style="color:var(--muted)">時間指定の前は半角スペース必須。例: <b>+a 1.5</b>。演出・切替は開始後すぐ次へ進むため、複数を同時に始めたい場合は <b>+a</b>、<b>+b</b> のように連続して書けます。完了待ちは <b>w 1.5</b> のように明示します。</span><br><br>
+    <b>[bg 識別名]</b> 背景準備　<b>[chara a 識別名]</b> 立ち絵A準備　<b>[il a 識別名]</b> イラストA準備<br>
+    <b>[bgm 識別名]</b> BGM準備　<b>[se 識別名]</b> SE準備　<b>[voice 識別名]</b> VOICE準備<br>
+    <b>+bgm / -bgm</b> BGM再生 / 停止　<b>+se / -se</b> SE再生 / 停止　<b>+voice / -voice</b> VOICE再生 / 停止<br>
+    <b>[dark]</b> / <b>[light]</b> 暗転 / 明転　<b>//コメント</b> 制作コメント（ゲーム実行時は無視）`;
+  }
+
+  // Remove the dangerous/redundant full reset entry from the normal UI.
+  // Existing project/new-project and unused-asset cleanup remain available.
+  document.getElementById('clearAllAppData')?.remove();
+
+  // Keep final block hints free of ALL command recommendations even if an older
+  // field renderer supplies them internally.
+  const prevFields41=window.fields;
+  if(typeof prevFields41==='function'){
+    window.fields=function(c,i){
+      let h=prevFields41.apply(this,arguments);
+      if(typeof h!=='string')return h;
+      h=h
+        .replace(/、全員同時なら\s*<b>\+chara all<\/b>/g,'')
+        .replace(/、全スロット同時なら\s*<b>\+il all<\/b>/g,'')
+        .replace(/全員同時なら\s*<b>\+chara all<\/b>。?/g,'')
+        .replace(/全スロット同時なら\s*<b>\+il all<\/b>。?/g,'');
+      return h;
+    };
+  }
+
+  refreshHelp41();
+  try{renderEditor?.()}catch(_){ }
+})();
+</script>
+<style id="tatenovel-v42-slotset-style">
+.slotSetHintV42{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#121720;color:#cbd3df;font-size:11px;line-height:1.55}
+</style>
+<script id="tatenovel-v42-slotset-commands">
+(function(){
+  'use strict';
+  const ORDER42='abcd';
+  const defaultFade42=()=>{const n=Number(projectSettings?.defaultFadeDuration);return Number.isFinite(n)?Math.max(0,n):.8};
+  const normalizeSlots42=s=>[...new Set(String(s||'').split(''))].sort((a,b)=>ORDER42.indexOf(a)-ORDER42.indexOf(b)).join('');
+  const uniqueSlots42=s=>{s=String(s||'');return !!s&&/^[abcd]+$/.test(s)&&new Set(s).size===s.length};
+  function parseSlotLine42(t){
+    let m=String(t||'').match(/^([+-])([abcd]+)(?: ([0-9]+(?:\.[0-9]+)?))?$/);
+    if(m&&uniqueSlots42(m[2]))return {kind:'char',sign:m[1],slots:normalizeSlots42(m[2]),duration:m[3]==null?defaultFade42():Number(m[3])};
+    m=String(t||'').match(/^([+-])il ([abcd]+)(?: ([0-9]+(?:\.[0-9]+)?))?$/);
+    if(m&&uniqueSlots42(m[2]))return {kind:'illust',sign:m[1],slots:normalizeSlots42(m[2]),duration:m[3]==null?defaultFade42():Number(m[3])};
+    return null;
+  }
+  function looksLikeRemovedOrMalformed42(t){
+    t=String(t||'');
+    return /^(?:[+-][abcd]+(?:$|[ 　0-9])|[+-]il(?:\s|$)|[+-]all(?:\s|$)|[+-]scene(?:\s|$)|[+-]chara(?:\s|$))/.test(t);
+  }
+  function preprocess42(raw){
+    let markBase=987420000,seq=0,valid=new Map(),invalid=new Map();
+    const lines=String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>{
+      const t=line.trim(),p=parseSlotLine42(t);
+      if(p){const mark=markBase+(seq++);valid.set(mark,p);return (p.kind==='illust'?'+il a ':'+a ')+mark}
+      if(looksLikeRemovedOrMalformed42(t)){
+        const token='\uE120TNV42_'+(seq++)+'\uE121';invalid.set(token,line);return token;
+      }
+      return line;
+    });
+    return {src:lines.join('\n'),valid,invalid};
+  }
+  function postprocess42(pages,prep){
+    for(const page of pages||[]){
+      const out=[];
+      for(const ev of page.events||[]){
+        if(ev?.type==='visibility'&&prep.valid.has(Number(ev.duration))){
+          const p=prep.valid.get(Number(ev.duration));
+          for(const k of p.slots){
+            out.push({type:'visibility',cmd:p.sign+(p.kind==='illust'?'illust:'+k:k),duration:p.duration});
+          }
+          continue;
+        }
+        if(ev?.type==='text'&&typeof ev.value==='string'&&prep.invalid.has(ev.value)){
+          out.push({type:'text',value:prep.invalid.get(ev.value)});continue;
+        }
+        out.push(ev);
+      }
+      page.events=out;
+    }
+    return pages;
+  }
+
+  // Final canonical shorthand parser. ALL/SCENE/CHARA ALL are no longer commands.
+  const prevParse42=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    const prep=preprocess42(raw),pages=prevParse42.call(this,prep.src,initialSpeaker);
+    return postprocess42(pages,prep);
+  };
+
+  // Script TXT output normalizes slot sets to A->D order. Internal Builder text is not rewritten while typing.
+  function normalizeText42(raw){
+    return String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>{
+      const lead=(line.match(/^\s*/)||[''])[0],tail=(line.match(/\s*$/)||[''])[0],t=line.trim(),p=parseSlotLine42(t);
+      if(!p)return line;
+      const body=p.sign+(p.kind==='illust'?'il ':'')+p.slots+(t.match(/ ([0-9]+(?:\.[0-9]+)?)$/)?.[0]||'');
+      return lead+body+tail;
+    }).join('\n');
+  }
+  if(window.ScriptV1&&typeof ScriptV1.serialize==='function'){
+    const oldSerialize42=ScriptV1.serialize;
+    ScriptV1.serialize=function(input){
+      const list=(input||[]).map(c=>{
+        if(!c||c.type!=='text')return c;
+        const x=JSON.parse(JSON.stringify(c));
+        if(typeof x.source==='string')x.source=normalizeText42(x.source);
+        if(typeof x.text==='string')x.text=normalizeText42(x.text);
+        return x;
+      });
+      return oldSerialize42.call(this,list);
+    };
+  }
+
+  // Helpful validation: command-looking malformed/deprecated forms are errors rather than silently accepted aliases.
+  if(typeof window.validateScenario==='function'){
+    const oldValidate42=window.validateScenario;
+    window.validateScenario=function(){
+      const r=oldValidate42.apply(this,arguments)||{issues:[]};r.issues=Array.isArray(r.issues)?r.issues:[];
+      for(let i=0;i<commands.length;i++){
+        const c=commands[i];if(c?.type!=='text')continue;
+        for(const line of String(c.text||'').replace(/\r\n?/g,'\n').split('\n')){
+          const t=line.trim();if(!looksLikeRemovedOrMalformed42(t))continue;
+          if(parseSlotLine42(t))continue;
+          if(/^([+-])(?:all|scene)(?:\s|$)/.test(t)||/^([+-])chara(?:\s|$)/.test(t)||/^([+-])il all(?:\s|$)/.test(t))
+            r.issues.push({level:'error',msg:`${i+1}: ALL系コマンドは廃止されています（例: -abcd 1 / +il abcd 2）`});
+          else r.issues.push({level:'error',msg:`${i+1}: スロット集合コマンドの形式が不正です。時間指定の前は半角スペース必須、A〜Dの重複不可です`});
+        }
+      }
+      return r;
+    };
+  }
+
+  function refreshHelp42(){
+    const hint=document.querySelector('.left .hintBox');if(!hint)return;
+    hint.innerHTML=`<b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br>
+    <b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br>
+    <b>@名前</b> 任意話者　<b>@</b> 話者名を消す<br><br>
+    <b>画像ブロックは準備・差分設定</b>です。未指定スロットは前の状態を引き継ぎます。<br>
+    <b>+a / -a</b> Aを表示 / 非表示　<b>+ab / -cd 1</b> 複数スロットを同時開始　<b>+abcd</b> A〜Dすべて<br>
+    <b>+il a / -il a</b> イラストA　<b>+il ab / -il cd 1</b> 複数　<b>+il abcd</b> A〜Dすべて<br>
+    <b>+bg / -bg</b> 背景を表示 / 非表示<br>
+    <span style="color:var(--muted)">スロット集合はA〜Dのみ・重複不可。入力順に意味はなく、Script TXT保存時は a→b→c→d に正規化します。時間指定の前は半角スペース必須。演出・切替は非同期で、完了待ちは <b>w 1</b> のように明示します。</span><br><br>
+    <b>[bg 識別名]</b> 背景準備　<b>[chara a 識別名]</b> 立ち絵A準備　<b>[il a 識別名]</b> イラストA準備<br>
+    <b>[bgm 識別名]</b> BGM準備　<b>[se 識別名]</b> SE準備　<b>[voice 識別名]</b> VOICE準備<br>
+    <b>+bgm / -bgm</b> BGM再生 / 停止　<b>+se / -se</b> SE再生 / 停止　<b>+voice / -voice</b> VOICE再生 / 停止<br>
+    <b>[dark]</b> / <b>[light]</b> 暗転 / 明転　<b>//コメント</b> 制作コメント（ゲーム実行時は無視）`;
+  }
+
+  // Update block-specific hints without reintroducing ALL aliases.
+  if(typeof window.fields==='function'){
+    const oldFields42=window.fields;
+    window.fields=function(c,i){
+      let h=oldFields42.apply(this,arguments);if(typeof h!=='string')return h;
+      if(c?.type==='chars'&&!h.includes('slotSetHintV42'))h+=`<div class="slotSetHintV42">表示切替: <b>+a</b> / <b>-a</b>。複数なら <b>+ab</b>、全4スロットなら <b>+abcd</b>。同時開始・非同期です。</div>`;
+      if(c?.type==='illust'&&!h.includes('slotSetHintV42'))h+=`<div class="slotSetHintV42">表示切替: <b>+il a</b> / <b>-il a</b>。複数なら <b>+il ab</b>、全4スロットなら <b>+il abcd</b>。同時開始・非同期です。</div>`;
+      return h;
+    };
+  }
+  refreshHelp42();
+
+  // Exported game receives exactly the same canonical parser. It expands a group into
+  // independent non-blocking visibility events, so all targets begin in the same run turn.
+  const PLAYER_PATCH_V42=String.raw`<script>
+(function(){
+  'use strict';
+  var ORD42='abcd';
+  function norm42(s){var a=[],seen={};String(s||'').split('').forEach(function(k){if(!seen[k]){seen[k]=1;a.push(k)}});return a.sort(function(x,y){return ORD42.indexOf(x)-ORD42.indexOf(y)}).join('')}
+  function uniq42(s){s=String(s||'');if(!s||!/^[abcd]+$/.test(s))return false;var z={};for(var i=0;i<s.length;i++){if(z[s[i]])return false;z[s[i]]=1}return true}
+  function def42(){return typeof df==='function'?df():.8}
+  function one42(t){var m=String(t||'').match(/^([+-])([abcd]+)(?: ([0-9]+(?:\.[0-9]+)?))?$/);if(m&&uniq42(m[2]))return{kind:'char',sign:m[1],slots:norm42(m[2]),duration:m[3]==null?def42():Number(m[3])};m=String(t||'').match(/^([+-])il ([abcd]+)(?: ([0-9]+(?:\.[0-9]+)?))?$/);if(m&&uniq42(m[2]))return{kind:'illust',sign:m[1],slots:norm42(m[2]),duration:m[3]==null?def42():Number(m[3])};return null}
+  function like42(t){return /^(?:[+-][abcd]+(?:$|[ 　0-9])|[+-]il(?:\s|$)|[+-]all(?:\s|$)|[+-]scene(?:\s|$)|[+-]chara(?:\s|$))/.test(String(t||''))}
+  var oldPd42=pd;
+  pd=function(raw,initial){
+    var base=987420000,seq=0,good={},bad={},lines=String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){var t=line.trim(),p=one42(t);if(p){var n=base+(seq++);good[n]=p;return(p.kind==='illust'?'+il a ':'+a ')+n}if(like42(t)){var tok='\uE120TNV42_'+(seq++)+'\uE121';bad[tok]=line;return tok}return line}),pages=oldPd42(lines.join('\n'),initial);
+    (pages||[]).forEach(function(pg){var out=[];(pg.events||[]).forEach(function(ev){var p;if(ev&&ev.type==='visibility'&&(p=good[Number(ev.duration)])){for(var i=0;i<p.slots.length;i++){var k=p.slots[i];out.push({type:'visibility',cmd:p.sign+(p.kind==='illust'?'illust:'+k:k),duration:p.duration})}return}if(ev&&ev.type==='text'&&typeof ev.value==='string'&&Object.prototype.hasOwnProperty.call(bad,ev.value)){out.push({type:'text',value:bad[ev.value]});return}out.push(ev)});pg.events=out});return pages
+  };
+})();
+${'</scr'+'ipt>'}`;
+  const oldMakePlayer42=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){const html=oldMakePlayer42.call(this,project,settings,catalog);return html.replace('</body></html>',PLAYER_PATCH_V42+'</body></html>')};
+
+  try{renderEditor?.();if(selectedIndex>=0)showVisualAt?.(selectedIndex);renderValidation?.()}catch(e){console.error('v42 refresh',e)}
+})();
+</script>
+
+<style id="tatenovel-v43-group-off-style">
+.groupOffHintV43{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.5}
+</style>
+<script id="tatenovel-v43-group-off">
+(function(){
+  'use strict';
+  const ORD43='abcd';
+  const uniq43=s=>{s=String(s||'').toLowerCase();return !!s&&/^[abcd]+$/.test(s)&&new Set(s).size===s.length};
+  const norm43=s=>String(s||'').toLowerCase().split('').sort((a,b)=>ORD43.indexOf(a)-ORD43.indexOf(b)).join('');
+
+  // OFF alone may address a slot set. Material preparation remains one slot per command.
+  // [chara abcd off] -> [chara a off][chara b off][chara c off][chara d off]
+  // [il bd off]      -> [il b off][il d off]
+  function expandGroupOff43(raw){
+    return String(raw??'').replace(/\[(chara|il)\s+([abcd]+)\s+off\]/gi,(full,kind,slots)=>{
+      slots=String(slots||'').toLowerCase();
+      if(!uniq43(slots))return full;
+      const n=norm43(slots),k=String(kind).toLowerCase();
+      if(n.length<=1)return `[${k} ${n} off]`;
+      return [...n].map(x=>`[${k} ${x} off]`).join('');
+    });
+  }
+  function normalizeGroupOff43(raw){
+    return String(raw??'').replace(/\[(chara|il)\s+([abcd]+)\s+off\]/gi,(full,kind,slots)=>{
+      slots=String(slots||'').toLowerCase();
+      if(!uniq43(slots))return full;
+      return `[${String(kind).toLowerCase()} ${norm43(slots)} off]`;
+    });
+  }
+
+  const prevParse43=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    return prevParse43.call(this,expandGroupOff43(raw),initialSpeaker);
+  };
+
+  // TXT export keeps the compact group form, normalized A->D.
+  if(window.ScriptV1&&typeof ScriptV1.serialize==='function'){
+    const oldSerialize43=ScriptV1.serialize;
+    ScriptV1.serialize=function(input){
+      const list=(input||[]).map(c=>{
+        if(!c||c.type!=='text')return c;
+        const x=JSON.parse(JSON.stringify(c));
+        if(typeof x.source==='string')x.source=normalizeGroupOff43(x.source);
+        if(typeof x.text==='string')x.text=normalizeGroupOff43(x.text);
+        return x;
+      });
+      return oldSerialize43.call(this,list);
+    };
+  }
+
+  // Group targets are legal only with OFF. No [chara ab cue] / [il ab cue], and no ON alias.
+  if(typeof window.validateScenario==='function'){
+    const oldValidate43=window.validateScenario;
+    window.validateScenario=function(){
+      const r=oldValidate43.apply(this,arguments)||{issues:[]};
+      r.issues=Array.isArray(r.issues)?r.issues:[];
+      for(let i=0;i<commands.length;i++){
+        const c=commands[i];if(c?.type!=='text')continue;
+        const raw=String(c.text||'');
+        const re=/\[(chara|il)\s+([^\]\s]+)(?:\s+([^\]\s]+))?([^\]]*)\]/gi;
+        let m;
+        while((m=re.exec(raw))){
+          const kind=m[1].toLowerCase(),target=String(m[2]||'').toLowerCase(),arg=String(m[3]||'').toLowerCase(),rest=String(m[4]||'').trim();
+          if(!/^[abcd]+$/.test(target)||target.length<=1)continue;
+          if(new Set(target).size!==target.length){
+            r.issues.push({level:'error',msg:`${i+1}: [${kind} ${target} ${arg||''}] のスロット指定が重複しています`});continue;
+          }
+          if(arg!=='off'||rest){
+            r.issues.push({level:'error',msg:`${i+1}: 複数スロット指定は off のみ対応です（例: [${kind} abcd off]）`});
+          }
+        }
+      }
+      return r;
+    };
+  }
+
+  function updateHelp43(){
+    const hint=document.querySelector('.left .hintBox');
+    if(hint&&!hint.innerHTML.includes('[chara abcd off]')){
+      hint.insertAdjacentHTML('beforeend','<br><b>[chara abcd off]</b> 立ち絵A〜Dの準備スロットを空にする　<b>[il abcd off]</b> イラストA〜Dの準備スロットを空にする<br><span style="color:var(--muted)">複数スロット指定は <b>off</b> のときだけ使用できます。<b>on</b> はありません。表示は +a / +ab / +il ab などを使います。</span>');
+    }
+  }
+  if(typeof window.fields==='function'){
+    const oldFields43=window.fields;
+    window.fields=function(c,i){
+      let h=oldFields43.apply(this,arguments);if(typeof h!=='string')return h;
+      if(c?.type==='chars'&&!h.includes('groupOffHintV43'))h+=`<div class="groupOffHintV43">準備スロットをまとめて空にする: <b>[chara ab off]</b> / <b>[chara abcd off]</b></div>`;
+      if(c?.type==='illust'&&!h.includes('groupOffHintV43'))h+=`<div class="groupOffHintV43">準備スロットをまとめて空にする: <b>[il ab off]</b> / <b>[il abcd off]</b></div>`;
+      return h;
+    };
+  }
+  updateHelp43();
+
+  // Exported game uses the same compact syntax by expanding it into the already-canonical
+  // one-slot OFF commands before the player parser sees the text.
+  const PLAYER_PATCH_V43=String.raw`<script>
+(function(){
+  'use strict';
+  var O43='abcd';
+  function u43(s){s=String(s||'').toLowerCase();if(!s||!/^[abcd]+$/.test(s))return false;var z={};for(var i=0;i<s.length;i++){if(z[s[i]])return false;z[s[i]]=1}return true}
+  function n43(s){return String(s||'').toLowerCase().split('').sort(function(a,b){return O43.indexOf(a)-O43.indexOf(b)}).join('')}
+  function x43(raw){return String(raw==null?'':raw).replace(/\[(chara|il)\s+([abcd]+)\s+off\]/gi,function(full,kind,slots){slots=String(slots||'').toLowerCase();if(!u43(slots))return full;var n=n43(slots),k=String(kind).toLowerCase();if(n.length<=1)return '['+k+' '+n+' off]';var out='';for(var i=0;i<n.length;i++)out+='['+k+' '+n[i]+' off]';return out})}
+  var oldPd43=pd;pd=function(raw,initial){return oldPd43(x43(raw),initial)};
+})();
+${'</scr'+'ipt>'}`;
+  const oldMakePlayer43=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=oldMakePlayer43.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER_PATCH_V43+'</body></html>');
+  };
+
+  try{renderEditor?.();if(selectedIndex>=0)showVisualAt?.(selectedIndex);renderValidation?.()}catch(e){console.error('v43 refresh',e)}
+})();
+</script>
+
+<style id="tatenovel-v46-command-guard-style">
+.commandGuardHintV46{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.5}
+</style>
+<script id="tatenovel-v46-command-guard">
+(function(){
+  'use strict';
+  const SLOT_ORDER46='abcd';
+  const fade46=()=>{const n=Number(projectSettings?.defaultFadeDuration);return Number.isFinite(n)?Math.max(0,n):.8};
+  const uniqueSlots46=s=>{s=String(s||'');return !!s&&/^[abcd]+$/.test(s)&&new Set(s).size===s.length};
+  const normSlots46=s=>String(s||'').split('').sort((a,b)=>SLOT_ORDER46.indexOf(a)-SLOT_ORDER46.indexOf(b)).join('');
+  const num46=s=>Math.max(0,Number(s)||0);
+
+  // Final shorthand command guard. Earlier parsers remain responsible for normal dialogue,
+  // inline [commands], speaker changes, waits, etc. This layer only converts a valid whole-line
+  // shorthand if an earlier parser accidentally left it as a text event.
+  function commandEvents46(value){
+    const t=String(value??'');
+    let m;
+    if((m=t.match(/^w +(\d+(?:\.\d+)?)$/)))return [{type:'timewait',seconds:Number(m[1])}];
+    if((m=t.match(/^([+-])bgm(?: (\d+(?:\.\d+)?))?$/)))return [{type:'visibility',cmd:m[1]+'bgm',duration:m[2]==null?fade46():num46(m[2])}];
+    if((m=t.match(/^([+-])(se|voice)$/)))return [{type:'visibility',cmd:m[1]+m[2],duration:0}];
+    if((m=t.match(/^([+-])bg(?: (\d+(?:\.\d+)?))?$/)))return [{type:'visibility',cmd:m[1]+'bg',duration:m[2]==null?fade46():num46(m[2])}];
+    if((m=t.match(/^([+-])([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&uniqueSlots46(m[2])){
+      const d=m[3]==null?fade46():num46(m[3]);
+      return [...normSlots46(m[2])].map(k=>({type:'visibility',cmd:m[1]+k,duration:d}));
+    }
+    if((m=t.match(/^([+-])il ([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&uniqueSlots46(m[2])){
+      const d=m[3]==null?fade46():num46(m[3]);
+      return [...normSlots46(m[2])].map(k=>({type:'visibility',cmd:m[1]+'illust:'+k,duration:d}));
+    }
+    if((m=t.match(/^-pict(?: (\d+(?:\.\d+)?))?$/))){
+      const d=m[1]==null?fade46():num46(m[1]);
+      return [
+        {type:'visibility',cmd:'-bg',duration:d},
+        {type:'visibility',cmd:'-a',duration:d},{type:'visibility',cmd:'-b',duration:d},{type:'visibility',cmd:'-c',duration:d},{type:'visibility',cmd:'-d',duration:d},
+        {type:'visibility',cmd:'-illust:a',duration:d},{type:'visibility',cmd:'-illust:b',duration:d},{type:'visibility',cmd:'-illust:c',duration:d},{type:'visibility',cmd:'-illust:d',duration:d}
+      ];
+    }
+    return null;
+  }
+  function guardPages46(pages){
+    for(const page of pages||[]){
+      const out=[];
+      for(const ev of page.events||[]){
+        if(ev?.type==='text'&&typeof ev.value==='string'){
+          const replacement=commandEvents46(ev.value);
+          if(replacement){out.push(...replacement);continue}
+        }
+        out.push(ev);
+      }
+      page.events=out;
+    }
+    return pages;
+  }
+
+  const parseBefore46=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    return guardPages46(parseBefore46.call(this,raw,initialSpeaker));
+  };
+
+  // Some old preview reset paths briefly leave illustration visibility as a boolean.
+  // Normalize it before any per-slot illustration visibility command executes.
+  const visibilityBefore46=window.setVisibility;
+  if(typeof visibilityBefore46==='function')window.setVisibility=function(cmd,duration){
+    const key=String(cmd||'').slice(1);
+    if((key==='illust'||key==='scene'||key.startsWith('illust:'))&&(!runtime.illustVisible||typeof runtime.illustVisible!=='object')){
+      runtime.illustVisible={a:false,b:false,c:false,d:false};
+    }
+    return visibilityBefore46.apply(this,arguments);
+  };
+
+  // Validation for pict itself. Existing validators continue to own the other shorthand rules.
+  if(typeof window.validateScenario==='function'){
+    const validateBefore46=window.validateScenario;
+    window.validateScenario=function(){
+      const r=validateBefore46.apply(this,arguments)||{issues:[]};
+      r.issues=Array.isArray(r.issues)?r.issues:[];
+      r.issues=r.issues.filter(issue=>{
+        const m=String(issue?.msg||'').match(/^(\d+): イラスト素材「([abcd]+)」がありません$/);
+        if(!m||m[2].length<2)return true;
+        const c=commands[Number(m[1])-1];
+        return !new RegExp('\\[il\\s+'+m[2]+'\\s+off\\]','i').test(String(c?.text||''));
+      });
+      for(let i=0;i<commands.length;i++){
+        const c=commands[i];if(c?.type!=='text')continue;
+        for(const raw of String(c.text||'').replace(/\r\n?/g,'\n').split('\n')){
+          const t=raw.trim();
+          if(/^\+pict(?:\s|$)/.test(t))r.issues.push({level:'error',msg:`${i+1}: +pict はありません。画像一括透過は -pict を使います`});
+          else if(/^-pict/.test(t)&&!/^\-pict(?: (?:\d+(?:\.\d+)?))?$/.test(t))r.issues.push({level:'error',msg:`${i+1}: -pict の形式が不正です。例: -pict / -pict 1`});
+        }
+      }
+      return r;
+    };
+  }
+
+  function refreshHelp46(){
+    const hint=document.querySelector('.left .hintBox');
+    if(!hint)return;
+    if(!hint.innerHTML.includes('-pict'))hint.insertAdjacentHTML('beforeend','<br><b>-pict</b> / <b>-pict 1</b> 背景＋立ち絵A〜D＋イラストA〜Dをまとめて透過<br><span style="color:var(--muted)">現在表示中の画像だけを非表示にし、準備状態は残します。非同期なので完了待ちは <b>w 1</b> のように明示します。</span>');
+  }
+  if(typeof window.fields==='function'){
+    const fieldsBefore46=window.fields;
+    window.fields=function(c,i){
+      let h=fieldsBefore46.apply(this,arguments);if(typeof h!=='string')return h;
+      if((c?.type==='bg'||c?.type==='chars'||c?.type==='illust')&&!h.includes('commandGuardHintV46'))h+=`<div class="commandGuardHintV46">画像一括透過: <b>-pict</b> / <b>-pict 1</b>（背景＋立ち絵A〜D＋イラストA〜D、非同期・準備状態は保持）</div>`;
+      return h;
+    };
+  }
+  refreshHelp46();
+
+  // Exported player receives the same final whole-line command guard after all older player patches.
+  const PLAYER_PATCH_V46=String.raw`<script>
+(function(){
+  'use strict';
+  var O46='abcd';
+  function fd46(){return typeof df==='function'?df():.8}
+  function uq46(s){s=String(s||'');if(!s||!/^[abcd]+$/.test(s))return false;var z={};for(var i=0;i<s.length;i++){if(z[s[i]])return false;z[s[i]]=1}return true}
+  function ns46(s){return String(s||'').split('').sort(function(a,b){return O46.indexOf(a)-O46.indexOf(b)}).join('')}
+  function n46(s){return Math.max(0,Number(s)||0)}
+  function ce46(v){var t=String(v==null?'':v),m,d,out=[],slots,i,k;
+    if((m=t.match(/^w +(\d+(?:\.\d+)?)$/)))return[{type:'timewait',seconds:Number(m[1])}];
+    if((m=t.match(/^([+-])bgm(?: (\d+(?:\.\d+)?))?$/)))return[{type:'visibility',cmd:m[1]+'bgm',duration:m[2]==null?fd46():n46(m[2])}];
+    if((m=t.match(/^([+-])(se|voice)$/)))return[{type:'visibility',cmd:m[1]+m[2],duration:0}];
+    if((m=t.match(/^([+-])bg(?: (\d+(?:\.\d+)?))?$/)))return[{type:'visibility',cmd:m[1]+'bg',duration:m[2]==null?fd46():n46(m[2])}];
+    if((m=t.match(/^([+-])([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&uq46(m[2])){d=m[3]==null?fd46():n46(m[3]);slots=ns46(m[2]);for(i=0;i<slots.length;i++)out.push({type:'visibility',cmd:m[1]+slots[i],duration:d});return out}
+    if((m=t.match(/^([+-])il ([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&uq46(m[2])){d=m[3]==null?fd46():n46(m[3]);slots=ns46(m[2]);for(i=0;i<slots.length;i++)out.push({type:'visibility',cmd:m[1]+'illust:'+slots[i],duration:d});return out}
+    if((m=t.match(/^-pict(?: (\d+(?:\.\d+)?))?$/))){d=m[1]==null?fd46():n46(m[1]);return[
+      {type:'visibility',cmd:'-bg',duration:d},
+      {type:'visibility',cmd:'-a',duration:d},{type:'visibility',cmd:'-b',duration:d},{type:'visibility',cmd:'-c',duration:d},{type:'visibility',cmd:'-d',duration:d},
+      {type:'visibility',cmd:'-illust:a',duration:d},{type:'visibility',cmd:'-illust:b',duration:d},{type:'visibility',cmd:'-illust:c',duration:d},{type:'visibility',cmd:'-illust:d',duration:d}
+    ]}
+    return null
+  }
+  function gp46(pages){(pages||[]).forEach(function(pg){var o=[];(pg.events||[]).forEach(function(e){if(e&&e.type==='text'&&typeof e.value==='string'){var r=ce46(e.value);if(r){o.push.apply(o,r);return}}o.push(e)});pg.events=o});return pages}
+  var pdBefore46=pd;pd=function(raw,initial){return gp46(pdBefore46(raw,initial))};
+})();
+${'</scr'+'ipt>'}`;
+  const makePlayerBefore46=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makePlayerBefore46.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER_PATCH_V46+'</body></html>');
+  };
+
+  window.TateNovelCommandGuardV46={commandEvents:commandEvents46,guardPages:guardPages46};
+  try{renderEditor?.();if(selectedIndex>=0)showVisualAt?.(selectedIndex);renderValidation?.()}catch(e){console.error('v46 refresh',e)}
+})();
+</script>
+
 </body></html>
