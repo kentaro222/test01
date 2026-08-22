@@ -411,7 +411,7 @@ async function bootstrap(){migrateImageTransforms();migrateWaitEffects();renderE
 <script>
 (function(){
   const style=document.createElement('style');
-  style.textContent=`.phone.imageEditing{overflow:visible}.phone.imageEditing .sceneArea,.phone.imageEditing .sceneCamera{overflow:visible}.illustEditPicker{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px;padding:8px;border:1px solid var(--line);border-radius:9px;background:#141923}.illustEditPicker span{font-size:11px;color:var(--muted);font-weight:800;margin-right:4px}.illustEditPicker button{min-width:38px;border:1px solid var(--line);background:#252b36;color:#fff;border-radius:8px;padding:7px 9px;font-weight:900}.illustEditPicker button.active{background:var(--accent);color:#10141e;border-color:transparent}`;
+  style.textContent=`.illustEditPicker{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px;padding:8px;border:1px solid var(--line);border-radius:9px;background:#141923}.illustEditPicker span{font-size:11px;color:var(--muted);font-weight:800;margin-right:4px}.illustEditPicker button{min-width:38px;border:1px solid var(--line);background:#252b36;color:#fff;border-radius:8px;padding:7px 9px;font-weight:900}.illustEditPicker button.active{background:var(--accent);color:#10141e;border-color:transparent}`;
   document.head.appendChild(style);
 
   const oldPreviewIllust=document.getElementById('previewIllust');
@@ -477,7 +477,7 @@ async function bootstrap(){migrateImageTransforms();migrateWaitEffects();renderE
       return `<details class="charSlot" ${used?'open':''}><summary><span>${title}</span><span class="charSlotState">${used?'使用中':'未使用'}</span></summary><div class="charSlotBody"><label>登録イラスト</label><select data-i="${i}" data-f="${k}Cue">${catalogOptions('illust',c[k+'Cue']||'',true)}</select><label>スロット倍率</label>${numCtl(i,k+'Scale',c[k+'Scale']??100,10,400,5,'%')}<label>左右</label>${numCtl(i,k+'X',c[k+'X']??0,-100,100,1,'%')}<label>上下</label>${numCtl(i,k+'Y',c[k+'Y']??0,-100,100,1,'%')}<label>レイヤー</label><select data-i="${i}" data-f="${k}LayerMode"><option value="front" ${c[k+'LayerMode']!=='behind'?'selected':''}>最前面（立ち絵の上）</option><option value="behind" ${c[k+'LayerMode']==='behind'?'selected':''}>背景の前（立ち絵の下）</option></select><label>フェード時間（空欄＝0.8秒）</label>${optionalNumCtl(i,k+'FadeDuration',c[k+'FadeDuration'],0,10,0.1,'秒',0.8)}<label><input style="width:auto" type="checkbox" data-i="${i}" data-f="${k}StartHidden" ${c[k+'StartHidden']?'checked':''}> 初期状態を透明にする</label></div></details>`;
     };
     const picker=`<div class="illustEditPicker"><span>調整対象</span>${['a','b','c','d'].map(k=>`<button type="button" data-illust-target="${k}" class="${window.illustEditTargetKey===k?'active':''}">${k.toUpperCase()}</button>`).join('')}</div>`;
-    return `<div class="assetOpenRow" style="margin-bottom:10px"><div class="audioHint">イラストをA〜Dへ割り当てます。画像調整ON時は画面外も見えるようにしています。</div><button type="button" class="miniBtn" data-open-assets="illust">イラスト素材管理</button></div>${picker}<div class="charGrid">${slot('a','イラストA')}${slot('b','イラストB')}${slot('c','イラストC')}${slot('d','イラストD')}</div><div class="gestureHint">素材の基本拡大率 × スロット倍率。文章内では [il a cue] / [il a off] / -il a / +il a / -il all / +il all が使えます。</div>`;
+    return `<div class="assetOpenRow" style="margin-bottom:10px"><div class="audioHint">イラストをA〜Dへ割り当てます。画像調整中も実ゲームと同じ表示範囲で確認します。</div><button type="button" class="miniBtn" data-open-assets="illust">イラスト素材管理</button></div>${picker}<div class="charGrid">${slot('a','イラストA')}${slot('b','イラストB')}${slot('c','イラストC')}${slot('d','イラストD')}</div><div class="gestureHint">素材の基本拡大率 × スロット倍率。文章内では [il a cue] / [il a off] / -il a / +il a / -il all / +il all が使えます。</div>`;
   };
 
   const oldRenderEditor=window.renderEditor;
@@ -3775,6 +3775,1845 @@ ${'</scr'+'ipt>'}`;
     const html=previousMakePlayerHTMLV23(project,settings,catalog);
     return html.replace('</body></html>',PLAYER_PATCH_V23+'</body></html>');
   };
+})();
+</script>
+
+<style id="tatenovel-v25-testplay-style">
+#previewPanel .previewBtns{flex-wrap:wrap}
+#previewPanel .previewBtns button{min-width:92px}
+#previewFromSelected,#previewPause{flex:1 1 42%}
+#previewPause.active{background:var(--accent);color:#10141e;border-color:transparent;font-weight:900}
+.testPlayMeta{margin-top:7px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#11151c;color:var(--muted);font-size:10px;line-height:1.5;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.testPlayMeta .text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.testPlayMeta button{flex:0 0 auto;border:1px solid var(--line);background:#252b36;color:#fff;border-radius:7px;padding:5px 7px;font-size:10px}
+.cmd.testPlayCurrent{outline:2px solid rgba(119,159,255,.85);outline-offset:2px}
+@media(max-width:720px){#previewPanel .previewBtns button{font-size:11px;min-height:42px}.testPlayMeta{align-items:flex-start}.testPlayMeta .text{white-space:normal}}
+</style>
+<script id="tatenovel-v25-testplay">
+(function(){
+  'use strict';
+  const nativeDelay=ms=>new Promise(r=>setTimeout(r,Math.max(0,Number(ms)||0)));
+  const clone=v=>JSON.parse(JSON.stringify(v));
+  let testPaused=false;
+  let pauseWaiters=[];
+  let testStarting=false;
+  const choiceMemory=new Map();
+  const routeStorageKey=()=>`TateNovelStudioTestRoute:${projectSettings.projectId||'default'}`;
+
+  try{
+    const saved=JSON.parse(sessionStorage.getItem(routeStorageKey())||'[]');
+    if(Array.isArray(saved))for(const x of saved)if(Array.isArray(x)&&x.length===2)choiceMemory.set(String(x[0]),String(x[1]));
+  }catch(_){ }
+  function saveRoutes(){try{sessionStorage.setItem(routeStorageKey(),JSON.stringify([...choiceMemory.entries()]))}catch(_){ }}
+  function commandKey(c,i){return String(c?.id||`index:${i}`)}
+  function choiceTarget(o){return String(o?.jump??o?.target??'')}
+  function jumpTarget(c){return String(c?.label??c?.target??'')}
+  function ifTrueTarget(c){return String(c?.trueLabel??c?.thenTarget??'')}
+  function ifFalseTarget(c){return String(c?.falseLabel??c?.elseTarget??'')}
+
+  const btns=document.querySelector('#previewPanel .previewBtns');
+  const startBtn=document.getElementById('previewStart');
+  const nextBtn=document.getElementById('previewStep');
+  const originalStartClick=startBtn?.onclick;
+  if(startBtn)startBtn.textContent='▶ 最初から';
+  if(nextBtn){nextBtn.textContent='次へ';nextBtn.title='文章送り・クリック待ちを進めます'}
+
+  const fromBtn=document.createElement('button');
+  fromBtn.type='button';fromBtn.id='previewFromSelected';fromBtn.textContent='▶ 選択位置から';
+  fromBtn.title='選択中のブロックまで状態を再構築し、そこからテストします';
+  const pauseBtn=document.createElement('button');
+  pauseBtn.type='button';pauseBtn.id='previewPause';pauseBtn.textContent='⏸ 一時停止';
+  pauseBtn.setAttribute('aria-pressed','false');
+  if(btns){
+    btns.insertBefore(fromBtn,nextBtn||null);
+    btns.insertBefore(pauseBtn,nextBtn||null);
+  }
+  const meta=document.createElement('div');meta.className='testPlayMeta';meta.id='testPlayMeta';
+  meta.innerHTML='<span class="text">テストプレイ待機</span><button type="button" id="testRouteClear">経路クリア</button>';
+  const hint=document.querySelector('#previewPanel .fastTestHint');
+  if(hint)hint.insertAdjacentElement('afterend',meta); else btns?.insertAdjacentElement('afterend',meta);
+
+  function syncPause(){
+    pauseBtn.textContent=testPaused?'▶ 再開':'⏸ 一時停止';
+    pauseBtn.classList.toggle('active',testPaused);
+    pauseBtn.setAttribute('aria-pressed',testPaused?'true':'false');
+  }
+  function pauseGate(){return testPaused?new Promise(r=>pauseWaiters.push(r)):Promise.resolve()}
+  function setPaused(on,resume=true){
+    const was=testPaused;testPaused=!!on;syncPause();
+    if(was&&!testPaused){const q=pauseWaiters.splice(0);q.forEach(r=>r());if(resume&&!runtime?.waiting&&!runtime?.ended&&!testStarting)queueMicrotask(()=>window.run?.())}
+    updateMeta();
+  }
+  syncPause();
+
+  // Pause text typing/progression at the next safe timing boundary.
+  const sleepBeforeV25=window.sleep;
+  window.sleep=async function(ms){const v=await sleepBeforeV25(ms);if(!testStarting)await pauseGate();return v};
+
+  // A timed wait does not continue counting down while test-play is paused.
+  const waitBeforeV25=window.waitSeconds;
+  window.waitSeconds=function(sec){
+    if(window.TestPlayFast?.enabled)return waitBeforeV25(sec);
+    let remaining=Math.max(0,Number(sec)||0)*1000;
+    return new Promise(resolve=>{
+      let done=false,last=performance.now(),timer=0;
+      const finish=()=>{if(done)return;done=true;clearTimeout(timer);runtime.timedWait=false;runtime.waitResolve=null;resolve()};
+      const tick=()=>{
+        if(done)return;
+        const now=performance.now();
+        if(!testPaused)remaining-=Math.max(0,now-last);
+        last=now;
+        if(remaining<=0){finish();return}
+        timer=setTimeout(tick,Math.min(50,remaining));
+      };
+      runtime.timedWait=true;runtime.waitResolve=finish;tick();
+    });
+  };
+
+  const runBeforeV25=window.run;
+  window.run=function(){
+    if(testPaused||testStarting){updateMeta();return}
+    try{const r=runBeforeV25.apply(this,arguments);queueMicrotask(updateMeta);return r}
+    catch(err){showTestError(err);throw err}
+  };
+
+  function showTestError(err){
+    const n=Math.max(0,Math.min(commands.length-1,(runtime?.pc||1)-1));
+    const msg=`テスト停止: Block ${n+1} / ${err?.message||err}`;
+    try{status(msg)}catch(_){ }
+    console.error('TateNovel test-play error',err);
+    setPaused(true,false);
+  }
+
+  // Remember the author's latest branch choice for "start from selected" reconstruction.
+  const showChoicesBeforeV25=window.showChoices;
+  window.showChoices=function(c){
+    const idx=Math.max(0,(runtime?.pc||1)-1);
+    const r=showChoicesBeforeV25(c);
+    const options=c?.options||[];
+    document.querySelectorAll('#previewChoices button').forEach((b,oi)=>{
+      b.addEventListener('click',()=>{const t=choiceTarget(options[oi]);if(t){choiceMemory.set(commandKey(c,idx),t);saveRoutes();updateMeta()}},{capture:true,once:true});
+    });
+    return r;
+  };
+
+  function updateMeta(){
+    const el=meta.querySelector('.text');if(!el)return;
+    const pc=Math.max(0,Math.min(commands.length,Number(runtime?.pc)||0));
+    let label='';
+    const cur=commands[Math.max(0,pc-1)];if(cur?.type==='label')label=String(cur.name||'');
+    const state=testPaused?'一時停止':(runtime?.ended?'END':runtime?.waiting?'実行中':'待機');
+    el.textContent=`${state} / 次 ${Math.min(pc+1,commands.length||0)} / ${commands.length}${label?' / label: '+label:''} / 経路 ${choiceMemory.size}`;
+    const hi=runtime?.waiting?pc-1:pc;
+    document.querySelectorAll('.cmd.testPlayCurrent').forEach(x=>x.classList.remove('testPlayCurrent'));
+    if(hi>=0&&hi<commands.length)document.querySelector(`[data-cmd-index="${hi}"]`)?.classList.add('testPlayCurrent');
+  }
+  setInterval(updateMeta,250);
+
+  document.getElementById('testRouteClear').onclick=()=>{choiceMemory.clear();saveRoutes();updateMeta();try{status('テスト経路の記憶をクリアしました')}catch(_){ }};
+  pauseBtn.onclick=e=>{e.preventDefault();e.stopPropagation();setPaused(!testPaused,true)};
+
+  // Keep the existing graceful restart behavior, but make it a true test reset.
+  if(startBtn&&originalStartClick){
+    startBtn.onclick=e=>{
+      setPaused(false,false);testStarting=false;
+      try{stopAllPreviewAudio?.()}catch(_){ }
+      choiceMemory.size; // route memory intentionally survives a runtime reset.
+      return originalStartClick.call(startBtn,e);
+    };
+  }
+
+  async function cleanPreviewToIdle(){
+    testStarting=true;setPaused(true,false);
+    try{runtime.skipTyping=true;runtime.waitResolve?.();stopAllPreviewAudio?.()}catch(_){ }
+    if(originalStartClick){
+      const fake={preventDefault(){},stopPropagation(){}};
+      try{originalStartClick.call(startBtn,fake)}catch(err){console.warn('graceful test reset failed',err)}
+      await nativeDelay(390);
+    }else{
+      try{resetBlockPreview();stopAllPreviewAudio?.()}catch(_){ }
+      await nativeDelay(20);
+    }
+    try{runtime.waitResolve?.();stopAllPreviewAudio?.();resetBlockPreview();runtime.pc=0;refreshVars?.()}catch(err){console.error(err)}
+  }
+
+  async function applyTextStateSilent(c){
+    const pages=parseDialogue(c?.text||'',runtime.currentSpeaker||c?.speaker||'');
+    for(const p of pages){
+      if(p.speakerChanged)runtime.currentSpeaker=p.clearSpeaker?'':p.speaker;
+      for(const ev of p.events||[]){
+        if(ev.type==='visibility')setVisibility(ev.cmd,0);
+        else if(ev.type==='layer')setCharLayerPreview(ev.target,ev.value);
+        else if(ev.type==='bgPreset'){const bc=findBgPreset(ev.cue);if(bc)await transitionBgPreview(bc)}
+        else if(ev.type==='bgOff')setVisibility('-bg',0);
+        else if(ev.type==='charaSet')setCharaPreview(ev.target,ev.cue);
+        else if(ev.type==='illustSet'||ev.type==='illustPreset'){
+          const target=ev.target||'a',ic=findIllustPreset(ev.cue,target);if(ic)applyIllust(ic);
+        }
+        else if(ev.type==='illustOff')await hideIllustPreview(ev.target||'all',0);
+        else if(ev.type==='inlineEffect')applyEffectStateInstant(ev.cmd||{});
+        else if(ev.type==='bgmStop')await stopPreviewBgm(0);
+        else if(ev.type==='audioCue'&&ev.kind==='bgm'){
+          const ac=findAudioCue('bgm',ev.cue);if(ac){const x=clone(ac);x.fadeDuration=0;await playPreviewAudio(x)}
+        }
+      }
+    }
+  }
+
+  async function reconstructTo(target){
+    target=Math.max(0,Math.min(Number(target)||0,commands.length-1));
+    let pc=0,guard=0;
+    const visits=new Map();
+    while(pc<commands.length&&guard++<10000){
+      if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true}}
+      const seen=(visits.get(pc)||0)+1;visits.set(pc,seen);
+      if(seen>32)return {ok:false,message:`Block ${pc+1} 付近でループを検出しました`};
+      const c=commands[pc];runtime.pc=pc+1;
+      if(!c){pc=runtime.pc;continue}
+      if(c.type==='bg')await transitionBgPreview(c);
+      else if(c.type==='chars')applyChars(c);
+      else if(c.type==='illust')applyIllust(c);
+      else if(c.type==='var')setVar(c);
+      else if(c.type==='effect')applyEffectStateInstant(c);
+      else if(c.type==='bgm'){
+        if(c.action==='stop')await stopPreviewBgm(0);else{const x=clone(c);x.fadeDuration=0;await playPreviewAudio(x)}
+      }
+      else if(c.type==='text')await applyTextStateSilent(c);
+      else if(c.type==='jump'){
+        const n=findLabel(jumpTarget(c));if(n<0)return {ok:false,message:`Block ${pc+1}: ジャンプ先がありません`};runtime.pc=n+1;
+      }
+      else if(c.type==='if'){
+        const ok=compare(runtime.vars[c.name],c.op,parseVal(c.value));const dest=ok?ifTrueTarget(c):ifFalseTarget(c);
+        if(dest){const n=findLabel(dest);if(n<0)return {ok:false,message:`Block ${pc+1}: 条件分岐先「${dest}」がありません`};runtime.pc=n+1}
+      }
+      else if(c.type==='choice'){
+        const remembered=choiceMemory.get(commandKey(c,pc));
+        if(!remembered)return {ok:false,choiceIndex:pc,message:`Block ${pc+1} の選択経路が未確定です。\n一度「最初から」でこの選択肢を選ぶと、その経路を記憶します。`};
+        const n=findLabel(remembered);if(n<0)return {ok:false,choiceIndex:pc,message:`Block ${pc+1} の記憶済みジャンプ先「${remembered}」がありません`};runtime.pc=n+1;
+      }
+      else if(c.type==='end')return {ok:false,message:`選択位置より前の Block ${pc+1} で END に到達します`};
+      // wait / SE / VOICE / memo / comment / label are intentionally instantaneous or silent during reconstruction.
+      pc=runtime.pc;
+    }
+    if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true}}
+    return {ok:false,message:'現在のテスト経路から選択位置へ到達できません'};
+  }
+
+  fromBtn.onclick=async e=>{
+    e.preventDefault();e.stopPropagation();
+    if(selectedIndex<0||selectedIndex>=commands.length){alert('開始するブロックを選択してください');return}
+    if(testStarting)return;
+    const target=selectedIndex;
+    fromBtn.disabled=true;fromBtn.textContent='準備中…';
+    try{
+      await cleanPreviewToIdle();
+      const r=await reconstructTo(target);
+      if(!r.ok){
+        testStarting=false;setPaused(true,false);updateMeta();status?.(r.message.split('\n')[0]);alert(r.message);return;
+      }
+      runtime.pc=target;runtime.waiting=false;runtime.ended=false;
+      document.getElementById('previewText').textContent='';document.getElementById('previewSpeaker').textContent='';document.getElementById('previewChoices').innerHTML='';document.getElementById('tapHint').style.display='none';
+      refreshVars?.();testStarting=false;setPaused(false,false);status?.(`Block ${target+1} からテスト開始`);window.run();
+    }catch(err){testStarting=false;showTestError(err)}
+    finally{fromBtn.disabled=false;fromBtn.textContent='▶ 選択位置から'}
+  };
+
+  updateMeta();
+  window.TateNovelTestPlay={
+    get paused(){return testPaused},
+    pause(){setPaused(true,false)},resume(){setPaused(false,true)},
+    routes:choiceMemory,
+    startFromSelected:()=>fromBtn.click()
+  };
+})();
+</script>
+
+<style id="partial-visual-v26-style">
+.slotPatchMode{margin-bottom:10px}.slotPatchKeep{color:var(--muted);font-size:12px;padding:8px 0}.slotPatchOff{color:#f0b7b7;font-size:12px;padding:8px 0}.visualPatchHint{margin-top:10px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#121720;color:#cbd3df;font-size:11px;line-height:1.55}
+</style>
+<script id="tatenovel-v26-partial-visual-blocks" data-builder-image-fix="v28">
+(function(){
+  'use strict';
+  const K=['a','b','c','d'];
+  const DEF_ORDER={a:1,b:2,c:3,d:4};
+  const TIE={a:4,b:3,c:2,d:1};
+  const BX={a:30,b:70,c:40,d:60};
+  const CHAR_BOTTOM=108;
+  const modeOf=(c,k)=>{const m=String(c?.[k+'PatchMode']||'');if(['keep','set','off'].includes(m))return m;const cue=String(c?.[k+'Cue']||'');return cue==='__off__'?'off':(cue?'set':'keep')};
+  const order=v=>Math.max(1,Math.min(4,Math.round(Number(v)||1)));
+  const zGroup=(base,o,k)=>base+(4-order(o))*10+TIE[k];
+  const charZ=(o,k)=>zGroup(50,o,k), illZ=(layer,o,k)=>zGroup(layer==='behind'?10:100,o,k);
+  const clone=v=>JSON.parse(JSON.stringify(v));
+  const assetViewRef=a=>window.TateNovelImageV18?.viewRef?.(a)||(a?.src||'');
+
+  // Existing blocks: a real cue means "set", __off__ means explicit clear, empty means "leave unchanged".
+  let migrated=false;
+  for(const c of commands){
+    if(!c||!['chars','illust'].includes(c.type))continue;
+    for(const k of K){
+      if(!['keep','set','off'].includes(String(c[k+'PatchMode']||''))){
+        const cue=String(c[k+'Cue']||'');
+        c[k+'PatchMode']=cue==='__off__'?'off':(cue?'set':'keep');
+        migrated=true;
+      }
+      if(c[k+'PatchMode']==='keep'&&c[k+'Cue']){c[k+'Cue']='';migrated=true}
+      if(c[k+'PatchMode']==='off'&&c[k+'Cue']!=='__off__'){c[k+'Cue']='__off__';migrated=true}
+    }
+  }
+  if(Number(projectSettings.visualPatchVersion||0)<1){projectSettings.visualPatchVersion=1;migrated=true}
+  if(migrated)saveLocal();
+
+  const oldDefault=window.defaultCommand;
+  window.defaultCommand=function(type){
+    const c=oldDefault(type);
+    if(type==='chars'||type==='illust')for(const k of K){c[k+'PatchMode']='keep';c[k+'Cue']=''}
+    return c;
+  };
+
+  function patchModeSelect(i,k,m){return `<select class="slotPatchMode" data-i="${i}" data-f="${k}PatchMode"><option value="keep" ${m==='keep'?'selected':''}>変更なし</option><option value="set" ${m==='set'?'selected':''}>設定・変更</option><option value="off" ${m==='off'?'selected':''}>スロットを空にする</option></select>`}
+  function orderSelect(i,k,v){const o=order(v??DEF_ORDER[k]);return `<select data-i="${i}" data-f="${k}Order"><option value="1" ${o===1?'selected':''}>1　最前面</option><option value="2" ${o===2?'selected':''}>2</option><option value="3" ${o===3?'selected':''}>3</option><option value="4" ${o===4?'selected':''}>4　最背面</option></select>`}
+  const oldFields=window.fields;
+  window.fields=function(c,i){
+    if(c?.type==='chars'){
+      const slot=(k,title)=>{const m=modeOf(c,k),cue=String(c[k+'Cue']||'');const state=m==='keep'?'変更なし':m==='off'?'空にする':(cue?'設定':'設定・変更');let body=`<label>このブロックで</label>${patchModeSelect(i,k,m)}`;
+        if(m==='keep')body+=`<div class="slotPatchKeep">このスロットには触れません。前の状態をそのまま引き継ぎます。</div>`;
+        else if(m==='off')body+=`<div class="slotPatchOff">このスロットの登録を解除します。表示中ならそのスロットだけ画面から外れます。</div>`;
+        else body+=`<label>話者名</label><input data-i="${i}" data-f="${k}Name" value="${esc(c[k+'Name']||'')}"><label>登録立ち絵</label><select data-i="${i}" data-f="${k}Cue">${catalogOptions('chara',cue==='__off__'?'':cue,false)}</select><label>スロット倍率</label>${numCtl(i,k+'Scale',c[k+'Scale']??100,10,400,5,'%')}<label>左右</label>${numCtl(i,k+'X',c[k+'X']??0,-100,100,1,'%')}<label>上下（足元基準）</label>${numCtl(i,k+'Y',c[k+'Y']??0,-100,100,1,'%')}<label>重なり順</label>${orderSelect(i,k,c[k+'Order']??DEF_ORDER[k])}<label><input style="width:auto" type="checkbox" data-i="${i}" data-f="${k}Flip" ${c[k+'Flip']?'checked':''}> 左右反転</label>`;
+        return `<details class="charSlot" ${m==='set'?'open':''}><summary><span>${title}</span><span class="charSlotState">${state}</span></summary><div class="charSlotBody">${body}</div></details>`};
+      return `<div class="assetOpenRow" style="margin-bottom:10px"><div class="audioHint">このブロックで変更するスロットだけ指定します。</div><button type="button" class="miniBtn" data-open-assets="chara">立ち絵素材管理</button></div><div class="charGrid">${slot('a','キャラA')}${slot('b','キャラB')}${slot('c','キャラC')}${slot('d','キャラD')}</div><div class="visualPatchHint"><b>変更なし</b>のスロットは前の素材・位置・表示状態を完全に引き継ぎます。初めて設定するスロットは非表示のまま準備され、<b>+a</b> 等で表示します。すでに表示中のスロットを設定変更した場合は、表示状態を保ったまま設定が更新されます。</div>`;
+    }
+    if(c?.type==='illust'){
+      const slot=(k,title)=>{const m=modeOf(c,k),cue=String(c[k+'Cue']||'');const state=m==='keep'?'変更なし':m==='off'?'空にする':(cue?'設定':'設定・変更');let body=`<label>このブロックで</label>${patchModeSelect(i,k,m)}`;
+        if(m==='keep')body+=`<div class="slotPatchKeep">このスロットには触れません。前の状態をそのまま引き継ぎます。</div>`;
+        else if(m==='off')body+=`<div class="slotPatchOff">このスロットの登録を解除します。表示中ならそのスロットだけ画面から外れます。</div>`;
+        else body+=`<label>登録イラスト</label><select data-i="${i}" data-f="${k}Cue">${catalogOptions('illust',cue==='__off__'?'':cue,false)}</select><label>スロット倍率</label>${numCtl(i,k+'Scale',c[k+'Scale']??100,10,400,5,'%')}<label>左右</label>${numCtl(i,k+'X',c[k+'X']??0,-100,100,1,'%')}<label>上下</label>${numCtl(i,k+'Y',c[k+'Y']??0,-100,100,1,'%')}<label>表示位置</label><select data-i="${i}" data-f="${k}LayerMode"><option value="front" ${c[k+'LayerMode']!=='behind'?'selected':''}>立ち絵より前</option><option value="behind" ${c[k+'LayerMode']==='behind'?'selected':''}>立ち絵より後ろ</option></select><label>重なり順</label>${orderSelect(i,k,c[k+'Order']??DEF_ORDER[k])}`;
+        return `<details class="charSlot" ${m==='set'?'open':''}><summary><span>${title}</span><span class="charSlotState">${state}</span></summary><div class="charSlotBody">${body}</div></details>`};
+      return `<div class="assetOpenRow" style="margin-bottom:10px"><div class="audioHint">このブロックで変更するスロットだけ指定します。</div><button type="button" class="miniBtn" data-open-assets="illust">イラスト素材管理</button></div><div class="charGrid">${slot('a','イラストA')}${slot('b','イラストB')}${slot('c','イラストC')}${slot('d','イラストD')}</div><div class="visualPatchHint"><b>変更なし</b>のスロットは前の素材・位置・表示状態を引き継ぎます。前/後を先に判定し、その中で重なり順1→4、同順位はA→Dの順で手前です。</div>`;
+    }
+    return oldFields(c,i);
+  };
+
+  const oldRender=window.renderEditor;
+  window.renderEditor=function(){
+    oldRender();
+    document.querySelectorAll('select[data-f$="PatchMode"]').forEach(el=>{
+      const prior=el.onchange;
+      el.onchange=e=>{
+        prior?.call(el,e);
+        const i=+el.dataset.i,c=commands[i],k=el.dataset.f[0],m=String(el.value||'keep');
+        if(c){c[k+'PatchMode']=m;if(m==='keep')c[k+'Cue']='';else if(m==='off')c[k+'Cue']='__off__';else if(c[k+'Cue']==='__off__')c[k+'Cue']='';saveLocal();selectedIndex=i;renderEditor();showVisualAt(i);setEditTargetForSelected?.();updatePreviewCharPicker?.()}
+      };
+    });
+  };
+
+  const oldSummary=window.summary;
+  window.summary=function(c){
+    if(c?.type==='chars'||c?.type==='illust'){
+      const parts=[];for(const k of K){const m=modeOf(c,k);if(m==='set'&&c[k+'Cue'])parts.push(`${k.toUpperCase()}:${c[k+'Cue']}`);else if(m==='off')parts.push(`${k.toUpperCase()}:空`) }
+      return parts.join(' / ')||'変更なし';
+    }
+    return oldSummary(c);
+  };
+
+  // --- Builder runtime: configuration and visibility are independent state. ---
+  function ensureCharState(){runtime.charState=Object.assign({a:null,b:null,c:null,d:null},runtime.charState||{});runtime.charCue=Object.assign({a:'',b:'',c:'',d:''},runtime.charCue||{});runtime.charVisible=Object.assign({a:true,b:true,c:true,d:true},runtime.charVisible||{});runtime.charOff=Object.assign({a:false,b:false,c:false,d:false},runtime.charOff||{});runtime.charLayer=Object.assign({a:4,b:3,c:2,d:1},runtime.charLayer||{})}
+  function charStateFrom(c,k){return {cue:String(c[k+'Cue']||''),name:String(c[k+'Name']||''),scale:Number(c[k+'Scale'])||100,x:Number(c[k+'X'])||0,y:Number(c[k+'Y'])||0,order:order(c[k+'Order']??DEF_ORDER[k]),flip:!!c[k+'Flip']}}
+  function renderCharState(k,s,visible){const e=charEl(k);if(!e)return;if(!s||!s.cue){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}const a=catalogFind('chara',s.cue);if(!a){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}const sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100)),fl=s.flip?-1:1;e.className='char slot'+k.toUpperCase();e.style.zIndex=String(charZ(s.order,k));e.style.left=(BX[k]+Number(s.x||0))+'%';e.style.top=(CHAR_BOTTOM+Number(s.y||0))+'%';e.style.transformOrigin='50% 100%';e.style.transform=`translate(-50%,-100%) scale(${sc*fl},${sc})`;e.style.transition='none';e.style.opacity=visible?'1':'0';setElementAsset(e,assetViewRef(a))}
+  window.applyChars=function(c){
+    ensureCharState();runtime.chars=runtime.chars||{};
+    for(const k of K){const m=modeOf(c,k);if(m==='keep')continue;if(m==='off'){runtime.charState[k]=null;runtime.charCue[k]='';runtime.charOff[k]=true;runtime.charVisible[k]=false;renderCharState(k,null,false);continue}const prev=runtime.charState[k],wasVisible=!!prev&&runtime.charVisible[k]===true,s=charStateFrom(c,k);runtime.charState[k]=s;runtime.charCue[k]=s.cue;runtime.charOff[k]=!s.cue;runtime.charVisible[k]=!!s.cue&&wasVisible;runtime.charLayer[k]=5-s.order;for(const f of ['Name','Cue','Scale','X','Y','Order','Flip'])runtime.chars[k+f]=c[k+f];renderCharState(k,s,runtime.charVisible[k]===true)}
+  };
+  window.transitionCharsPreview=async c=>window.applyChars(c);
+  window.setCharaPreview=function(k,cue){
+    if(!K.includes(k))return;ensureCharState();const t=String(cue||'');if(t.toLowerCase()==='off'){runtime.charState[k]=null;runtime.charCue[k]='';runtime.charOff[k]=true;runtime.charVisible[k]=false;renderCharState(k,null,false);return}const a=catalogFind('chara',t);if(!a)return;const prev=runtime.charState[k]||{cue:'',name:'',scale:100,x:0,y:0,order:DEF_ORDER[k],flip:false},wasVisible=!!runtime.charState[k]&&runtime.charVisible[k]===true;const s=Object.assign({},prev,{cue:t});runtime.charState[k]=s;runtime.charCue[k]=t;runtime.charOff[k]=false;runtime.charVisible[k]=wasVisible;renderCharState(k,s,wasVisible)
+  };
+
+  function ensureIllState(){runtime.illustState=Object.assign({a:null,b:null,c:null,d:null},runtime.illustState||{});runtime.illustCue=runtime.illustCue&&typeof runtime.illustCue==='object'?Object.assign({a:'',b:'',c:'',d:''},runtime.illustCue):{a:'',b:'',c:'',d:''};runtime.illustVisible=runtime.illustVisible&&typeof runtime.illustVisible==='object'?Object.assign({a:false,b:false,c:false,d:false},runtime.illustVisible):{a:false,b:false,c:false,d:false}}
+  function illStateFrom(c,k){return {cue:String(c[k+'Cue']||''),scale:Number(c[k+'Scale'])||100,x:Number(c[k+'X'])||0,y:Number(c[k+'Y'])||0,layerMode:c[k+'LayerMode']==='behind'?'behind':'front',order:order(c[k+'Order']??DEF_ORDER[k])}}
+  function renderIllState(k,s,visible){const e=illustEl(k);if(!e)return;if(!s||!s.cue){e.className='illust hidden';e.removeAttribute('src');e.style.opacity='0';return}const a=catalogFind('illust',s.cue);if(!a){e.className='illust hidden';e.removeAttribute('src');e.style.opacity='0';return}const sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100));e.className='illust'+(s.layerMode==='behind'?' layerBehind':'');e.style.zIndex=String(illZ(s.layerMode,s.order,k));e.style.left=(50+Number(s.x||0))+'%';e.style.top=(50+Number(s.y||0))+'%';e.style.transform=`translate(-50%,-50%) scale(${sc})`;e.style.transition='none';e.style.opacity=visible?'1':'0';setElementAsset(e,assetViewRef(a))}
+  window.applyIllust=function(c){
+    ensureIllState();const targets=c?._partialIllustTarget?[c._partialIllustTarget]:K;
+    for(const k of targets){const m=c?._partialIllustTarget?'set':modeOf(c,k);if(m==='keep')continue;if(m==='off'){runtime.illustState[k]=null;runtime.illustCue[k]='';runtime.illustVisible[k]=false;renderIllState(k,null,false);continue}const prev=runtime.illustState[k],wasVisible=!!prev&&runtime.illustVisible[k]===true,s=illStateFrom(c,k);runtime.illustState[k]=s;runtime.illustCue[k]=s.cue;runtime.illustVisible[k]=!!s.cue&&wasVisible;renderIllState(k,s,runtime.illustVisible[k]===true)}
+  };
+  window.transitionIllustPreview=async c=>window.applyIllust(c);
+
+  // Asset usage: only slots explicitly set by a block count as references.
+  const oldUsed=window.usedCatalogCues;
+  window.usedCatalogCues=function(){
+    const u=oldUsed();u.chara=new Set();u.illust=new Set();const add=(set,v)=>{v=String(v||'').trim();if(v&&v!=='__off__')set.add(v)};
+    for(const c of commands){
+      if(c?.type==='chars'){
+        for(const k of K)if(modeOf(c,k)==='set')add(u.chara,c[k+'Cue']);
+      }else if(c?.type==='illust'){
+        for(const k of K)if(modeOf(c,k)==='set')add(u.illust,c[k+'Cue']);
+      }else if(c?.type==='text'){
+        const x=stripCommentLines(c.text||'');let m;
+        const cr=/\[chara\s+[abcd]\s+([^\]\s]+)/gi;while((m=cr.exec(x)))if(m[1].toLowerCase()!=='off')add(u.chara,m[1]);
+        const ir=/\[il\s+([^\]]+)\]/gi;while((m=ir.exec(x))){const p=m[1].trim().split(/\s+/),first=(p.shift()||'').toLowerCase();let cue='';if(K.includes(first))cue=p.shift()||'';else if(first!=='all')cue=first;if(cue&&cue.toLowerCase()!=='off')add(u.illust,cue)}
+      }
+    }
+    return u;
+  };
+
+  const oldValidate=window.validateScenario;
+  window.validateScenario=function(){const r=oldValidate();r.issues=r.issues.filter(x=>{const m=String(x.msg||'').match(/^(\d+): イラスト素材が未選択/);if(!m)return true;const c=commands[Number(m[1])-1];return !(c?.type==='illust'&&K.every(k=>modeOf(c,k)==='keep'))});for(let i=0;i<commands.length;i++){const c=commands[i];if(c?.type==='chars'||c?.type==='illust'){if(K.every(k=>modeOf(c,k)==='keep'))r.issues.push({level:'warn',msg:`${i+1}: ${c.type==='chars'?'立ち絵':'イラスト'}ブロックに変更対象がありません`})}}return r};
+
+  // Script v1: omitted slot = keep, "a off" = clear, row with attributes = set.
+  if(window.ScriptV1){
+    const api=window.ScriptV1,oldTo=api.toV10Command,oldFrom=api.fromV10Command,oldCanonical=api.canonicalCommands,oldSerialize=api.serialize,oldParse=api.parse;
+    function patchSlots(v10,legacy){if(!v10||!legacy||!['chars','illust'].includes(v10.type))return v10;const old=clone(v10.slots||{}),slots={};for(const k of K){const m=modeOf(legacy,k);if(m==='keep')continue;if(m==='off')slots[k]=null;else slots[k]=old[k]||null}v10.slots=slots;return v10}
+    api.toV10Command=function(c,i){return patchSlots(oldTo(c,i),c)};
+    api.fromV10Command=function(c){const out=oldFrom(c);if(c&&['chars','illust'].includes(c.type)){for(const k of K){if(!Object.prototype.hasOwnProperty.call(c.slots||{},k)){out[k+'PatchMode']='keep';out[k+'Cue']=''}else if(c.slots[k]==null){out[k+'PatchMode']='off';out[k+'Cue']='__off__'}else out[k+'PatchMode']='set'}}return out};
+    api.canonicalCommands=function(){const list=oldCanonical();for(let i=0;i<list.length;i++)patchSlots(list[i],commands[i]);return list};
+    api.serialize=function(input){const list=(input||[]).map((c,i)=>{if(c&&c.type&&c.slots)return clone(c);return api.toV10Command(c,i)});return list.map(c=>{let t=oldSerialize([c]);if(c&&['chars','illust'].includes(c.type)){const keep=K.filter(k=>!Object.prototype.hasOwnProperty.call(c.slots||{},k));if(keep.length){const lines=t.split('\n').filter((line,idx)=>idx===0||!keep.includes((line.trim().match(/^([abcd])(?:\s|$)/)||[])[1]));t=lines.join('\n')}}return t}).join('\n\n---\n\n')};
+    api.parse=function(raw,opts){const res=oldParse(raw,opts);if(res?.commands&&res?.sourceMap){const lines=String(raw??'').replace(/\r\n?/g,'\n').split('\n');for(let i=0;i<res.commands.length;i++){const c=res.commands[i];if(!c||!['chars','illust'].includes(c.type))continue;const sm=res.sourceMap[i];if(!sm)continue;const seen=new Set();for(let n=sm.startLine;n<=sm.endLine;n++){const m=(lines[n-1]||'').trim().match(/^([abcd])(?:\s|$)/i);if(m)seen.add(m[1].toLowerCase())}for(const k of K)if(!seen.has(k))delete c.slots[k]}}return res};
+  }
+
+  // Portable V10 JSON preserves the same tri-state slot semantics.
+  const oldBundle=window.portableProjectBundle;
+  window.portableProjectBundle=async function(){const b=await oldBundle();if(Array.isArray(b?.commands))for(let i=0;i<b.commands.length;i++){const v=b.commands[i],src=commands[i];if(v&&src&&['chars','illust'].includes(v.type)){const old=clone(v.slots||{}),slots={};for(const k of K){const m=modeOf(src,k);if(m==='off')slots[k]=null;else if(m==='set')slots[k]=old[k]||null}v.slots=slots}}return b};
+  const oldImport=window.importPortableProject;
+  window.importPortableProject=async function(j){const patchInfo=Array.isArray(j?.commands)?j.commands.map(c=>{if(!c||!['chars','illust'].includes(c.type))return null;const o={};for(const k of K)o[k]=!Object.prototype.hasOwnProperty.call(c.slots||{},k)?'keep':(c.slots[k]==null?'off':'set');return o}):[];const r=await oldImport(j);for(let i=0;i<commands.length;i++){const c=commands[i],info=patchInfo[i];if(c&&info&&['chars','illust'].includes(c.type))for(const k of K){c[k+'PatchMode']=info[k];if(info[k]==='keep')c[k+'Cue']='';else if(info[k]==='off')c[k+'Cue']='__off__'}}saveLocal();return r};
+
+  // Exported game: patch-only visual blocks, with accumulated character state saved/restored.
+  const PLAYER_PATCH_V26=String.raw`<script>
+(function(){
+  var K=['a','b','c','d'],D={a:1,b:2,c:3,d:4},T={a:4,b:3,c:2,d:1},BX={a:30,b:70,c:40,d:60},BASE=108;
+  function md(c,k){var m=String(c&&c[k+'PatchMode']||'');if(m==='keep'||m==='set'||m==='off')return m;var q=String(c&&c[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')}
+  function co(v){return Math.max(1,Math.min(4,Math.round(Number(v)||1)))}function gz(b,o,k){return b+(4-co(o))*10+T[k]}function cz(o,k){return gz(50,o,k)}function iz(l,o,k){return gz(l==='behind'?10:100,o,k)}
+  function ecs(){rt.charState=Object.assign({a:null,b:null,c:null,d:null},rt.charState||{});rt.charCue=Object.assign({a:'',b:'',c:'',d:''},rt.charCue||{});rt.charVisible=Object.assign({a:true,b:true,c:true,d:true},rt.charVisible||{});rt.charOff=Object.assign({a:false,b:false,c:false,d:false},rt.charOff||{});rt.charLayer=Object.assign({a:4,b:3,c:2,d:1},rt.charLayer||{})}
+  function cs(c,k){return {cue:String(c&&c[k+'Cue']||''),name:String(c&&c[k+'Name']||''),scale:Number(c&&c[k+'Scale'])||100,x:Number(c&&c[k+'X'])||0,y:Number(c&&c[k+'Y'])||0,order:co(c&&c[k+'Order']!=null?c[k+'Order']:D[k]),flip:!!(c&&c[k+'Flip'])}}
+  function rc(k,s,v){var e=playerChar(k);if(!e)return;if(!s||!s.cue){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}var a=catFind('chara',s.cue);if(!a||!a.src){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}var sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100)),fl=s.flip?-1:1;e.className='char slot'+k.toUpperCase();e.src=a.src;e.style.zIndex=String(cz(s.order,k));e.style.left=(BX[k]+Number(s.x||0))+'%';e.style.top=(BASE+Number(s.y||0))+'%';e.style.transformOrigin='50% 100%';e.style.transform='translate(-50%,-100%) scale('+(sc*fl)+','+sc+')';e.style.transition='none';e.style.opacity=v?'1':'0'}
+  var oldFresh=fresh;fresh=function(){var x=oldFresh();x.charState={a:null,b:null,c:null,d:null};return x};
+  chars=function(c,idx){ecs();if(Number.isInteger(idx))rt.charsIndex=idx;K.forEach(function(k){var m=md(c,k);if(m==='keep')return;if(m==='off'){rt.charState[k]=null;rt.charCue[k]='';rt.charOff[k]=true;rt.charVisible[k]=false;rc(k,null,false);return}var prev=rt.charState[k],vis=!!prev&&rt.charVisible[k]===true,s=cs(c,k);rt.charState[k]=s;rt.charCue[k]=s.cue;rt.charOff[k]=!s.cue;rt.charVisible[k]=!!s.cue&&vis;rt.charLayer[k]=5-s.order;rc(k,s,rt.charVisible[k]===true)})};
+  transChars=async function(c,idx){chars(c,idx)};
+  setChara=function(k,cue){if(K.indexOf(k)<0)return;ecs();var q=String(cue||'');if(q.toLowerCase()==='off'){rt.charState[k]=null;rt.charCue[k]='';rt.charOff[k]=true;rt.charVisible[k]=false;rc(k,null,false);return}var a=catFind('chara',q);if(!a)return;var prev=rt.charState[k]||{cue:'',name:'',scale:100,x:0,y:0,order:D[k],flip:false},vis=!!rt.charState[k]&&rt.charVisible[k]===true,s=Object.assign({},prev,{cue:q});rt.charState[k]=s;rt.charCue[k]=q;rt.charOff[k]=false;rt.charVisible[k]=vis;rc(k,s,vis)};
+  function eis(){rt.illustState=Object.assign({a:null,b:null,c:null,d:null},rt.illustState||{});rt.illustCue=rt.illustCue&&typeof rt.illustCue==='object'?Object.assign({a:'',b:'',c:'',d:''},rt.illustCue):{a:'',b:'',c:'',d:''};rt.illustVisible=rt.illustVisible&&typeof rt.illustVisible==='object'?Object.assign({a:false,b:false,c:false,d:false},rt.illustVisible):{a:false,b:false,c:false,d:false}}
+  function is(c,k){return {cue:String(c&&c[k+'Cue']||''),scale:Number(c&&c[k+'Scale'])||100,x:Number(c&&c[k+'X'])||0,y:Number(c&&c[k+'Y'])||0,layerMode:String(c&&c[k+'LayerMode']||'front')==='behind'?'behind':'front',order:co(c&&c[k+'Order']!=null?c[k+'Order']:D[k])}}
+  function ri(k,s,v){var e=document.getElementById('ILLUST_'+k.toUpperCase());if(!e)return;if(!s||!s.cue){e.className='illust hidden';e.removeAttribute('src');e.style.opacity='0';return}var a=catFind('illust',s.cue);if(!a||!a.src){e.className='illust hidden';e.removeAttribute('src');e.style.opacity='0';return}var sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100));e.className='illust'+(s.layerMode==='behind'?' layerBehind':'');e.src=a.src;e.style.zIndex=String(iz(s.layerMode,s.order,k));e.style.left=(50+Number(s.x||0))+'%';e.style.top=(50+Number(s.y||0))+'%';e.style.transform='translate(-50%,-50%) scale('+sc+')';e.style.transition='none';e.style.opacity=v?'1':'0'}
+  illust=function(c,idx){eis();if(Number.isInteger(idx))rt.illustIndex=idx;var targets=c&&c._partialIllustTarget?[c._partialIllustTarget]:K;targets.forEach(function(k){var m=c&&c._partialIllustTarget?'set':md(c,k);if(m==='keep')return;if(m==='off'){rt.illustState[k]=null;rt.illustCue[k]='';rt.illustVisible[k]=false;ri(k,null,false);return}var prev=rt.illustState[k],vis=!!prev&&rt.illustVisible[k]===true,s=is(c,k);rt.illustState[k]=s;rt.illustCue[k]=s.cue;rt.illustVisible[k]=!!s.cue&&vis;ri(k,s,rt.illustVisible[k]===true)})};
+  transIllust=async function(c,idx){illust(c,idx)};
+  var oldMake=makeSaveState;makeSaveState=function(src){var s=oldMake(src||rt);s.charState=clone((src||rt).charState||{a:null,b:null,c:null,d:null});return s};
+  var oldRestore=restoreState;restoreState=function(s){var saved=clone(s||{}),cs=saved.charState?clone(saved.charState):null;oldRestore(s);if(cs){ecs();rt.charState=Object.assign({a:null,b:null,c:null,d:null},cs);K.forEach(function(k){var st=rt.charState[k];rt.charCue[k]=st&&st.cue||'';rt.charOff[k]=!st;rc(k,st,!!st&&rt.charVisible[k]===true)})}if(rt.illustState)K.forEach(function(k){ri(k,rt.illustState[k],!!rt.illustState[k]&&rt.illustVisible[k]===true)})};
+})();
+${'</scr'+'ipt>'}`;
+  const oldMakePlayer=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){const html=oldMakePlayer(project,settings,catalog);return html.replace('</body></html>',PLAYER_PATCH_V26+'</body></html>')};
+
+  // Update help after all earlier compatibility patches.
+  const hint=document.querySelector('.left .hintBox');
+  if(hint)hint.innerHTML=hint.innerHTML.replace('画像ブロックは「準備」だけ','画像ブロックは「差分設定」').replace('背景・立ち絵・イラストはブロック到達時に表示せず、透明状態で配置を登録します。','立ち絵・イラストは、ブロック内で「設定・変更」を選んだスロットだけ更新します。「変更なし」のスロットは前の状態を維持します。表示・非表示は + / - コマンドで制御します。');
+
+  renderEditor();if(selectedIndex>=0){showVisualAt(selectedIndex);setEditTargetForSelected?.();updatePreviewCharPicker?.()}renderValidation();saveLocal();
+})();
+</script>
+<style id="tatenovel-v27-builder-state-style">
+.builderStateMeta{margin-top:6px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#10151d;color:var(--muted);font-size:10px;line-height:1.45}
+.builderStateMeta.warn{border-color:#8b6b36;color:#f0d59a;background:#1b1811}
+.slotInheritedState{margin:0 0 10px;padding:8px 9px;border:1px dashed #3b4658;border-radius:8px;background:#0f141c;color:#b9c4d3;font-size:11px;line-height:1.55}
+.slotInheritedState b{color:#e5ebf4}.slotInheritedState .visOn{color:#a9e2b2}.slotInheritedState .visOff{color:#b5bdc9}
+@media(max-width:720px){.slotInheritedState{font-size:12px}.builderStateMeta{font-size:11px}}
+</style>
+<script id="tatenovel-v27-builder-state">
+(function(){
+  'use strict';
+  const K=['a','b','c','d'],DEF={a:1,b:2,c:3,d:4};
+  const clone=v=>JSON.parse(JSON.stringify(v));
+  const modeOf=(c,k)=>{const m=String(c?.[k+'PatchMode']||'');if(['keep','set','off'].includes(m))return m;const q=String(c?.[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')};
+  const ord=v=>Math.max(1,Math.min(4,Math.round(Number(v)||1)));
+  const cmdKey=(c,i)=>String(c?.id||`index:${i}`);
+  const jumpTarget=c=>String(c?.label??c?.target??'');
+  const trueTarget=c=>String(c?.trueLabel??c?.thenTarget??'');
+  const falseTarget=c=>String(c?.falseLabel??c?.elseTarget??'');
+  const choiceTarget=o=>String(o?.jump??o?.target??'');
+  const labelIndex=name=>commands.findIndex(c=>c?.type==='label'&&String(c.name||'')===String(name||''));
+  const routes=()=>window.TateNovelTestPlay?.routes instanceof Map?window.TateNovelTestPlay.routes:new Map();
+
+  function graphCanReach(start,target,seen=new Set()){
+    start=Number(start);target=Number(target);
+    if(start===target)return true;
+    if(start<0||start>=commands.length||seen.has(start))return false;
+    seen.add(start);const c=commands[start];if(!c)return graphCanReach(start+1,target,new Set(seen));
+    const go=n=>graphCanReach(n,target,new Set(seen));
+    if(c.type==='end')return false;
+    if(c.type==='jump'){const n=labelIndex(jumpTarget(c));return n>=0&&go(n)}
+    if(c.type==='if'){
+      const a=trueTarget(c),b=falseTarget(c),next=[];
+      if(a){const n=labelIndex(a);if(n>=0)next.push(n)}else next.push(start+1);
+      if(b){const n=labelIndex(b);if(n>=0)next.push(n)}else next.push(start+1);
+      return next.some(go);
+    }
+    if(c.type==='choice')return (c.options||[]).some(o=>{const n=labelIndex(choiceTarget(o));return n>=0&&go(n)});
+    return go(start+1);
+  }
+
+  function applyVarTo(vars,c){const v=parseVal(c?.value);if(c?.op==='=')vars[c.name]=v;else if(c?.op==='+'||c?.op==='+=')vars[c.name]=(Number(vars[c.name])||0)+(Number(v)||0);else if(c?.op==='-'||c?.op==='-=')vars[c.name]=(Number(vars[c.name])||0)-(Number(v)||0)}
+
+  function traceTo(target){
+    target=Math.max(0,Math.min(Number(target)||0,commands.length-1));
+    const seq=[],vars={},visits=new Map(),inferred=[];let pc=0,guard=0;
+    while(pc>=0&&pc<commands.length&&guard++<12000){
+      if(pc===target)return {ok:true,sequence:seq,vars,inferred};
+      const v=(visits.get(pc)||0)+1;visits.set(pc,v);if(v>40)return {ok:false,sequence:seq,vars,inferred,message:`Block ${pc+1} 付近でループを検出しました`};
+      const c=commands[pc];seq.push(pc);if(c?.type==='var')applyVarTo(vars,c);
+      if(!c){pc++;continue}
+      if(c.type==='end')return {ok:false,sequence:seq,vars,inferred,message:`現在の経路では Block ${pc+1} の END で終了します`};
+      if(c.type==='jump'){
+        const n=labelIndex(jumpTarget(c));if(n<0)return {ok:false,sequence:seq,vars,inferred,message:`Block ${pc+1}: ジャンプ先がありません`};pc=n===target?n:n+1;continue;
+      }
+      if(c.type==='if'){
+        const yes=compare(vars[c.name],c.op,parseVal(c.value)),dest=yes?trueTarget(c):falseTarget(c);
+        if(dest){const n=labelIndex(dest);if(n<0)return {ok:false,sequence:seq,vars,inferred,message:`Block ${pc+1}: 条件分岐先「${dest}」がありません`};pc=n===target?n:n+1}else pc++;
+        continue;
+      }
+      if(c.type==='choice'){
+        const mem=routes().get(cmdKey(c,pc));let dest='';
+        if(mem&&(c.options||[]).some(o=>choiceTarget(o)===mem))dest=mem;
+        else{
+          const candidates=[];
+          for(const o of c.options||[]){const t=choiceTarget(o),n=labelIndex(t);if(n>=0&&graphCanReach(n,target))candidates.push(t)}
+          const uniq=[...new Set(candidates)];
+          if(uniq.length===1){dest=uniq[0];inferred.push({index:pc,target:dest})}
+          else if(uniq.length>1)return {ok:false,sequence:seq,vars,inferred,ambiguous:true,choiceIndex:pc,message:`Block ${pc+1} の分岐から選択位置へ複数経路で到達できます。テストプレイで経路を一度選んでください。`};
+          else return {ok:false,sequence:seq,vars,inferred,message:`現在の経路から Block ${target+1} へ到達できません`};
+        }
+        const n=labelIndex(dest);if(n<0)return {ok:false,sequence:seq,vars,inferred,message:`Block ${pc+1}: 選択先「${dest}」がありません`};pc=n===target?n:n+1;continue;
+      }
+      pc++;
+    }
+    return {ok:false,sequence:seq,vars,inferred,message:'選択位置までの状態を再構築できませんでした'};
+  }
+
+  function blankState(){return {vars:{},speaker:'',chars:{a:null,b:null,c:null,d:null},charVisible:{a:false,b:false,c:false,d:false},illust:{a:null,b:null,c:null,d:null},illVisible:{a:false,b:false,c:false,d:false}}}
+  function charFrom(c,k){return {cue:String(c?.[k+'Cue']||''),name:String(c?.[k+'Name']||''),scale:Number(c?.[k+'Scale'])||100,x:Number(c?.[k+'X'])||0,y:Number(c?.[k+'Y'])||0,order:ord(c?.[k+'Order']??DEF[k]),flip:!!c?.[k+'Flip']}}
+  function illFrom(c,k){return {cue:String(c?.[k+'Cue']||''),scale:Number(c?.[k+'Scale'])||100,x:Number(c?.[k+'X'])||0,y:Number(c?.[k+'Y'])||0,order:ord(c?.[k+'Order']??DEF[k]),layerMode:c?.[k+'LayerMode']==='behind'?'behind':'front'}}
+  function visEvent(s,cmd){
+    const on=String(cmd||'')[0]==='+',key=String(cmd||'').slice(1);
+    const chars=(key==='all'||key==='scene')?K:(K.includes(key)?[key]:[]);for(const k of chars)if(s.chars[k])s.charVisible[k]=on;
+    let ils=[];if(key==='illust'||key==='scene')ils=K;else if(key.startsWith('illust:')){const q=key.split(':')[1];ils=q==='all'?K:(K.includes(q)?[q]:[])}for(const k of ils)if(s.illust[k])s.illVisible[k]=on;
+  }
+  function applyTextToState(s,c){
+    const pages=parseDialogue(c?.text||'',s.speaker||c?.speaker||'');
+    for(const p of pages){if(p.speakerChanged)s.speaker=p.clearSpeaker?'':p.speaker;for(const ev of p.events||[]){
+      if(ev.type==='visibility')visEvent(s,ev.cmd);
+      else if(ev.type==='charaSet'){
+        const k=ev.target;if(!K.includes(k))continue;const cue=String(ev.cue||'');if(cue.toLowerCase()==='off'){s.chars[k]=null;s.charVisible[k]=false}else{const existed=!!s.chars[k],was=s.charVisible[k]===true;s.chars[k]=Object.assign({cue:'',name:'',scale:100,x:0,y:0,order:DEF[k],flip:false},s.chars[k]||{},{cue});s.charVisible[k]=existed&&was}
+      }
+      else if(ev.type==='illustSet'||ev.type==='illustPreset'){
+        let k=ev.target||'a',cue=String(ev.cue||'');if(cue.includes('::')){const p=cue.split('::');if(K.includes(p[0])){k=p[0];cue=p.slice(1).join('::')}}if(!K.includes(k))k='a';const existed=!!s.illust[k],was=s.illVisible[k]===true;s.illust[k]=Object.assign({cue:'',scale:100,x:0,y:0,order:DEF[k],layerMode:'front'},s.illust[k]||{},{cue});s.illVisible[k]=existed&&was;
+      }
+      else if(ev.type==='illustOff'){
+        let k=ev.target||'all';if(typeof ev.duration==='object'&&ev.duration?.target)k=ev.duration.target;const a=k==='all'?K:[k];for(const q of a)if(K.includes(q)){s.illust[q]=null;s.illVisible[q]=false}
+      }
+      else if(ev.type==='layer'&&K.includes(ev.target)&&s.chars[ev.target])s.chars[ev.target].order=Math.max(1,Math.min(4,5-(Number(ev.value)||1)));
+    }}
+  }
+  function applyStateCommand(s,c){
+    if(!c)return;
+    if(c.type==='var'){applyVarTo(s.vars,c);return}
+    if(c.type==='chars'){for(const k of K){const m=modeOf(c,k);if(m==='keep')continue;if(m==='off'){s.chars[k]=null;s.charVisible[k]=false;continue}const existed=!!s.chars[k],was=s.charVisible[k]===true;s.chars[k]=charFrom(c,k);s.charVisible[k]=existed&&was}return}
+    if(c.type==='illust'){for(const k of K){const m=modeOf(c,k);if(m==='keep')continue;if(m==='off'){s.illust[k]=null;s.illVisible[k]=false;continue}const existed=!!s.illust[k],was=s.illVisible[k]===true;s.illust[k]=illFrom(c,k);s.illVisible[k]=existed&&was}return}
+    if(c.type==='text')applyTextToState(s,c);
+  }
+  function stateBefore(index){const tr=traceTo(index),s=blankState();for(const i of tr.sequence||[])applyStateCommand(s,commands[i]);return {trace:tr,state:s}}
+
+  function applyStatic(c,showText){
+    if(!c)return;
+    if(c.type==='bg')applyBg(c);else if(c.type==='chars')applyChars(c);else if(c.type==='illust')applyIllust(c);else if(c.type==='var')setVar(c);else if(c.type==='effect')applyEffectStateInstant(c);else if(c.type==='text')applyDialogueStateInstant(c,!!showText);
+  }
+  function forcePlacement(c){
+    if(!c)return;
+    if(c.type==='bg'){
+      const d=runtime.preparedBg,bg=document.getElementById('previewBg');if(d&&bg){bg.style.left=(50+(Number(d.x)||0))+'%';bg.style.top=(50+(Number(d.y)||0))+'%';bg.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,(Number(d.scale)||100)/100)})`;bg.style.filter=`brightness(${1-Math.max(0,Math.min(100,Number(d.darkness)||0))/100})`;bg.style.opacity='1';if(d.src)setElementAsset(bg,d.src);else{bg.classList.add('hidden');bg.removeAttribute('src')}}
+    }else if(c.type==='chars'){
+      for(const k of K){if(runtime.charState?.[k]){const e=charEl(k);if(e)e.style.opacity='1'}}
+    }else if(c.type==='illust'){
+      for(const k of K){if(runtime.illustState?.[k]){const e=illustEl(k);if(e)e.style.opacity='1'}}
+    }
+  }
+
+  let meta=document.getElementById('builderStateMeta');
+  if(!meta){meta=document.createElement('div');meta.id='builderStateMeta';meta.className='builderStateMeta';const test=document.getElementById('testPlayMeta');if(test)test.insertAdjacentElement('afterend',meta);else document.querySelector('#previewPanel .previewBtns')?.insertAdjacentElement('afterend',meta)}
+  function setMeta(tr,index){
+    if(!meta)return;if(tr?.ok){meta.classList.remove('warn');const auto=tr.inferred?.length?` / 分岐${tr.inferred.length}件を位置から自動判定`:'';meta.textContent=`編集プレビュー: 実行経路で Block ${index+1} まで再構築${auto}`}
+    else{meta.classList.add('warn');meta.textContent=`編集プレビュー: ${tr?.message||'経路未確定'}`}
+  }
+
+  window.showVisualAt=function(index){
+    if(index<0||index>=commands.length){resetBlockPreview();setMeta({ok:false,message:'ブロック未選択'},0);return}
+    const tr=traceTo(index);resetBlockPreview();
+    for(const i of tr.sequence||[])applyStatic(commands[i],false);
+    if(tr.ok)applyStatic(commands[index],commands[index]?.type==='text');
+    refreshVars?.();if(tr.ok)forcePlacement(commands[index]);setMeta(tr,index);
+    return tr;
+  };
+
+  function describeSlot(kind,s,visible){
+    if(!s||!s.cue)return '<b>引継ぎ状態:</b> 未設定';
+    const vis=visible?'<span class="visOn">表示中</span>':'<span class="visOff">非表示</span>';
+    let x=`<b>引継ぎ状態:</b> ${esc(s.cue)} / ${vis} / ${Number(s.scale)||100}% / X ${Number(s.x)||0} / Y ${Number(s.y)||0} / 重なり ${ord(s.order)}`;
+    if(kind==='illust')x+=` / ${s.layerMode==='behind'?'立ち絵より後ろ':'立ち絵より前'}`;
+    return x;
+  }
+  function annotateSelected(){
+    const i=selectedIndex,c=commands[i];if(!c||!['chars','illust'].includes(c.type))return;
+    const res=stateBefore(i),root=document.querySelector(`[data-cmd-index="${i}"]`);if(!root)return;const details=[...root.querySelectorAll('.charSlot')];
+    for(let n=0;n<Math.min(4,details.length);n++){
+      const k=K[n],d=details[n],body=d.querySelector('.charSlotBody'),badge=d.querySelector('.charSlotState'),m=modeOf(c,k);if(!body)continue;
+      const s=c.type==='chars'?res.state.chars[k]:res.state.illust[k],v=c.type==='chars'?res.state.charVisible[k]:res.state.illVisible[k];
+      const note=document.createElement('div');note.className='slotInheritedState';note.innerHTML=res.trace.ok?describeSlot(c.type,s,v):`<b>引継ぎ状態:</b> 経路未確定<br>${esc(res.trace.message||'テストプレイで経路を確定してください')}`;body.prepend(note);
+      if(badge&&m==='keep')badge.textContent=`変更なし｜${s?.cue||'未設定'}`;
+      else if(badge&&m==='off')badge.textContent=`空にする｜${s?.cue||'未設定'}`;
+      else if(badge&&m==='set')badge.textContent=`設定｜${String(c[k+'Cue']||'')||'未選択'}`;
+    }
+  }
+  const renderBeforeV27=window.renderEditor;
+  window.renderEditor=function(){const r=renderBeforeV27.apply(this,arguments);annotateSelected();return r};
+
+  // Route changes should immediately refresh the builder's inherited-state view.
+  const clear=document.getElementById('testRouteClear');if(clear){const old=clear.onclick;clear.onclick=e=>{const r=old?.call(clear,e);renderEditor();if(selectedIndex>=0)showVisualAt(selectedIndex);return r}}
+  window.TateNovelBuilderState={traceTo,stateBefore,refresh(){renderEditor();if(selectedIndex>=0)showVisualAt(selectedIndex)}};
+
+  renderEditor();if(selectedIndex>=0)showVisualAt(selectedIndex);
+})();
+</script>
+
+<style id="tatenovel-v29-prepared-char-style">
+.slotInheritedState .preparedNote{display:block;margin-top:4px;color:var(--muted)}
+</style>
+<script id="tatenovel-v29-br-prepared-chars">
+(function(){
+  'use strict';
+  const K=['a','b','c','d'],DEF={a:1,b:2,c:3,d:4},TIE={a:4,b:3,c:2,d:1},BX={a:30,b:70,c:40,d:60},BASE=108;
+  const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const ord=v=>Math.max(1,Math.min(4,Math.round(Number(v)||1)));
+  const mode=(c,k)=>{const m=String(c?.[k+'PatchMode']||'');if(['keep','set','off'].includes(m))return m;const q=String(c?.[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')};
+  const fromBlock=(c,k)=>({cue:String(c?.[k+'Cue']||''),name:String(c?.[k+'Name']||''),scale:Number(c?.[k+'Scale'])||100,x:Number(c?.[k+'X'])||0,y:Number(c?.[k+'Y'])||0,order:ord(c?.[k+'Order']??DEF[k]),flip:!!c?.[k+'Flip']});
+  const charZ=(o,k)=>50+(4-ord(o))*10+TIE[k];
+  function asset(cue){return (assetCatalog?.chara||[]).find(a=>String(a.cue||'')===String(cue||''))||null}
+  function ensure(){
+    runtime.charState=Object.assign({a:null,b:null,c:null,d:null},runtime.charState||{}); // current/last committed
+    runtime.charPrepared=Object.assign({a:null,b:null,c:null,d:null},runtime.charPrepared||{});
+    runtime.charPreparedDirty=Object.assign({a:false,b:false,c:false,d:false},runtime.charPreparedDirty||{});
+    runtime.charVisible=Object.assign({a:false,b:false,c:false,d:false},runtime.charVisible||{});
+    runtime.charCue=Object.assign({a:'',b:'',c:'',d:''},runtime.charCue||{});
+    runtime.charOff=Object.assign({a:false,b:false,c:false,d:false},runtime.charOff||{});
+  }
+  const viewRefV29=a=>window.TateNovelImageV18?.viewRef?.(a)||(a?.src||'');
+  function render(k,s,visible){
+    const e=charEl(k);if(!e)return;
+    if(!s||!s.cue){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}
+    const a=asset(s.cue);if(!a){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}
+    const sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100)),fl=s.flip?-1:1;
+    e.className='char slot'+k.toUpperCase();e.style.zIndex=String(charZ(s.order,k));e.style.left=(BX[k]+Number(s.x||0))+'%';e.style.top=(BASE+Number(s.y||0))+'%';e.style.transformOrigin='50% 100%';e.style.transform=`translate(-50%,-100%) scale(${sc*fl},${sc})`;e.style.transition='none';e.style.opacity=visible?'1':'0';setElementAsset(e,viewRefV29(a));
+  }
+  function prepare(k,s){ensure();runtime.charPrepared[k]=clone(s);runtime.charPreparedDirty[k]=true}
+  function ghostCurrent(k){
+    const e=charEl(k);if(!e||e.classList.contains('hidden')||Number(getComputedStyle(e).opacity)<=.001)return null;
+    const g=e.cloneNode(false);g.removeAttribute('id');g.classList.add('charSwapGhost');g.style.pointerEvents='none';e.parentNode?.insertBefore(g,e.nextSibling);return g;
+  }
+  function commitPrepared(k,d){
+    ensure();const e=charEl(k),dirty=runtime.charPreparedDirty[k]===true;
+    if(!dirty){runtime.charVisible[k]=!!runtime.charState[k];if(e&&runtime.charState[k]){e.style.transition=d>0?`opacity ${d}s linear`:'none';if(d>0)void e.offsetWidth;e.style.opacity='1'}return}
+    const next=clone(runtime.charPrepared[k]),prev=clone(runtime.charState[k]),wasVisible=!!prev&&runtime.charVisible[k]===true;
+    if(next?.cue&&!asset(next.cue))return; // missing prepared asset must not destroy the current visible image
+    const ghost=wasVisible?ghostCurrent(k):null;
+    runtime.charState[k]=next;runtime.charPreparedDirty[k]=false;runtime.charCue[k]=next?.cue||'';runtime.charOff[k]=!next;runtime.charVisible[k]=!!next?.cue;
+    if(!next?.cue){if(e){e.style.transition=d>0?`opacity ${d}s linear`:'none';e.style.opacity='0'}if(ghost){ghost.style.transition=d>0?`opacity ${d}s linear`:'none';void ghost.offsetWidth;ghost.style.opacity='0';setTimeout(()=>ghost.remove(),d*1000+70)}return}
+    render(k,next,false);if(e){e.style.transition=d>0?`opacity ${d}s linear`:'none';if(d>0)void e.offsetWidth;e.style.opacity='1'}
+    if(ghost){ghost.style.transition=d>0?`opacity ${d}s linear`:'none';void ghost.offsetWidth;ghost.style.opacity='0';setTimeout(()=>ghost.remove(),d*1000+70)}
+  }
+  function hideCurrent(k,d){ensure();runtime.charVisible[k]=false;const e=charEl(k);if(e){e.style.transition=d>0?`opacity ${d}s linear`:'none';e.style.opacity='0'}}
+
+  // [br] is an explicit display blank line. Physical blank source lines remain formatting-only.
+  const oldParseDialogue=window.parseDialogue;
+  window.parseDialogue=function(raw,initial){
+    const lineToken='\uE000TNBRL\uE001',inlineToken='\uE000TNBri\uE001';
+    const src=String(raw??'').split('\n').map(line=>line.trim().toLowerCase()==='[br]'?lineToken:line.replace(/\[br\]/gi,inlineToken)).join('\n');
+    const pages=oldParseDialogue(src,initial);
+    for(const p of pages||[])for(const ev of p.events||[])if(ev?.type==='text'&&typeof ev.value==='string')ev.value=ev.value.split(lineToken).join('\n').split(inlineToken).join('\n\n');
+    return pages;
+  };
+  const oldDialogueState=window.applyDialogueStateInstant;
+  window.applyDialogueStateInstant=function(c,showText=false){
+    const before=runtime.currentSpeaker||c?.speaker||'',r=oldDialogueState(c,showText);
+    if(showText){const p=parseDialogue(c?.text||'',before)[0],out=document.getElementById('previewText');if(p&&out){let t='';for(const ev of p.events||[])if(ev.type==='text'){if(t&&!t.endsWith('\n'))t+='\n';t+=ev.value}out.textContent=t}}
+    return r;
+  };
+  if(window.ScriptV1){
+    const oldParse=ScriptV1.parse;
+    ScriptV1.parse=function(raw,opts){
+      const token='\uE000TNBR\uE001',src=String(raw??'').replace(/\[br\]/gi,token),r=oldParse(src,opts);
+      for(const c of r?.commands||[])if(c?.type==='text'&&typeof c.source==='string')c.source=c.source.split(token).join('[br]');
+      return r;
+    };
+  }
+
+  // Character blocks and [chara a cue] now prepare the next A-D state only.
+  window.applyChars=function(c){
+    ensure();runtime.chars=runtime.chars||{};
+    for(const k of K){const m=mode(c,k);if(m==='keep')continue;if(m==='off'){prepare(k,null);continue}const s=fromBlock(c,k);prepare(k,s);for(const f of ['Name','Cue','Scale','X','Y','Order','Flip'])runtime.chars[k+f]=c[k+f]}
+  };
+  window.transitionCharsPreview=async c=>window.applyChars(c);
+  window.setCharaPreview=function(k,cue){
+    if(!K.includes(k))return;ensure();const q=String(cue||'');if(q.toLowerCase()==='off'){prepare(k,null);return}if(!asset(q))return;
+    const base=clone(runtime.charPreparedDirty[k]?runtime.charPrepared[k]:runtime.charState[k])||{cue:'',name:'',scale:100,x:0,y:0,order:DEF[k],flip:false};prepare(k,Object.assign(base,{cue:q}));
+  };
+
+  // Only +/- commits/hides the visible character. Background/illustration behavior remains unchanged.
+  const oldVisibility=window.setVisibility;
+  window.setVisibility=function(cmd,duration){
+    const on=String(cmd||'')[0]==='+',key=String(cmd||'').slice(1);let d=duration==null?(Number(projectSettings?.defaultFadeDuration)||.8):Math.max(0,Number(duration)||0);if(window.TateNovelFastTest?.enabled)d=0;
+    const chars=(key==='all'||key==='scene')?K:(K.includes(key)?[key]:[]);
+    if(chars.length)for(const k of chars)on?commitPrepared(k,d):hideCurrent(k,d);
+    if(key==='scene'){oldVisibility((on?'+':'-')+'bg',d);oldVisibility((on?'+':'-')+'illust',d);return}
+    if(chars.length)return;
+    return oldVisibility(cmd,d);
+  };
+
+  // Builder placement view: when editing a character block, show its prepared values for set slots.
+  const oldShowVisualAt=window.showVisualAt;
+  window.showVisualAt=function(index){
+    const r=oldShowVisualAt(index),c=commands[index];
+    if(c?.type==='chars')for(const k of K)if(mode(c,k)==='set'){const s=fromBlock(c,k);render(k,s,true)}
+    return r;
+  };
+
+  // Correct v27 inherited-state annotation for prepare/commit semantics.
+  function staticState(index){
+    const tr=window.TateNovelBuilderState?.traceTo?.(index),s={speaker:'',current:{a:null,b:null,c:null,d:null},prepared:{a:null,b:null,c:null,d:null},dirty:{a:false,b:false,c:false,d:false},visible:{a:false,b:false,c:false,d:false}};
+    const commit=(k,on)=>{if(on){if(s.dirty[k]){s.current[k]=clone(s.prepared[k]);s.dirty[k]=false}s.visible[k]=!!s.current[k]}else s.visible[k]=false};
+    const visibility=cmd=>{const on=String(cmd||'')[0]==='+',key=String(cmd||'').slice(1),ks=(key==='all'||key==='scene')?K:(K.includes(key)?[key]:[]);for(const k of ks)commit(k,on)};
+    const applyText=c=>{for(const p of parseDialogue(c?.text||'',s.speaker||c?.speaker||'')){if(p.speakerChanged)s.speaker=p.clearSpeaker?'':p.speaker;for(const ev of p.events||[]){if(ev.type==='visibility')visibility(ev.cmd);else if(ev.type==='charaSet'){const k=ev.target;if(!K.includes(k))continue;const q=String(ev.cue||'');if(q.toLowerCase()==='off'){s.prepared[k]=null;s.dirty[k]=true}else{s.prepared[k]=Object.assign({},clone(s.dirty[k]?s.prepared[k]:s.current[k])||{cue:'',name:'',scale:100,x:0,y:0,order:DEF[k],flip:false},{cue:q});s.dirty[k]=true}}else if(ev.type==='layer'&&K.includes(ev.target)&&s.current[ev.target])s.current[ev.target].order=Math.max(1,Math.min(4,5-(Number(ev.value)||1)))}}};
+    for(const i of tr?.sequence||[]){const c=commands[i];if(c?.type==='chars')for(const k of K){const m=mode(c,k);if(m==='set'){s.prepared[k]=fromBlock(c,k);s.dirty[k]=true}else if(m==='off'){s.prepared[k]=null;s.dirty[k]=true}}else if(c?.type==='text')applyText(c)}
+    return {trace:tr,state:s};
+  }
+  function describe(s,v){if(!s?.cue)return '<b>引継ぎ表示:</b> 未設定';return `<b>引継ぎ表示:</b> ${esc(s.cue)} / ${v?'<span class="visOn">表示中</span>':'<span class="visOff">非表示</span>'} / ${Number(s.scale)||100}% / X ${Number(s.x)||0} / Y ${Number(s.y)||0} / 重なり ${ord(s.order)}`}
+  function fixAnnotation(){
+    const i=selectedIndex,c=commands[i];if(c?.type!=='chars')return;const res=staticState(i),root=document.querySelector(`[data-cmd-index="${i}"]`);if(!root)return;const ds=[...root.querySelectorAll('.charSlot')];
+    for(let n=0;n<Math.min(4,ds.length);n++){const k=K[n],body=ds[n].querySelector('.charSlotBody'),badge=ds[n].querySelector('.charSlotState');if(!body)continue;body.querySelectorAll('.slotInheritedState').forEach(x=>x.remove());const note=document.createElement('div');note.className='slotInheritedState';if(res.trace?.ok){note.innerHTML=describe(res.state.current[k],res.state.visible[k]);if(res.state.dirty[k])note.innerHTML+=`<span class="preparedNote">次に準備済み: ${esc(res.state.prepared[k]?.cue||'空')}</span>`}else note.innerHTML=`<b>引継ぎ表示:</b> 経路未確定<br>${esc(res.trace?.message||'テストプレイで経路を確定してください')}`;body.prepend(note);const m=mode(c,k);if(badge&&m==='keep')badge.textContent=`変更なし｜${res.state.current[k]?.cue||'未設定'}`;else if(badge&&m==='off')badge.textContent='次を空にする';else if(badge&&m==='set')badge.textContent=`準備｜${String(c[k+'Cue']||'')||'未選択'}`}
+  }
+  const oldRenderEditor=window.renderEditor;
+  window.renderEditor=function(){const r=oldRenderEditor.apply(this,arguments);fixAnnotation();return r};
+
+  // Text editing button + wording for the new two-stage character behavior.
+  const oldFields=window.fields;
+  window.fields=function(c,i){let h=oldFields(c,i);if(c?.type==='text'&&!h.includes('data-inline-insert="[br]"'))h=h.replace('<div class="inlineCommandBar">','<div class="inlineCommandBar"><button type="button" data-inline-insert="[br]" data-i="'+i+'">空行 BR</button>');if(c?.type==='chars')h=h.replace('このスロットの登録を解除します。表示中ならそのスロットだけ画面から外れます。','次に表示する登録を空にします。現在表示中の立ち絵はその場では変わらず、-a または +a まで維持されます。').replace('初めて設定するスロットは非表示のまま準備され、<b>+a</b> 等で表示します。すでに表示中のスロットを設定変更した場合は、表示状態を保ったまま設定が更新されます。','設定・変更は「次に表示する立ち絵」を準備します。表示中の立ち絵は画像・位置ともその場では変わりません。<b>+a</b> 等で準備済み立ち絵へ切り替え、<b>-a</b> 等では現在の立ち絵だけを消します。');return h};
+  const hint=document.querySelector('.left .hintBox');if(hint&&!hint.textContent.includes('[br]'))hint.insertAdjacentHTML('beforeend','<br>表示用の空行は <b>[br]</b> を使います。通常の空行はScript整形用として表示には残りません。');
+
+  // Exported game gets the same parser and current/prepared character runtime.
+  const PLAYER_PATCH_V29=String.raw`<script>
+(function(){
+  var K=['a','b','c','d'],D={a:1,b:2,c:3,d:4},T={a:4,b:3,c:2,d:1},BX={a:30,b:70,c:40,d:60},BASE=108;
+  function cp(v){return v==null?v:JSON.parse(JSON.stringify(v))}function co(v){return Math.max(1,Math.min(4,Math.round(Number(v)||1)))}function md(c,k){var m=String(c&&c[k+'PatchMode']||'');if(m==='keep'||m==='set'||m==='off')return m;var q=String(c&&c[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')}function cs(c,k){return{cue:String(c&&c[k+'Cue']||''),name:String(c&&c[k+'Name']||''),scale:Number(c&&c[k+'Scale'])||100,x:Number(c&&c[k+'X'])||0,y:Number(c&&c[k+'Y'])||0,order:co(c&&c[k+'Order']!=null?c[k+'Order']:D[k]),flip:!!(c&&c[k+'Flip'])}}function z(o,k){return 50+(4-co(o))*10+T[k]}
+  function ecs(){rt.charState=Object.assign({a:null,b:null,c:null,d:null},rt.charState||{});rt.charPrepared=Object.assign({a:null,b:null,c:null,d:null},rt.charPrepared||{});rt.charPreparedDirty=Object.assign({a:false,b:false,c:false,d:false},rt.charPreparedDirty||{});rt.charVisible=Object.assign({a:false,b:false,c:false,d:false},rt.charVisible||{});rt.charCue=Object.assign({a:'',b:'',c:'',d:''},rt.charCue||{});rt.charOff=Object.assign({a:false,b:false,c:false,d:false},rt.charOff||{})}
+  function rr(k,s,v){var e=playerChar(k);if(!e)return;if(!s||!s.cue){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}var a=catFind('chara',s.cue);if(!a||!a.src){e.className='char slot'+k.toUpperCase()+' hidden';e.removeAttribute('src');e.style.opacity='0';return}var sc=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100)*(Math.max(10,Number(s.scale)||100)/100)),fl=s.flip?-1:1;e.className='char slot'+k.toUpperCase();e.src=a.src;e.style.zIndex=String(z(s.order,k));e.style.left=(BX[k]+Number(s.x||0))+'%';e.style.top=(BASE+Number(s.y||0))+'%';e.style.transformOrigin='50% 100%';e.style.transform='translate(-50%,-100%) scale('+(sc*fl)+','+sc+')';e.style.transition='none';e.style.opacity=v?'1':'0'}
+  function prep(k,s){ecs();rt.charPrepared[k]=cp(s);rt.charPreparedDirty[k]=true}
+  function ghost(k){var e=playerChar(k);if(!e||e.classList.contains('hidden')||Number(getComputedStyle(e).opacity)<=.001)return null;var g=e.cloneNode(false);g.removeAttribute('id');g.classList.add('charSwapGhost');g.style.pointerEvents='none';if(e.parentNode)e.parentNode.insertBefore(g,e.nextSibling);return g}
+  function commit(k,d){ecs();var e=playerChar(k),dirty=rt.charPreparedDirty[k]===true;if(!dirty){rt.charVisible[k]=!!rt.charState[k];if(e&&rt.charState[k]){e.style.transition=d>0?'opacity '+d+'s linear':'none';if(d>0)void e.offsetWidth;e.style.opacity='1'}return}var next=cp(rt.charPrepared[k]),prev=cp(rt.charState[k]),was=!!prev&&rt.charVisible[k]===true;if(next&&next.cue&&!catFind('chara',next.cue))return;var g=was?ghost(k):null;rt.charState[k]=next;rt.charPreparedDirty[k]=false;rt.charCue[k]=next&&next.cue||'';rt.charOff[k]=!next;rt.charVisible[k]=!!(next&&next.cue);if(!next||!next.cue){if(e){e.style.transition=d>0?'opacity '+d+'s linear':'none';e.style.opacity='0'}if(g){g.style.transition=d>0?'opacity '+d+'s linear':'none';void g.offsetWidth;g.style.opacity='0';setTimeout(function(){g.remove()},d*1000+70)}return}rr(k,next,false);if(e){e.style.transition=d>0?'opacity '+d+'s linear':'none';if(d>0)void e.offsetWidth;e.style.opacity='1'}if(g){g.style.transition=d>0?'opacity '+d+'s linear':'none';void g.offsetWidth;g.style.opacity='0';setTimeout(function(){g.remove()},d*1000+70)}}
+  function hide(k,d){ecs();rt.charVisible[k]=false;var e=playerChar(k);if(e){e.style.transition=d>0?'opacity '+d+'s linear':'none';e.style.opacity='0'}}
+  var oldFresh=fresh;fresh=function(){var x=oldFresh();x.charState={a:null,b:null,c:null,d:null};x.charPrepared={a:null,b:null,c:null,d:null};x.charPreparedDirty={a:false,b:false,c:false,d:false};x.charVisible={a:false,b:false,c:false,d:false};return x};
+  chars=function(c,idx){ecs();if(Number.isInteger(idx))rt.charsIndex=idx;K.forEach(function(k){var m=md(c,k);if(m==='keep')return;if(m==='off'){prep(k,null);return}prep(k,cs(c,k))})};transChars=async function(c,idx){chars(c,idx)};
+  setChara=function(k,cue){if(K.indexOf(k)<0)return;ecs();var q=String(cue||'');if(q.toLowerCase()==='off'){prep(k,null);return}if(!catFind('chara',q))return;var base=cp(rt.charPreparedDirty[k]?rt.charPrepared[k]:rt.charState[k])||{cue:'',name:'',scale:100,x:0,y:0,order:D[k],flip:false};base.cue=q;prep(k,base)};
+  var oldVis=vis;vis=function(cmd,duration){var on=String(cmd||'')[0]==='+',key=String(cmd||'').slice(1),d=duration==null?df():Math.max(0,Number(duration)||0);if(typeof fastForward!=='undefined'&&fastForward)d=d<=0?0:Math.min(.12,Math.max(.07,d*.18));var ks=(key==='all'||key==='scene')?K:(K.indexOf(key)>=0?[key]:[]);if(ks.length)ks.forEach(function(k){on?commit(k,d):hide(k,d)});if(key==='scene'){oldVis((on?'+':'-')+'bg',d);oldVis((on?'+':'-')+'illust',d);return}if(ks.length)return;return oldVis(cmd,duration)};
+  var oldPd=pd;pd=function(raw,initial){var lt='\uE000TNBRL\uE001',it='\uE000TNBri\uE001',src=String(raw==null?'':raw).split('\n').map(function(line){return line.trim().toLowerCase()==='[br]'?lt:line.replace(/\[br\]/gi,it)}).join('\n'),pages=oldPd(src,initial);(pages||[]).forEach(function(p){(p.events||[]).forEach(function(ev){if(ev&&ev.type==='text'&&typeof ev.value==='string')ev.value=ev.value.split(lt).join('\n').split(it).join('\n\n')})});return pages};
+  var oldSave=makeSaveState;makeSaveState=function(src){var x=src||rt,s=oldSave(x);s.charState=cp(x.charState||{a:null,b:null,c:null,d:null});s.charPrepared=cp(x.charPrepared||{a:null,b:null,c:null,d:null});s.charPreparedDirty=cp(x.charPreparedDirty||{a:false,b:false,c:false,d:false});return s};
+  var oldRestore=restoreState;restoreState=function(s){var saved=cp(s||{});oldRestore(s);ecs();rt.charState=Object.assign({a:null,b:null,c:null,d:null},saved.charState||rt.charState||{});rt.charPrepared=Object.assign({a:null,b:null,c:null,d:null},saved.charPrepared||rt.charState||{});rt.charPreparedDirty=Object.assign({a:false,b:false,c:false,d:false},saved.charPreparedDirty||{});K.forEach(function(k){var st=rt.charState[k];rt.charCue[k]=st&&st.cue||'';rt.charOff[k]=!st;rr(k,st,!!st&&rt.charVisible[k]===true)})};
+})();
+${'</scr'+'ipt>'}`;
+  const oldMakePlayer=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){const html=oldMakePlayer(project,settings,catalog);return html.replace('</body></html>',PLAYER_PATCH_V29+'</body></html>')};
+
+  renderEditor();if(selectedIndex>=0)showVisualAt(selectedIndex);saveLocal();
+})();
+</script>
+
+<script>
+(function(){
+  // v30: `br` shorthand, compact effect helper bar, and no-scroll inline insertion.
+  const prevParseDialogueV30=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    const src=String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trim().toLowerCase()==='br'?'[br]':line).join('\n');
+    return prevParseDialogueV30(src,initialSpeaker);
+  };
+
+  const prevFieldsV30=window.fields;
+  window.fields=function(c,i){
+    let html=prevFieldsV30(c,i);
+    if(c?.type!=='text')return html;
+    const bar=`<div class="inlineCommandBar">
+      <button type="button" data-inline-insert="br" data-i="${i}">空行 BR</button>
+      <button type="button" data-inline-insert="[w 0.5]" data-i="${i}">WAIT</button>
+      <button type="button" data-inline-insert="[shake 0.5 5]" data-i="${i}">揺れ</button>
+      <button type="button" data-inline-insert="[flash 0.35]" data-i="${i}">FLASH</button>
+      <button type="button" data-inline-insert="[dark 0.8]" data-i="${i}">暗転</button>
+      <button type="button" data-inline-insert="[light 0.8]" data-i="${i}">明転</button>
+      <button type="button" data-inline-insert="[zoom 140 50 50 0.8]" data-i="${i}">ZOOM IN</button>
+      <button type="button" data-inline-insert="[zoomout 0.8]" data-i="${i}">ZOOM OUT</button>
+      <button type="button" data-inline-insert="[bgm cue]" data-i="${i}">BGM</button>
+      <button type="button" data-inline-insert="[bgm stop 0.8]" data-i="${i}">BGM停止</button>
+      <button type="button" data-inline-insert="[se cue]" data-i="${i}">SE</button>
+      <button type="button" data-inline-insert="[voice cue]" data-i="${i}">VOICE</button>
+    </div>`;
+    html=html.replace(/<div class="inlineCommandBar">[\s\S]*?<\/div><\/details>/,bar+'</details>');
+    return html;
+  };
+
+  let inlineFocusGuardV30=false;
+  const commandsRootV30=document.getElementById('commands');
+  if(commandsRootV30&&!commandsRootV30.__tnInlineFocusGuardV30){
+    commandsRootV30.__tnInlineFocusGuardV30=true;
+    commandsRootV30.addEventListener('focusin',e=>{
+      if(inlineFocusGuardV30||e.target?.closest?.('[data-inline-insert]'))e.stopImmediatePropagation();
+    },true);
+  }
+  function snapshotScrollV30(){
+    const center=document.querySelector('.center');
+    return {x:window.scrollX,y:window.scrollY,center,cy:center?.scrollTop||0,cx:center?.scrollLeft||0};
+  }
+  function restoreScrollV30(s){
+    if(!s)return;
+    try{window.scrollTo(s.x,s.y)}catch(_){ }
+    if(s.center){s.center.scrollTop=s.cy;s.center.scrollLeft=s.cx}
+  }
+  function brInsertV30(value,a,z){
+    const left=value.slice(0,a),right=value.slice(z);
+    const before=left&& !left.endsWith('\n')?'\n':'';
+    const after=right&& !right.startsWith('\n')?'\n':'';
+    const ins=before+'br'+after;
+    return {value:left+ins+right,caret:left.length+ins.length};
+  }
+  function bindInlineV30(){
+    document.querySelectorAll('[data-inline-insert]').forEach(b=>{
+      b.onpointerdown=e=>e.stopPropagation();
+      b.onclick=e=>{
+        e.preventDefault();e.stopPropagation();
+        const i=+b.dataset.i,ta=document.querySelector(`textarea[data-i="${i}"][data-f="text"]`);
+        if(!ta||!commands[i])return;
+        const scroll=snapshotScrollV30(),token=b.dataset.inlineInsert||'',a=ta.selectionStart??ta.value.length,z=ta.selectionEnd??a,before=snapshot();
+        let next,caret;
+        if(token==='br'){const r=brInsertV30(ta.value,a,z);next=r.value;caret=r.caret}else{next=ta.value.slice(0,a)+token+ta.value.slice(z);caret=a+token.length}
+        ta.value=next;commands[i].text=next;
+        inlineFocusGuardV30=true;
+        try{ta.focus({preventScroll:true})}catch(_){ta.focus()}
+        ta.setSelectionRange(caret,caret);
+        inlineFocusGuardV30=false;
+        if(before!==snapshot()){undoStack.push(before);if(undoStack.length>HISTORY_LIMIT)undoStack.shift();redoStack=[];updateHistoryButtons()}
+        saveLocal();
+        const sm=ta.closest('.cmd')?.querySelector('.cmdSummary');if(sm)sm.textContent=summary(commands[i]);
+        restoreScrollV30(scroll);requestAnimationFrame(()=>restoreScrollV30(scroll));
+      };
+    });
+  }
+
+  const prevRenderEditorV30=window.renderEditor;
+  window.renderEditor=function(){const r=prevRenderEditorV30.apply(this,arguments);bindInlineV30();return r};
+
+  const hint=document.querySelector('.left .hintBox');
+  if(hint){
+    hint.innerHTML=hint.innerHTML
+      .replace(/表示用の空行は <b>\[br\]<\/b> を使います。通常の空行はScript整形用として表示には残りません。/g,'表示用の空行は単独行の <b>br</b> を使います。<b>[br]</b> も互換記法として使用できます。通常の空行はScript整形用として表示には残りません。');
+  }
+
+  // Keep exported games on the same shorthand rule. v29 already implements [br].
+  const PLAYER_PATCH_V30=String.raw`<script>
+(function(){
+  var oldPdV30=pd;
+  pd=function(raw,initial){
+    var src=String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){return line.trim().toLowerCase()==='br'?'[br]':line}).join('\n');
+    return oldPdV30(src,initial);
+  };
+})();
+${'</scr'+'ipt>'}`;
+  const prevMakePlayerV30=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){const html=prevMakePlayerV30(project,settings,catalog);return html.replace('</body></html>',PLAYER_PATCH_V30+'</body></html>')};
+
+  renderEditor();
+  if(selectedIndex>=0)showVisualAt(selectedIndex);
+})();
+</script>
+
+
+
+<style id="tatenovel-v31-preview-tools-style">
+#previewVisualToolsV31{display:none;margin:0 0 8px;padding:8px;border:1px solid var(--line);border-radius:9px;background:#141923;gap:8px;flex-direction:column}
+#previewVisualToolsV31.show{display:flex}
+#previewVisualToolsV31 .pvRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#previewVisualToolsV31 .pvLabel{font-size:11px;color:var(--muted);font-weight:800;min-width:76px}
+#previewVisualToolsV31 button{border:1px solid var(--line);background:#252b36;color:#fff;border-radius:8px;padding:7px 9px;font-weight:800;min-width:42px}
+#previewVisualToolsV31 button.previewHidden{opacity:.55;text-decoration:line-through;background:#181c24}
+#previewVisualToolsV31 button.previewReset{margin-left:auto;min-width:auto;font-size:11px}
+#previewVisualToolsV31 select{flex:1;min-width:150px;padding:7px 8px;font-size:12px}
+#previewVisualToolsV31 .pvNote{font-size:10px;color:var(--muted);line-height:1.4}
+@media(max-width:720px){#previewVisualToolsV31 .pvLabel{flex:1 1 100%;min-width:0}#previewVisualToolsV31 select{min-width:0;width:100%}#previewVisualToolsV31 button{min-height:42px}}
+</style>
+<script id="tatenovel-v31-preview-tools-commandbar">
+(function(){
+  'use strict';
+  const K=['a','b','c','d'];
+
+  // Compact helper bar: keep preparation helpers, remove BR / WAIT shortcuts.
+  const prevFieldsV31=window.fields;
+  window.fields=function(c,i){
+    let html=prevFieldsV31(c,i);
+    if(c?.type!=='text')return html;
+    const bar=`<div class="inlineCommandBar">
+      <button type="button" data-inline-insert="[bg cue]" data-i="${i}">背景準備</button>
+      <button type="button" data-inline-insert="[chara a cue]" data-i="${i}">立ち絵準備</button>
+      <button type="button" data-inline-insert="[il a cue]" data-i="${i}">イラスト準備</button>
+      <button type="button" data-inline-insert="[shake 0.5 5]" data-i="${i}">揺れ</button>
+      <button type="button" data-inline-insert="[flash 0.35]" data-i="${i}">FLASH</button>
+      <button type="button" data-inline-insert="[dark 0.8]" data-i="${i}">暗転</button>
+      <button type="button" data-inline-insert="[light 0.8]" data-i="${i}">明転</button>
+      <button type="button" data-inline-insert="[zoom 140 50 50 0.8]" data-i="${i}">ZOOM IN</button>
+      <button type="button" data-inline-insert="[zoomout 0.8]" data-i="${i}">ZOOM OUT</button>
+      <button type="button" data-inline-insert="[bgm cue]" data-i="${i}">BGM</button>
+      <button type="button" data-inline-insert="[bgm stop 0.8]" data-i="${i}">BGM停止</button>
+      <button type="button" data-inline-insert="[se cue]" data-i="${i}">SE</button>
+      <button type="button" data-inline-insert="[voice cue]" data-i="${i}">VOICE</button>
+    </div>`;
+    return html.replace(/<div class="inlineCommandBar">[\s\S]*?<\/div><\/details>/,bar+'</details>');
+  };
+
+  // Preview-only visibility masks. Never written to project/settings/localStorage.
+  const hidden={chars:new Set(),illust:new Set()};
+  let tempBgCue='';
+  const picker=()=>document.getElementById('previewCharEditPicker')||document.querySelector('.previewPlacementControls');
+  const kind=()=>commands[selectedIndex]?.type||'';
+  const charNode=k=>window.charEl?.(k)||({a:'leftChar',b:'rightChar',c:'thirdChar',d:'fourthChar'}[k]?document.getElementById({a:'leftChar',b:'rightChar',c:'thirdChar',d:'fourthChar'}[k]):null);
+  const illNode=k=>window.illustEl?.(k)||document.getElementById('previewIllust'+k.toUpperCase());
+
+  let tools=document.getElementById('previewVisualToolsV31');
+  if(!tools){
+    tools=document.createElement('div');tools.id='previewVisualToolsV31';
+    tools.innerHTML=`<div class="pvRow" data-slot-row><span class="pvLabel">プレビュー表示</span>${K.map(k=>`<button type="button" data-preview-slot-hide="${k}" aria-pressed="false">${k.toUpperCase()}</button>`).join('')}<button type="button" class="previewReset" data-preview-slot-reset>全表示</button></div><div class="pvRow" data-temp-bg-row><span class="pvLabel">背景仮置き</span><select data-temp-bg><option value="">経路の背景を使用</option></select></div><div class="pvNote">A〜Dの非表示と背景仮置きは配置確認専用です。シナリオ・保存データ・書き出しゲームには反映されません。</div>`;
+    const p=picker();if(p)p.insertAdjacentElement('afterend',tools);else document.getElementById('phone')?.insertAdjacentElement('beforebegin',tools);
+  }
+
+  function clearMaskStyles(){for(const k of K){const c=charNode(k),il=illNode(k);if(c)c.style.visibility='';if(il)il.style.visibility=''}}
+  function applyMasks(){
+    clearMaskStyles();const t=kind();if(t==='chars')for(const k of K){const e=charNode(k);if(e&&hidden.chars.has(k))e.style.visibility='hidden'}
+    if(t==='illust')for(const k of K){const e=illNode(k);if(e&&hidden.illust.has(k))e.style.visibility='hidden'}
+  }
+  function bgOptions(){
+    const sel=tools?.querySelector('[data-temp-bg]');if(!sel)return;
+    const before=sel.value||tempBgCue;let s='<option value="">経路の背景を使用</option>';
+    for(const a of (assetCatalog?.bg||[])){const cue=String(a?.cue||'');if(!cue)continue;s+=`<option value="${esc(cue)}">${esc(cue)}</option>`}
+    sel.innerHTML=s;if([...sel.options].some(o=>o.value===before))sel.value=before;else{sel.value='';tempBgCue=''}
+  }
+  function applyTempBg(){
+    if(!tempBgCue||!['chars','illust'].includes(kind()))return;
+    const a=(assetCatalog?.bg||[]).find(x=>String(x?.cue||'')===tempBgCue),bg=document.getElementById('previewBg');if(!a||!bg)return;
+    const ref=window.TateNovelImageV18?.viewRef?.(a)||(a.src||'');
+    const scale=Math.max(.1,(Math.max(10,Number(a.baseScale)||100)/100));
+    const dark=Math.max(0,Math.min(100,Number(a.baseDark)||0));
+    bg.style.left='50%';bg.style.top='50%';bg.style.transform=`translate(-50%,-50%) scale(${scale})`;bg.style.filter=`brightness(${1-dark/100})`;bg.style.transition='none';bg.style.opacity='1';
+    setElementAsset(bg,ref);
+  }
+  function refreshTools(){
+    if(!tools)return;const t=kind(),isPlacement=['bg','chars','illust'].includes(t);tools.classList.toggle('show',isPlacement);
+    const slotRow=tools.querySelector('[data-slot-row]'),bgRow=tools.querySelector('[data-temp-bg-row]');
+    if(slotRow)slotRow.style.display=['chars','illust'].includes(t)?'flex':'none';
+    if(bgRow)bgRow.style.display=['chars','illust'].includes(t)?'flex':'none';
+    bgOptions();
+    tools.querySelectorAll('[data-preview-slot-hide]').forEach(b=>{const off=hidden[t]?.has(b.dataset.previewSlotHide)||false;b.classList.toggle('previewHidden',off);b.setAttribute('aria-pressed',off?'true':'false');b.title=off?'プレビューだけ非表示中':'プレビューに表示中'});
+    if(!isPlacement)clearMaskStyles();else{applyMasks();applyTempBg()}
+  }
+
+  tools?.querySelectorAll('[data-preview-slot-hide]').forEach(b=>b.onclick=e=>{
+    e.preventDefault();e.stopPropagation();const t=kind(),k=b.dataset.previewSlotHide;if(!hidden[t]||!K.includes(k))return;
+    hidden[t].has(k)?hidden[t].delete(k):hidden[t].add(k);refreshTools();
+  });
+  tools?.querySelector('[data-preview-slot-reset]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const t=kind();hidden[t]?.clear();refreshTools()});
+  tools?.querySelector('[data-temp-bg]')?.addEventListener('change',e=>{tempBgCue=String(e.target.value||'');window.showVisualAt?.(selectedIndex)});
+
+  const prevShowV31=window.showVisualAt;
+  window.showVisualAt=function(){const r=prevShowV31.apply(this,arguments);refreshTools();requestAnimationFrame(()=>{applyMasks();applyTempBg()});setTimeout(()=>{applyMasks();applyTempBg()},0);return r};
+  const prevPickerV31=window.updatePreviewCharPicker;
+  window.updatePreviewCharPicker=function(){const r=prevPickerV31?.apply(this,arguments);refreshTools();return r};
+
+  // Test play uses the real scene, never preview-only masks/temporary backgrounds.
+  ['previewStart','previewFromSelected','previewStep'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>clearMaskStyles(),true));
+
+  const prevRenderV31=window.renderEditor;
+  window.renderEditor=function(){const r=prevRenderV31.apply(this,arguments);refreshTools();return r};
+
+  renderEditor();if(selectedIndex>=0)showVisualAt(selectedIndex);else refreshTools();
+})();
+</script>
+
+<style id="tatenovel-v33-placement-control-order-style">
+/* V33: keep the dangerous edit toggle closest to the placement preview. */
+#previewPanel.placementPreview .previewEditBar{
+  display:flex!important;
+  margin:8px 0 8px;
+  padding:0;
+}
+#previewPanel:not(.placementPreview) .previewEditBar{display:none!important}
+#previewPanel.placementPreview .previewEditBar #toggleImageEdit{
+  width:100%;
+  min-height:46px;
+  border:1px solid var(--line);
+  background:#232936;
+  color:#fff;
+  border-radius:10px;
+  padding:10px 12px;
+  font-weight:900;
+}
+#previewPanel.placementPreview .previewEditBar #toggleImageEdit.active{
+  background:var(--accent);
+  color:#10141e;
+  border-color:transparent;
+}
+#previewPanel.placementPreview #previewVisualToolsV31{margin:0 0 8px}
+#previewPanel.placementPreview #previewCharEditPicker{margin:0 0 9px}
+#previewPanel.placementPreview #previewCharEditPicker.hidden{display:none!important}
+</style>
+<script id="tatenovel-v33-placement-control-order">
+(function(){
+  'use strict';
+  const panel=document.getElementById('previewPanel');
+  const phone=document.getElementById('phone');
+  const bar=panel?.querySelector('.previewEditBar');
+  const toggle=document.getElementById('toggleImageEdit');
+  const picker=document.getElementById('previewCharEditPicker')||document.querySelector('.previewPlacementControls');
+  const tools=document.getElementById('previewVisualToolsV31');
+
+  function arrangePlacementControls(){
+    if(!panel||!phone||!bar||!toggle)return;
+    // v12 moved the toggle into the target picker. Put it back directly under
+    // the preview screen, then place preview-only visibility tools above the
+    // A-D adjustment target picker.
+    if(toggle.parentElement!==bar)bar.appendChild(toggle);
+    bar.style.removeProperty('display');
+    phone.insertAdjacentElement('afterend',bar);
+    let anchor=bar;
+    if(tools){anchor.insertAdjacentElement('afterend',tools);anchor=tools}
+    if(picker)anchor.insertAdjacentElement('afterend',picker);
+  }
+
+  function syncPlacementControls(){
+    arrangePlacementControls();
+    const c=(typeof commands!=='undefined'&&selectedIndex>=0)?commands[selectedIndex]:null;
+    const kind=c?.type||'';
+    const isPlacement=['bg','chars','illust'].includes(kind);
+    const hasSlotTargets=kind==='chars'||kind==='illust';
+    if(toggle){
+      toggle.textContent=imageEditMode?'🔓 画像調整 ON':'🔒 画像調整 OFF';
+      toggle.setAttribute('aria-pressed',imageEditMode?'true':'false');
+    }
+    // The A-D target row is an editing control, not a visibility control.
+    // Keep it collapsed while image editing is OFF to prevent accidental
+    // target changes. Background has no A-D adjustment target.
+    if(picker)picker.classList.toggle('hidden',!(isPlacement&&imageEditMode&&hasSlotTargets));
+  }
+
+  const prevUpdate=window.updatePreviewCharPicker;
+  window.updatePreviewCharPicker=function(){
+    const r=prevUpdate?.apply(this,arguments);
+    syncPlacementControls();
+    return r;
+  };
+
+  const prevSet=window.setImageEditMode;
+  window.setImageEditMode=function(on){
+    const r=prevSet?.call(this,on);
+    syncPlacementControls();
+    return r;
+  };
+
+  const prevRender=window.renderEditor;
+  window.renderEditor=function(){
+    const r=prevRender.apply(this,arguments);
+    syncPlacementControls();
+    return r;
+  };
+
+  // Existing handlers run first; synchronize the layout after their state
+  // changes as a guard against older patch layers rewriting button text/UI.
+  toggle?.addEventListener('click',()=>setTimeout(syncPlacementControls,0));
+
+  arrangePlacementControls();
+  syncPlacementControls();
+})();
+</script>
+
+<style id="tatenovel-v35-audio-prepare-style">
+.audioPrepareHint{margin-top:10px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#121720;color:#cbd3df;font-size:11px;line-height:1.55}
+</style>
+<script id="tatenovel-v35-audio-prepare-play">
+(function(){
+  'use strict';
+
+  const AUDIO_KINDS=['bgm','se','voice'];
+  const AUDIO_PREP_VERSION=1;
+  const cloneAudio=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const audioFadeDefault=()=>Math.max(0,Number(projectSettings?.defaultFadeDuration ?? .8)||0);
+
+  function audioPrepEnsure(){
+    if(!runtime.audioPrepared||typeof runtime.audioPrepared!=='object')runtime.audioPrepared={bgm:null,se:null,voice:null};
+    for(const k of AUDIO_KINDS)if(!Object.prototype.hasOwnProperty.call(runtime.audioPrepared,k))runtime.audioPrepared[k]=null;
+    return runtime.audioPrepared;
+  }
+
+  // ---------- Builder blocks: audio blocks are preparation only ----------
+  const prevDefaultV35=window.defaultCommand;
+  window.defaultCommand=function(type){
+    const c=prevDefaultV35.apply(this,arguments);
+    if(c&&AUDIO_KINDS.includes(c.type)){
+      c.audioMode='prepare';
+      if(c.type==='bgm'){c.action='prepare';c.fadeDuration=null}
+    }
+    return c;
+  };
+
+  const prevFieldsV35=window.fields;
+  window.fields=function(c,i){
+    if(c?.type==='bgm'){
+      return `<div class="assetOpenRow"><div><label>BGM素材</label><select data-i="${i}" data-f="assetCue">${catalogOptions('bgm',c.assetCue||'',false)}</select></div><button type="button" class="miniBtn" data-open-assets="bgm">素材管理</button></div>
+      <label>再生方式</label><select data-i="${i}" data-f="loop"><option value="true" ${c.loop!==false&&c.loop!=='false'?'selected':''}>ループ</option><option value="false" ${c.loop===false||c.loop==='false'?'selected':''}>1回のみ</option></select>
+      <label>音量</label>${numCtl(i,'volume',c.volume??80,0,100,5,'%')}
+      <div class="audioPrepareHint"><b>セットのみ</b>：このブロックではまだ再生しません。<br><b>+bgm</b> で再生／切替、<b>+bgm 1.0</b> で1秒かけて切替、<b>-bgm 1.0</b> で1秒フェードアウトします。</div>`;
+    }
+    if(c?.type==='se'||c?.type==='voice'){
+      const label=c.type==='se'?'SE':'VOICE';
+      return `<div class="assetOpenRow"><div><label>${label}素材</label><select data-i="${i}" data-f="assetCue">${catalogOptions(c.type,c.assetCue||'',false)}</select></div><button type="button" class="miniBtn" data-open-assets="${c.type}">素材管理</button></div>
+      <label>音量</label>${numCtl(i,'volume',c.volume??100,0,100,5,'%')}
+      <div class="audioPrepareHint"><b>セットのみ</b>：このブロックではまだ再生しません。<br><b>+${c.type}</b> で先頭から再生、<b>-${c.type}</b> で現在の音を停止します。</div>`;
+    }
+    return prevFieldsV35.apply(this,arguments);
+  };
+
+  const prevSummaryV35=window.summary;
+  window.summary=function(c){
+    if(c?.type==='bgm')return 'BGMセット: '+(c.assetCue||'未選択');
+    if(c?.type==='se')return 'SEセット: '+(c.assetCue||'未選択');
+    if(c?.type==='voice')return 'VOICEセット: '+(c.assetCue||'未選択');
+    return prevSummaryV35.apply(this,arguments);
+  };
+
+  // The helper bar keeps preparation buttons. +/- playback commands are short enough to type directly.
+  const prevFieldsBarV35=window.fields;
+  window.fields=function(c,i){
+    let html=prevFieldsBarV35.apply(this,arguments);
+    if(c?.type!=='text')return html;
+    const bar=`<div class="inlineCommandBar">
+      <button type="button" data-inline-insert="[bg cue]" data-i="${i}">背景準備</button>
+      <button type="button" data-inline-insert="[chara a cue]" data-i="${i}">立ち絵準備</button>
+      <button type="button" data-inline-insert="[il a cue]" data-i="${i}">イラスト準備</button>
+      <button type="button" data-inline-insert="[bgm cue]" data-i="${i}">BGM準備</button>
+      <button type="button" data-inline-insert="[se cue]" data-i="${i}">SE準備</button>
+      <button type="button" data-inline-insert="[voice cue]" data-i="${i}">VOICE準備</button>
+      <button type="button" data-inline-insert="[shake 0.5 5]" data-i="${i}">揺れ</button>
+      <button type="button" data-inline-insert="[flash 0.35]" data-i="${i}">FLASH</button>
+      <button type="button" data-inline-insert="[dark 0.8]" data-i="${i}">暗転</button>
+      <button type="button" data-inline-insert="[light 0.8]" data-i="${i}">明転</button>
+      <button type="button" data-inline-insert="[zoom 140 50 50 0.8]" data-i="${i}">ZOOM IN</button>
+      <button type="button" data-inline-insert="[zoomout 0.8]" data-i="${i}">ZOOM OUT</button>
+    </div>`;
+    return html.replace(/<div class="inlineCommandBar">[\s\S]*?<\/div><\/details>/,bar+'</details>');
+  };
+
+  // ---------- Existing-project migration ----------
+  // Old blocks auto-played. Convert once to "prepare block + explicit play text" so old projects keep their sound timing.
+  function newTextAudio(line){
+    return {id:(typeof commandId==='function'?commandId():'cmd-'+Date.now()+'-'+Math.random().toString(36).slice(2)),type:'text',speaker:'',side:'none',text:line};
+  }
+  function migrateAudioList(list){
+    if(!Array.isArray(list))return false;
+    const out=[];let changed=false;
+    for(const c0 of list){
+      const c=c0||{};
+      if(c.type==='bgm'&&c.action==='stop'){
+        const d=c.fadeDuration==null?audioFadeDefault():Math.max(0,Number(c.fadeDuration)||0);
+        out.push(newTextAudio('-bgm'+(d!==audioFadeDefault()?' '+d:'')));
+        changed=true;continue;
+      }
+      if(AUDIO_KINDS.includes(c.type)&&c.audioMode!=='prepare'){
+        const prep=Object.assign({},c,{audioMode:'prepare'});
+        if(prep.type==='bgm'){const d=prep.fadeDuration==null?audioFadeDefault():Math.max(0,Number(prep.fadeDuration)||0);prep.action='prepare';prep.fadeDuration=null;out.push(prep);out.push(newTextAudio('+bgm'+(d!==audioFadeDefault()?' '+d:'')))}
+        else {out.push(prep);out.push(newTextAudio('+'+prep.type))}
+        changed=true;continue;
+      }
+      out.push(c);
+    }
+    if(changed){list.splice(0,list.length,...out)}
+    return changed;
+  }
+  function markAudioPrepareList(list){
+    if(!Array.isArray(list))return;
+    for(const c of list)if(AUDIO_KINDS.includes(c?.type)){
+      c.audioMode='prepare';
+      if(c.type==='bgm'&&c.action!=='stop'){c.action='prepare';c.fadeDuration=null}
+    }
+  }
+  if(Number(projectSettings.audioPrepareVersion||0)>=AUDIO_PREP_VERSION){
+    markAudioPrepareList(commands);
+  }else{
+    migrateAudioList(commands);
+    projectSettings.audioPrepareVersion=AUDIO_PREP_VERSION;
+  }
+  try{saveLocal()}catch(_){}
+
+  // Re-run migration after importing older project JSON. V35+ JSON is identified
+  // by settings.audioPrepareVersion so canonical JSON can remain backward-compatible.
+  if(typeof window.importPortableProject==='function'){
+    const prevImportV35=window.importPortableProject;
+    window.importPortableProject=async function(j){
+      const incomingNew=Number(j?.settings?.audioPrepareVersion||0)>=AUDIO_PREP_VERSION;
+      const r=await prevImportV35.apply(this,arguments);
+      if(incomingNew)markAudioPrepareList(commands);else migrateAudioList(commands);
+      projectSettings.audioPrepareVersion=AUDIO_PREP_VERSION;
+      try{saveLocal()}catch(_){}
+      return r;
+    };
+  }
+
+  // ---------- Audio preparation / playback in Studio preview ----------
+  const actualPlayPreviewAudioV35=window.playPreviewAudio;
+  const actualStopAllPreviewV35=window.stopAllPreviewAudio;
+  const actualSetVisibilityV35=window.setVisibility;
+  const actualFindAudioCueV35=window.findAudioCue;
+  const previewBgmGhostsV35=[];
+
+  // Inline [bgm cue volume=80 loop=false], [se cue volume=80], etc.
+  window.findAudioCue=function(kind,spec){
+    if(!AUDIO_KINDS.includes(kind))return actualFindAudioCueV35.apply(this,arguments);
+    const parts=String(spec||'').trim().split(/\s+/).filter(Boolean),cue=parts.shift()||'';
+    const c=actualFindAudioCueV35.call(this,kind,cue);
+    if(!c)return null;
+    for(const p of parts){
+      const eq=p.indexOf('=');if(eq<1)continue;
+      const k=p.slice(0,eq).toLowerCase(),v=p.slice(eq+1);
+      if(k==='volume'&&Number.isFinite(Number(v)))c.volume=Math.max(0,Math.min(100,Number(v)));
+      else if(kind==='bgm'&&k==='loop')c.loop=!/^(false|0|no)$/i.test(v);
+    }
+    return c;
+  };
+
+  // Every audio block / inline [audio cue] prepares only.
+  window.playPreviewAudio=async function(c){
+    if(!c||!AUDIO_KINDS.includes(c.type))return actualPlayPreviewAudioV35.apply(this,arguments);
+    audioPrepEnsure()[c.type]=cloneAudio(c);
+  };
+
+  async function commitPreviewBgm(d){
+    const prep=audioPrepEnsure().bgm;if(!prep)return;
+    const r=(typeof resolveAudioCommand==='function'?resolveAudioCommand(prep):null)||prep;
+    if(!r?.src)return;
+    const url=await assetPlayableUrl(r.src);if(!url)return;
+    d=Math.max(0,Number(d)||0);
+    const n=Number(r.volume),target=Math.max(0,Math.min(1,(Number.isFinite(n)?n:80)/100));
+    let ghost=null;
+    if(!previewBgmAudio.paused&&previewBgmAudio.src&&d>0){
+      try{
+        ghost=new Audio(previewBgmAudio.src);
+        ghost.loop=previewBgmAudio.loop;ghost.volume=previewBgmAudio.volume;
+        try{ghost.currentTime=previewBgmAudio.currentTime||0}catch(_){}
+        await ghost.play().catch(()=>{});
+        previewBgmGhostsV35.push(ghost);
+      }catch(_){ghost=null}
+    }
+    previewBgmAudio.pause();
+    previewBgmAudio.src=url;
+    previewBgmAudio.loop=!(r.loop===false||r.loop==='false');
+    previewBgmAudio.volume=d?0:target;
+    runtime.bgmCue=r.assetCue||r.cue||'';
+    try{previewBgmAudio.currentTime=0}catch(_){}
+    try{await previewBgmAudio.play()}catch(_){}
+    if(d){
+      const jobs=[fadeAudio(previewBgmAudio,target,d)];
+      if(ghost)jobs.push(fadeAudio(ghost,0,d));
+      await Promise.all(jobs);
+    }
+    if(ghost){ghost.pause();const n=previewBgmGhostsV35.indexOf(ghost);if(n>=0)previewBgmGhostsV35.splice(n,1)}
+  }
+  async function commitPreviewSe(){
+    const prep=audioPrepEnsure().se;if(!prep||window.__tnAudioReconstructingV35)return;
+    await actualPlayPreviewAudioV35.call(window,cloneAudio(prep));
+  }
+  async function commitPreviewVoice(){
+    const prep=audioPrepEnsure().voice;if(!prep||window.__tnAudioReconstructingV35)return;
+    await actualPlayPreviewAudioV35.call(window,cloneAudio(prep));
+  }
+  function stopPreviewSe(){
+    previewSeAudios.forEach(a=>{try{a.pause()}catch(_){}});
+    previewSeAudios.length=0;
+  }
+  function stopPreviewVoice(){
+    try{previewVoiceAudio.pause();previewVoiceAudio.removeAttribute('src')}catch(_){}
+  }
+
+  window.setVisibility=function(cmd,duration){
+    const s=String(cmd||''),on=s[0]==='+',key=s.slice(1);
+    if(['bgm','se','voice'].includes(key)&&window.__tnAudioStaticVisualV35)return;
+    if(key==='bgm'){const d=duration==null?audioFadeDefault():Math.max(0,Number(duration)||0);on?commitPreviewBgm(d):stopPreviewBgm(d);return}
+    if(key==='se'){on?commitPreviewSe():stopPreviewSe();return}
+    if(key==='voice'){on?commitPreviewVoice():stopPreviewVoice();return}
+    return actualSetVisibilityV35.apply(this,arguments);
+  };
+
+  // Selecting a Builder block reconstructs a visual still image; it must never make sound.
+  if(typeof window.applyDialogueStateInstant==='function'){
+    const oldDialogueStateAudioV35=window.applyDialogueStateInstant;
+    window.applyDialogueStateInstant=function(){
+      window.__tnAudioStaticVisualV35=true;
+      try{return oldDialogueStateAudioV35.apply(this,arguments)}
+      finally{window.__tnAudioStaticVisualV35=false}
+    };
+  }
+
+  window.stopAllPreviewAudio=function(){
+    for(const a of previewBgmGhostsV35.splice(0)){try{a.pause()}catch(_){}}
+    return actualStopAllPreviewV35.apply(this,arguments);
+  };
+
+  // Add strict audio +/- shorthand to text parsing. ASCII space only.
+  const prevParseDialogueAudioV35=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    const pages=prevParseDialogueAudioV35.apply(this,arguments);
+    for(const p of pages||[]){
+      const out=[];
+      for(const ev of p.events||[]){
+        if(ev?.type==='text'&&typeof ev.value==='string'){
+          const m=ev.value.match(/^([+-])(bgm)(?: ([0-9]+(?:\.[0-9]+)?))?$/);
+          const s=ev.value.match(/^([+-])(se|voice)$/);
+          if(m){out.push({type:'visibility',cmd:m[1]+m[2],duration:m[3]==null?audioFadeDefault():Math.max(0,Number(m[3])||0)});continue}
+          if(s){out.push({type:'visibility',cmd:s[1]+s[2],duration:0});continue}
+        }
+        out.push(ev);
+      }
+      p.events=out;
+    }
+    return pages;
+  };
+
+  // Avoid SE/VOICE bursts while "start from selected" reconstructs earlier state.
+  const fromSelectedV35=document.getElementById('previewFromSelected');
+  if(fromSelectedV35?.onclick){
+    const oldFromSelectedV35=fromSelectedV35.onclick;
+    fromSelectedV35.onclick=async function(e){
+      window.__tnAudioReconstructingV35=true;
+      try{return await oldFromSelectedV35.call(this,e)}
+      finally{window.__tnAudioReconstructingV35=false}
+    };
+  }
+
+  // ---------- Script TXT: new canonical audio meaning is preparation ----------
+  if(window.ScriptV1){
+    const oldParseScriptAudioV35=ScriptV1.parse;
+    const oldSerializeScriptAudioV35=ScriptV1.serialize;
+    const oldApplyScriptAudioV35=ScriptV1.apply;
+
+    ScriptV1.parse=function(raw,opts){
+      const r=oldParseScriptAudioV35.call(this,raw,opts);
+      if(!r||!Array.isArray(r.commands))return r;
+      const out=[];
+      for(const c0 of r.commands){
+        const c=c0||{};
+        if(c.type==='bgm'&&c.action==='stop'){
+          const d=c.fade==null?audioFadeDefault():Math.max(0,Number(c.fade)||0);
+          out.push({id:c.id,type:'text',side:'none',speaker:'',source:'-bgm'+(d!==audioFadeDefault()?' '+d:'')});
+          continue;
+        }
+        if(AUDIO_KINDS.includes(c.type)){
+          c.action='prepare';c.audioMode='prepare';if(c.type==='bgm')delete c.fade;
+        }
+        out.push(c);
+      }
+      r.commands=out;return r;
+    };
+
+    ScriptV1.serialize=function(input){
+      // Old stop objects are serialized as normal text controls; audio blocks themselves only prepare.
+      const list=(input||[]).map(x=>cloneAudio(x));
+      const converted=[];
+      for(const c of list){
+        if(c?.type==='bgm'&&c.action==='stop'){
+          const d=c.fade==null?audioFadeDefault():Math.max(0,Number(c.fade)||0);
+          converted.push({id:c.id,type:'text',side:'none',speaker:'',source:'-bgm'+(d!==audioFadeDefault()?' '+d:'')});continue;
+        }
+        if(AUDIO_KINDS.includes(c?.type)){c.action='play';delete c.fade;c.audioMode='prepare'}
+        converted.push(c);
+      }
+      return oldSerializeScriptAudioV35.call(this,converted)
+        .replace(/\[bgm ([^\]\n]+?) fade=[^\]\s]+([^\]]*)\]/g,'[bgm $1$2]');
+    };
+
+    ScriptV1.apply=function(raw){
+      const parsed=ScriptV1.parse(raw,{previousCommands:ScriptV1.canonicalCommands()});
+      if(!parsed?.ok){
+        try{ScriptV1.setDraft?.(raw,true)}catch(_){}
+        return parsed;
+      }
+      try{pushHistory()}catch(_){}
+      commands=(parsed.commands||[]).map(c=>ScriptV1.fromV10Command(c));
+      for(const c of commands)if(AUDIO_KINDS.includes(c?.type)){
+        c.audioMode='prepare';
+        if(c.type==='bgm'){c.action='prepare';c.fadeDuration=null}
+      }
+      try{ScriptV1.clearDraft?.()}catch(_){}
+      try{saveLocal();renderEditor();startPreview();renderValidation()}catch(e){console.error(e)}
+      return parsed;
+    };
+  }
+
+  // ---------- Exported game patch ----------
+  const PLAYER_PATCH_V35=String.raw`<script>
+(function(){
+  'use strict';
+  var AK35=['bgm','se','voice'],oldPlay35=playAud,oldVis35=vis,oldPd35=pd,oldStopAll35=stopAudioAll,oldFresh35=fresh,oldSave35=makeSaveState;
+  var ghosts35=[];
+  function cp35(v){return v==null?v:JSON.parse(JSON.stringify(v))}
+  function def35(){return typeof df==='function'?df():.8}
+  function prep35(){if(!rt.audioPrepared||typeof rt.audioPrepared!=='object')rt.audioPrepared={bgm:null,se:null,voice:null};AK35.forEach(function(k){if(!Object.prototype.hasOwnProperty.call(rt.audioPrepared,k))rt.audioPrepared[k]=null});return rt.audioPrepared}
+  fresh=function(){var x=oldFresh35();x.audioPrepared={bgm:null,se:null,voice:null};return x};
+  makeSaveState=function(src){var s=oldSave35(src);s.audioPrepared=cp35((src||rt).audioPrepared||{bgm:null,se:null,voice:null});return s};
+
+  function parseSpec35(kind,spec){
+    var p=String(spec||'').trim().split(/\s+/).filter(Boolean),cue=p.shift()||'',c=audioCue(kind,cue);if(!c)return null;
+    p.forEach(function(q){var n=q.indexOf('=');if(n<1)return;var k=q.slice(0,n).toLowerCase(),v=q.slice(n+1);if(k==='volume'&&isFinite(Number(v)))c.volume=Math.max(0,Math.min(100,Number(v)));else if(kind==='bgm'&&k==='loop')c.loop=!/^(false|0|no)$/i.test(v)});
+    return c;
+  }
+  var oldAudioCue35=audioCue;
+  audioCue=function(kind,spec){if(AK35.indexOf(kind)<0)return oldAudioCue35.apply(this,arguments);var p=String(spec||'').trim().split(/\s+/),cue=p.shift()||'',c=oldAudioCue35(kind,cue);if(!c)return null;p.forEach(function(q){var n=q.indexOf('=');if(n<1)return;var k=q.slice(0,n).toLowerCase(),v=q.slice(n+1);if(k==='volume'&&isFinite(Number(v)))c.volume=Math.max(0,Math.min(100,Number(v)));else if(kind==='bgm'&&k==='loop')c.loop=!/^(false|0|no)$/i.test(v)});return c};
+
+  playAud=async function(c,idx){
+    if(!c||AK35.indexOf(c.type)<0)return oldPlay35.apply(this,arguments);
+    prep35()[c.type]=cp35(c);
+  };
+
+  async function plusBgm35(d){
+    var c=prep35().bgm;if(!c)return;var r=resolveAudio(c)||c;if(!r||!r.src)return;
+    d=Math.max(0,Number(d)||0);var base=clamp100(r.volume,80),target=audioVolume('bgm',base),g=null;
+    if(!bgmAudio.paused&&bgmAudio.src&&d>0){
+      try{g=new Audio(bgmAudio.src);g.loop=bgmAudio.loop;g.volume=bgmAudio.volume;g._baseVolume=bgmAudio._baseVolume;try{g.currentTime=bgmAudio.currentTime||0}catch(e){};await g.play().catch(function(){});ghosts35.push(g)}catch(e){g=null}
+    }
+    bgmAudio.pause();bgmAudio.src=r.src;bgmAudio.loop=!(r.loop===false||r.loop==='false');bgmAudio._baseVolume=base;bgmAudio.volume=d?0:target;try{bgmAudio.currentTime=0}catch(e){}
+    rt.bgmIndex=-1;rt.bgmCue=r.assetCue||r.cue||'';rt.bgmTime=0;try{await bgmAudio.play()}catch(e){}
+    if(d){var jobs=[fadeA(bgmAudio,target,d)];if(g)jobs.push(fadeA(g,0,d));await Promise.all(jobs)}
+    if(g){g.pause();var gi=ghosts35.indexOf(g);if(gi>=0)ghosts35.splice(gi,1)}
+  }
+  async function plusSe35(){var c=prep35().se;if(!c)return;await oldPlay35(cp35(c),-1)}
+  async function plusVoice35(){var c=prep35().voice;if(!c)return;await oldPlay35(cp35(c),-1)}
+  function minusSe35(){seAudios.forEach(function(a){try{a.pause()}catch(e){}});seAudios=[]}
+  function minusVoice35(){try{voiceAudio.pause();voiceAudio.removeAttribute('src')}catch(e){}}
+
+  vis=function(cmd,duration){
+    var s=String(cmd||''),on=s[0]==='+',key=s.slice(1);
+    if(key==='bgm'){var d=duration==null?def35():Math.max(0,Number(duration)||0);if(on)plusBgm35(d);else stopBgm(d);return}
+    if(key==='se'){if(on)plusSe35();else minusSe35();return}
+    if(key==='voice'){if(on)plusVoice35();else minusVoice35();return}
+    return oldVis35.apply(this,arguments);
+  };
+
+  pd=function(raw,initial){
+    var pages=oldPd35.apply(this,arguments);
+    (pages||[]).forEach(function(p){var out=[];(p.events||[]).forEach(function(ev){
+      if(ev&&ev.type==='text'&&typeof ev.value==='string'){
+        var m=ev.value.match(/^([+-])(bgm)(?: ([0-9]+(?:\.[0-9]+)?))?$/),q=ev.value.match(/^([+-])(se|voice)$/);
+        if(m){out.push({type:'visibility',cmd:m[1]+m[2],duration:m[3]==null?def35():Math.max(0,Number(m[3])||0)});return}
+        if(q){out.push({type:'visibility',cmd:q[1]+q[2],duration:0});return}
+      }
+      out.push(ev)
+    });p.events=out});
+    return pages
+  };
+
+  stopAudioAll=function(){ghosts35.splice(0).forEach(function(a){try{a.pause()}catch(e){}});return oldStopAll35.apply(this,arguments)};
+})();
+${'</scr'+'ipt>'}`;
+
+  const prevMakePlayerV35=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=prevMakePlayerV35.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER_PATCH_V35+'</body></html>');
+  };
+
+  // Persist current commands after migration and refresh UI.
+  try{saveLocal()}catch(_){}
+  renderEditor();
+  if(selectedIndex>=0)showVisualAt(selectedIndex);
+})();
+</script>
+
+<style id="tatenovel-v36-audio-execution-style">
+.audioPrepareHint .audioExecNote{display:block;margin-top:5px;color:#9fd0ff;font-weight:800}
+</style>
+<script id="tatenovel-v36-audio-execution">
+(function(){
+  'use strict';
+  const AK36=['bgm','se','voice'];
+  const clone36=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const clamp01=n=>Math.max(0,Math.min(1,Number(n)||0));
+  const defaultFade36=()=>Math.max(0,Number(projectSettings?.defaultFadeDuration ?? .8)||0);
+  const prep36=()=>{
+    if(!runtime.audioPrepared||typeof runtime.audioPrepared!=='object')runtime.audioPrepared={bgm:null,se:null,voice:null};
+    for(const k of AK36)if(!Object.prototype.hasOwnProperty.call(runtime.audioPrepared,k))runtime.audioPrepared[k]=null;
+    return runtime.audioPrepared;
+  };
+
+  // Audio owns its own asynchronous lifetime. A preview reset invalidates every old
+  // fade/play operation before the runtime is rebuilt, so stale promises cannot stop
+  // or change the volume of newly restarted audio.
+  let audioEpoch36=0,bgmOp36=0,voiceOp36=0,seEpoch36=0;
+  const bgmGhosts36=[];
+  const oldStopAll36=window.stopAllPreviewAudio;
+  const resetEl36=a=>{if(!a)return;try{a.pause()}catch(_){};try{a.currentTime=0}catch(_){};try{a.removeAttribute('src');a.load?.()}catch(_){}};
+  function hardStop36(){
+    audioEpoch36++;bgmOp36++;voiceOp36++;seEpoch36++;
+    for(const a of bgmGhosts36.splice(0))resetEl36(a);
+    try{oldStopAll36?.()}catch(_){}
+    resetEl36(previewBgmAudio);resetEl36(previewVoiceAudio);
+    try{previewSeAudios.forEach(resetEl36);previewSeAudios.length=0}catch(_){}
+  }
+  window.stopAllPreviewAudio=hardStop36;
+
+  // Any route that creates a fresh preview runtime (initial load, 最初から,
+  // 選択位置からの内部リセット) first terminates the previous audio session.
+  const oldStart36=window.startPreview;
+  window.startPreview=function(){hardStop36();return oldStart36.apply(this,arguments)};
+
+  function fadeToken36(a,to,d,valid){
+    d=Math.max(0,Number(d)||0);to=clamp01(to);
+    if(!d){if(valid())a.volume=to;return Promise.resolve(valid())}
+    return new Promise(resolve=>{
+      const from=Number(a.volume)||0,start=performance.now();
+      const tick=now=>{
+        if(!valid()){resolve(false);return}
+        const t=Math.min(1,(now-start)/(d*1000));a.volume=from+(to-from)*t;
+        if(t<1)requestAnimationFrame(tick);else resolve(true);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  async function plusBgm36(duration){
+    const prep=clone36(prep36().bgm);if(!prep)return;
+    const my=++bgmOp36,epoch=audioEpoch36;
+    const r=(typeof resolveAudioCommand==='function'?resolveAudioCommand(prep):null)||prep;if(!r?.src)return;
+    const url=await assetPlayableUrl(r.src);if(!url||my!==bgmOp36||epoch!==audioEpoch36)return;
+    const n=Number(r.volume),target=clamp01((Number.isFinite(n)?n:80)/100),d=Math.max(0,Number(duration)||0);
+    let ghost=null;
+    if(!previewBgmAudio.paused&&previewBgmAudio.src&&d>0){
+      try{ghost=new Audio(previewBgmAudio.src);ghost.loop=previewBgmAudio.loop;ghost.volume=previewBgmAudio.volume;try{ghost.currentTime=previewBgmAudio.currentTime||0}catch(_){};await ghost.play().catch(()=>{});if(my!==bgmOp36||epoch!==audioEpoch36){resetEl36(ghost);return}bgmGhosts36.push(ghost)}catch(_){ghost=null}
+    }
+    previewBgmAudio.pause();previewBgmAudio.src=url;previewBgmAudio.loop=!(r.loop===false||r.loop==='false');previewBgmAudio.volume=d?0:target;
+    runtime.bgmCue=r.assetCue||r.cue||'';try{previewBgmAudio.currentTime=0}catch(_){};try{await previewBgmAudio.play()}catch(_){}
+    const valid=()=>my===bgmOp36&&epoch===audioEpoch36;
+    if(d&&valid()){
+      const jobs=[fadeToken36(previewBgmAudio,target,d,valid)];if(ghost)jobs.push(fadeToken36(ghost,0,d,valid));
+      await Promise.all(jobs);
+    }
+    if(ghost){resetEl36(ghost);const i=bgmGhosts36.indexOf(ghost);if(i>=0)bgmGhosts36.splice(i,1)}
+  }
+  async function minusBgm36(duration){
+    const my=++bgmOp36,epoch=audioEpoch36,d=Math.max(0,Number(duration)||0),valid=()=>my===bgmOp36&&epoch===audioEpoch36;
+    if(d&&!previewBgmAudio.paused)await fadeToken36(previewBgmAudio,0,d,valid);
+    if(!valid())return;resetEl36(previewBgmAudio);runtime.bgmCue='';
+  }
+  async function plusSe36(){
+    const prep=clone36(prep36().se);if(!prep||window.__tnAudioReconstructingV35)return;
+    const ticket=seEpoch36,epoch=audioEpoch36,r=(typeof resolveAudioCommand==='function'?resolveAudioCommand(prep):null)||prep;if(!r?.src)return;
+    const url=await assetPlayableUrl(r.src);if(!url||ticket!==seEpoch36||epoch!==audioEpoch36)return;
+    const n=Number(r.volume),a=new Audio(url);a.volume=clamp01((Number.isFinite(n)?n:100)/100);previewSeAudios.push(a);a.onended=()=>{const i=previewSeAudios.indexOf(a);if(i>=0)previewSeAudios.splice(i,1)};try{await a.play()}catch(_){}
+  }
+  function minusSe36(){seEpoch36++;try{previewSeAudios.forEach(resetEl36);previewSeAudios.length=0}catch(_){}}
+  async function plusVoice36(){
+    const prep=clone36(prep36().voice);if(!prep||window.__tnAudioReconstructingV35)return;
+    const my=++voiceOp36,epoch=audioEpoch36,r=(typeof resolveAudioCommand==='function'?resolveAudioCommand(prep):null)||prep;if(!r?.src)return;
+    const url=await assetPlayableUrl(r.src);if(!url||my!==voiceOp36||epoch!==audioEpoch36)return;
+    resetEl36(previewVoiceAudio);previewVoiceAudio.src=url;const n=Number(r.volume);previewVoiceAudio.volume=clamp01((Number.isFinite(n)?n:100)/100);try{await previewVoiceAudio.play()}catch(_){}
+  }
+  function minusVoice36(){voiceOp36++;resetEl36(previewVoiceAudio)}
+
+  // Legacy [bgm stop ...] is also start-and-continue. It returns an already resolved
+  // Promise so existing event loops do not wait for the fade to finish.
+  window.stopPreviewBgm=function(duration=defaultFade36()){minusBgm36(duration);return Promise.resolve()};
+
+  // Audio +/- starts an operation and immediately lets the scenario continue.
+  // Visual +/- keeps the existing blocking behavior.
+  const oldSetVisibility36=window.setVisibility;
+  let skipNextAudioSleep36=0;
+  window.setVisibility=function(cmd,duration){
+    const s=String(cmd||''),on=s[0]==='+',key=s.slice(1);
+    if(AK36.includes(key)){
+      const d=key==='bgm'?(duration==null?defaultFade36():Math.max(0,Number(duration)||0)):0;
+      if(key==='bgm')on?plusBgm36(d):minusBgm36(d);
+      else if(key==='se')on?plusSe36():minusSe36();
+      else on?plusVoice36():minusVoice36();
+      // showPreviewDialoguePage() normally waits visibility duration. Audio is the
+      // exception: consume exactly that following sleep without changing the fade.
+      if(key==='bgm'&&d>0&&runtime?.typing===true)skipNextAudioSleep36++;
+      return;
+    }
+    return oldSetVisibility36.apply(this,arguments);
+  };
+  const oldSleep36=window.sleep;
+  window.sleep=function(ms){
+    if(skipNextAudioSleep36>0&&Number(ms)>0){skipNextAudioSleep36--;return Promise.resolve()}
+    return oldSleep36.apply(this,arguments);
+  };
+
+  // Explain the execution rule in audio blocks without adding another control.
+  const oldFields36=window.fields;
+  window.fields=function(c,i){
+    let h=oldFields36.apply(this,arguments);
+    if(c&&AK36.includes(c.type)&&typeof h==='string'){
+      h=h.replace(/(<div class="audioPrepareHint">[\s\S]*?)(<\/div>)/, '$1<span class="audioExecNote">再生・停止は開始した時点で次の命令へ進みます。</span>$2');
+    }
+    return h;
+  };
+
+  // Exported game: same cancellable audio session + non-blocking playback rule.
+  const PLAYER_PATCH_V36=String.raw`<script>
+(function(){
+  'use strict';
+  var AK36=['bgm','se','voice'],oldVis36=vis,oldStopAll36=stopAudioAll,oldRestore36=restoreState,oldSl36=sl;
+  var epoch36=0,bgmOp36=0,voiceOp36=0,seEpoch36=0,ghosts36=[],skipSleep36=0;
+  function cp36(v){return v==null?v:JSON.parse(JSON.stringify(v))}
+  function cl36(n){n=Number(n)||0;return Math.max(0,Math.min(1,n))}
+  function df36(){return typeof df==='function'?Math.max(0,Number(df())||0):.8}
+  function prep36(){if(!rt.audioPrepared||typeof rt.audioPrepared!=='object')rt.audioPrepared={bgm:null,se:null,voice:null};AK36.forEach(function(k){if(!Object.prototype.hasOwnProperty.call(rt.audioPrepared,k))rt.audioPrepared[k]=null});return rt.audioPrepared}
+  function resetEl36(a){if(!a)return;try{a.pause()}catch(e){};try{a.currentTime=0}catch(e){};try{a.removeAttribute('src');a.load&&a.load()}catch(e){}}
+  function stopAll36(){epoch36++;bgmOp36++;voiceOp36++;seEpoch36++;ghosts36.splice(0).forEach(resetEl36);try{oldStopAll36()}catch(e){};resetEl36(bgmAudio);resetEl36(voiceAudio);try{seAudios.forEach(resetEl36);seAudios=[]}catch(e){}}
+  stopAudioAll=stopAll36;
+  function fade36(a,to,d,valid){d=Math.max(0,Number(d)||0);to=cl36(to);if(!d){if(valid())a.volume=to;return Promise.resolve(valid())}return new Promise(function(resolve){var from=Number(a.volume)||0,start=performance.now();function tick(now){if(!valid()){resolve(false);return}var t=Math.min(1,(now-start)/(d*1000));a.volume=from+(to-from)*t;if(t<1)requestAnimationFrame(tick);else resolve(true)}requestAnimationFrame(tick)})}
+  async function plusBgm36(d){var c=cp36(prep36().bgm);if(!c)return;var my=++bgmOp36,ep=epoch36,r=resolveAudio(c)||c;if(!r||!r.src)return;d=Math.max(0,Number(d)||0);var base=clamp100(r.volume,80),target=audioVolume('bgm',base),g=null;if(!bgmAudio.paused&&bgmAudio.src&&d>0){try{g=new Audio(bgmAudio.src);g.loop=bgmAudio.loop;g.volume=bgmAudio.volume;g._baseVolume=bgmAudio._baseVolume;try{g.currentTime=bgmAudio.currentTime||0}catch(e){};await g.play().catch(function(){});if(my!==bgmOp36||ep!==epoch36){resetEl36(g);return}ghosts36.push(g)}catch(e){g=null}}bgmAudio.pause();bgmAudio.src=r.src;bgmAudio.loop=!(r.loop===false||r.loop==='false');bgmAudio._baseVolume=base;bgmAudio.volume=d?0:target;rt.bgmIndex=-1;rt.bgmCue=r.assetCue||r.cue||'';rt.bgmTime=0;try{bgmAudio.currentTime=0}catch(e){};try{await bgmAudio.play()}catch(e){}var valid=function(){return my===bgmOp36&&ep===epoch36};if(d&&valid()){var jobs=[fade36(bgmAudio,target,d,valid)];if(g)jobs.push(fade36(g,0,d,valid));await Promise.all(jobs)}if(g){resetEl36(g);var i=ghosts36.indexOf(g);if(i>=0)ghosts36.splice(i,1)}}
+  async function minusBgm36(d){var my=++bgmOp36,ep=epoch36,valid=function(){return my===bgmOp36&&ep===epoch36};d=Math.max(0,Number(d)||0);if(d&&!bgmAudio.paused)await fade36(bgmAudio,0,d,valid);if(!valid())return;resetEl36(bgmAudio);rt.bgmIndex=-1;rt.bgmCue='';rt.bgmTime=0}
+  function plusSe36(){var c=cp36(prep36().se);if(!c)return;var ticket=seEpoch36,ep=epoch36,r=resolveAudio(c)||c;if(!r||!r.src||ticket!==seEpoch36||ep!==epoch36)return;var base=clamp100(r.volume,100),a=new Audio(r.src);a._baseVolume=base;a.volume=audioVolume('se',base);seAudios.push(a);a.onended=function(){var i=seAudios.indexOf(a);if(i>=0)seAudios.splice(i,1)};a.play().catch(function(){})}
+  function minusSe36(){seEpoch36++;seAudios.forEach(resetEl36);seAudios=[]}
+  function plusVoice36(){var c=cp36(prep36().voice);if(!c)return;var my=++voiceOp36,ep=epoch36,r=resolveAudio(c)||c;if(!r||!r.src||my!==voiceOp36||ep!==epoch36)return;resetEl36(voiceAudio);var base=clamp100(r.volume,100);voiceAudio.src=r.src;voiceAudio._baseVolume=base;voiceAudio.volume=audioVolume('voice',base);voiceAudio.play().catch(function(){})}
+  function minusVoice36(){voiceOp36++;resetEl36(voiceAudio)}
+  stopBgm=function(d){minusBgm36(d==null?df36():d);return Promise.resolve()};
+  vis=function(cmd,duration){var s=String(cmd||''),on=s[0]==='+',key=s.slice(1);if(AK36.indexOf(key)>=0){var d=key==='bgm'?(duration==null?df36():Math.max(0,Number(duration)||0)):0;if(key==='bgm')on?plusBgm36(d):minusBgm36(d);else if(key==='se')on?plusSe36():minusSe36();else on?plusVoice36():minusVoice36();if(key==='bgm'&&d>0&&rt&&rt.typing===true)skipSleep36++;return}return oldVis36.apply(this,arguments)};
+  sl=function(ms){if(skipSleep36>0&&Number(ms)>0){skipSleep36--;return Promise.resolve()}return oldSl36.apply(this,arguments)};
+  // Loading a save/continue is also a runtime replacement. Terminate the old audio
+  // session first so an obsolete fade cannot pause the restored BGM later.
+  restoreState=function(s){stopAll36();return oldRestore36.apply(this,arguments)};
+})();
+${'</scr'+'ipt>'}`;
+  const oldMakePlayer36=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=oldMakePlayer36.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER_PATCH_V36+'</body></html>');
+  };
+
+  try{renderEditor()}catch(_){}
+})();
+</script>
+
+
+
+<style id="tatenovel-v37-nonblocking-style">
+.nonBlockingHint{margin-top:9px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#121720;color:#cbd3df;font-size:11px;line-height:1.55}
+</style>
+<script id="tatenovel-v37-nonblocking-runtime">
+(function(){
+  'use strict';
+  // V37 timing rule: timed visual/audio operations start and continue in parallel.
+  // Only explicit waits, click/page waits, choices, and text flow block scenario progress.
+
+  const fxAnimations37=new Set();
+  function trackFx37(a){
+    if(!a)return a;
+    fxAnimations37.add(a);
+    try{a.finished.finally(()=>fxAnimations37.delete(a)).catch(()=>{})}catch(_){ }
+    return a;
+  }
+  function cancelFx37(){for(const a of [...fxAnimations37]){try{a.cancel()}catch(_){ }}fxAnimations37.clear()}
+  const resetBlock37=window.resetBlockPreview;
+  if(typeof resetBlock37==='function')window.resetBlockPreview=function(){cancelFx37();return resetBlock37.apply(this,arguments)};
+  const startPreview37=window.startPreview;
+  if(typeof startPreview37==='function')window.startPreview=function(){cancelFx37();return startPreview37.apply(this,arguments)};
+
+  function effectDuration37(c,k){
+    if(window.TestPlayFast?.enabled)return 0;
+    let d=Math.max(0,Number(c?.duration)||0);
+    if(d>0)return d;
+    return k==='flash'?0.35:k==='shake'?0.5:0.8;
+  }
+
+  // Effects are fire-and-continue. Their final visual state/animation still runs for the requested duration.
+  window.runEffectPreview=function(c){
+    const k=c?.effect||'flash',d=effectDuration37(c,k);
+    const scene=document.getElementById('sceneArea'),black=document.getElementById('blackoutFx'),flash=document.getElementById('flashFx');
+    if(k==='dark'||k==='light'){
+      runtime.darkened=k==='dark';
+      if(black){black.style.transition=d>0?`opacity ${d}s linear`:'none';black.style.opacity=runtime.darkened?'1':'0'}
+      return Promise.resolve();
+    }
+    if(k==='flash'){
+      if(d>0&&flash)trackFx37(flash.animate([{opacity:0},{opacity:1,offset:.35},{opacity:0}],{duration:d*1000,easing:'ease-out'}));
+      return Promise.resolve();
+    }
+    if(k==='shake'){
+      if(d>0&&scene){const px=Math.max(2,Math.min(30,(Number(c?.strength)||5)*2));trackFx37(scene.animate([{translate:'0 0'},{translate:`-${px}px 0`},{translate:`${px*.9}px 0`},{translate:`-${px*.6}px 0`},{translate:`${px*.35}px 0`},{translate:'0 0'}],{duration:d*1000,easing:'ease-out'}))}
+      return Promise.resolve();
+    }
+    if(k==='zoomIn'){
+      let x=Number(c?.centerX),y=Number(c?.centerY);if(!Number.isFinite(x))x=50;if(!Number.isFinite(y))y=50;
+      setCameraPreview(Math.max(100,Number(c?.zoom)||140),Math.max(0,Math.min(100,x)),Math.max(0,Math.min(100,y)),d);
+      return Promise.resolve();
+    }
+    if(k==='zoomOut'){setCameraPreview(100,50,50,d);return Promise.resolve()}
+    return Promise.resolve();
+  };
+
+  // Rebuild the dialogue runner with one timing rule: commands start, then the parser proceeds immediately.
+  // Background preparation may still await asset resolution because it is resource preparation, not an animation wait.
+  async function showPage37(resume=false){
+    const p=(runtime.textPages||[])[runtime.pageIndex];
+    if(!p)return false;
+    if(p.speakerChanged)runtime.currentSpeaker=p.clearSpeaker?'':p.speaker;
+    document.getElementById('previewSpeaker').textContent=displaySpeaker(runtime.currentSpeaker);
+    highlightSpeaker(runtime.currentSpeaker);
+    const out=document.getElementById('previewText');
+    if(!resume){
+      out.textContent='';runtime.eventIndex=0;
+      if(p.speakerChanged){await sleep(160);if(p.autoBounce)bounce('speaker')}
+    }
+    runtime.typing=true;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=false;
+    document.getElementById('tapHint').style.display='none';
+    for(;runtime.eventIndex<p.events.length;runtime.eventIndex++){
+      const ev=p.events[runtime.eventIndex];
+      if(ev.type==='wait'){
+        runtime.eventIndex++;runtime.typing=false;runtime.innerWait=true;document.getElementById('tapHint').style.display='block';return true;
+      }
+      if(ev.type==='timewait'){
+        runtime.typing=false;document.getElementById('tapHint').style.display='none';await waitSeconds(ev.seconds);runtime.typing=true;runtime.skipTyping=false;continue;
+      }
+      if(ev.type==='inlineEffect'){runEffectPreview(ev.cmd);continue}
+      if(ev.type==='audioCue'){const ac=findAudioCue(ev.kind,ev.cue);if(ac)playPreviewAudio(ac);continue}
+      if(ev.type==='bgmStop'){stopPreviewBgm(ev.duration);continue}
+      if(ev.type==='bgPreset'){
+        const bc=findBgPreset(ev.cue);if(bc)await transitionBgPreview(bc,ev.duration);continue;
+      }
+      if(ev.type==='bgOff'){hideBgPreview();continue}
+      if(ev.type==='charaSet'){setCharaPreview(ev.target,ev.cue);continue}
+      if(ev.type==='illustSet'){
+        const ic=findIllustPreset(ev.cue,ev.target);if(ic)transitionIllustPreview(ic,ev.duration);continue;
+      }
+      if(ev.type==='illustPreset'){
+        const ic=findIllustPreset(ev.cue,ev.target);if(ic)transitionIllustPreview(ic,ev.duration);continue;
+      }
+      if(ev.type==='illustOff'){hideIllustPreview(ev.target||'all',ev.duration);continue}
+      if(ev.type==='layer'){setCharLayerPreview(ev.target,ev.value);continue}
+      if(ev.type==='visibility'){setVisibility(ev.cmd,ev.duration);continue}
+      if(ev.type==='bounce'){bounce(ev.target);continue}
+      if(ev.type==='text'){
+        if(out.textContent&&!out.textContent.endsWith('\n'))out.textContent+='\n';
+        for(let ci=0;ci<ev.value.length;ci++){
+          if(runtime.skipTyping){out.textContent+=ev.value.slice(ci);ci=ev.value.length;break}
+          out.textContent+=ev.value[ci];await sleep(20)
+        }
+      }
+    }
+    runtime.typing=false;
+    if(p.endWait){runtime.pageBreakWait=true;document.getElementById('tapHint').style.display='block';return true}
+    document.getElementById('tapHint').style.display='none';
+    if(runtime.textPages&&runtime.pageIndex<runtime.textPages.length-1){runtime.pageIndex++;runtime.eventIndex=0;await window.showPreviewDialoguePage(false);status();return true}
+    runtime.textPages=null;runtime.pageIndex=0;runtime.eventIndex=0;runtime.waiting=false;run();return true;
+  }
+  function scheduleFast37(){
+    if(!window.TestPlayFast?.enabled)return;
+    queueMicrotask(()=>{
+      if(!window.TestPlayFast?.enabled||document.querySelector('#previewChoices button')||!runtime?.waiting)return;
+      if(runtime.innerWait||runtime.pageBreakWait)advancePreview();
+    });
+  }
+  window.showPreviewDialoguePage=async function(resume=false){const r=await showPage37(resume);scheduleFast37();return r};
+
+  // Explain the non-blocking rule where timing is edited.
+  const fields37=window.fields;
+  if(typeof fields37==='function')window.fields=function(c,i){
+    let h=fields37.apply(this,arguments);
+    if(c?.type==='effect'&&typeof h==='string')h+=`<div class="nonBlockingHint"><b>同時進行</b>：演出は開始後すぐ次の命令へ進みます。完了を待つ場合は直後に <b>w${Math.max(0,Number(c.duration)||0.8)}</b> などのウェイトを置きます。</div>`;
+    return h;
+  };
+  const fadeInput=document.getElementById('defaultVisualFade');
+  if(fadeInput){const box=fadeInput.closest('.settingSection,.projectSection,.settingsGroup')||fadeInput.parentElement?.parentElement;const hint=box?.querySelector('.audioHint');if(hint)hint.innerHTML='+ / - コマンドで秒数を省略したときに使います。<b>フェード中も次の命令へ進みます。</b> 完了待ちは直後に w0.8 などを置きます。'}
+
+  // Exported game receives the same execution semantics.
+  const PLAYER_PATCH_V37=String.raw`<script>
+(function(){
+  'use strict';
+  var activeFx37=[];
+  function track37(a){if(!a)return a;activeFx37.push(a);try{a.finished.finally(function(){var i=activeFx37.indexOf(a);if(i>=0)activeFx37.splice(i,1)}).catch(function(){})}catch(e){}return a}
+  function cancel37(){activeFx37.splice(0).forEach(function(a){try{a.cancel()}catch(e){}})}
+  var reset37=resetScene;resetScene=function(){cancel37();return reset37.apply(this,arguments)};
+  function fxDur37(c,k){var d=Math.max(0,Number(c&&c.duration)||0);if(d<=0)d=k==='flash'?.35:k==='shake'?.5:.8;if(typeof fastForward!=='undefined'&&fastForward&&d>0)d=Math.min(.18,Math.max(.09,d*.18));return d}
+  doFx=function(c){
+    c=c||{};var k=c.effect||'flash',d=fxDur37(c,k);
+    if(k==='dark'||k==='light'){rt.darkened=k==='dark';blackFx.style.transition=d>0?'opacity '+d+'s linear':'none';blackFx.style.opacity=rt.darkened?'1':'0';return Promise.resolve()}
+    if(k==='flash'){if(d>0)track37(whiteFx.animate([{opacity:0},{opacity:1,offset:.35},{opacity:0}],{duration:d*1000,easing:'ease-out'}));return Promise.resolve()}
+    if(k==='shake'){if(d>0){var px=Math.max(2,Math.min(30,(Number(c.strength)||5)*2));track37(scene.animate([{translate:'0 0'},{translate:-px+'px 0'},{translate:(px*.9)+'px 0'},{translate:-(px*.6)+'px 0'},{translate:(px*.35)+'px 0'},{translate:'0 0'}],{duration:d*1000,easing:'ease-out'}))}return Promise.resolve()}
+    if(k==='zoomIn'){var z=Math.max(100,Number(c.zoom)||140),x=Number(c.centerX),y=Number(c.centerY);if(!isFinite(x))x=50;if(!isFinite(y))y=50;x=Math.max(0,Math.min(100,x));y=Math.max(0,Math.min(100,y));setCam(z,x,y,d);return Promise.resolve()}
+    if(k==='zoomOut'){setCam(100,50,50,d);return Promise.resolve()}
+    return Promise.resolve()
+  };
+
+  var PAGE37=135,CLICK37=85,TEXT37=55;
+  function delay37(ms){return new Promise(function(r){setTimeout(r,Math.max(0,ms|0))})}
+  show=async function(resume){
+    resume=!!resume;
+    var p=rt.pages&&rt.pages[rt.page];if(!p)return;
+    if(p.speakerChanged)rt.currentSpeaker=p.clearSpeaker?'':p.speaker;
+    sp.textContent=nameOf(rt.currentSpeaker);
+    if(!resume){
+      tx.textContent='';rt.event=0;startPageLog();checkpointPage();
+      if(p.speakerChanged){await (fastForward?delay37(35):sl(160));if(p.autoBounce)bounce('speaker')}
+    }
+    rt.typing=true;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=false;tap.style.display='none';
+    for(;rt.event<p.events.length;rt.event++){
+      var ev=p.events[rt.event];
+      if(ev.type==='wait'){
+        if(fastForward){await delay37(CLICK37);continue}
+        rt.event++;rt.typing=false;rt.innerWait=true;tap.style.display='block';return;
+      }
+      if(ev.type==='timewait'){rt.typing=false;tap.style.display='none';await waitSec(ev.seconds);rt.typing=true;rt.skipTyping=false;continue}
+      if(ev.type==='inlineEffect'){doFx(ev.cmd);continue}
+      if(ev.type==='audioCue'){var ac=audioCue(ev.kind,ev.cue);if(ac)playAud(ac,commands.indexOf(ac));continue}
+      if(ev.type==='bgmStop'){stopBgm(ev.duration);continue}
+      if(ev.type==='bgPreset'){var bc=bgPreset(ev.cue);if(bc)await transBg(bc,commands.indexOf(bc),ev.duration);continue}
+      if(ev.type==='bgOff'){hideBg();continue}
+      if(ev.type==='charaSet'){setChara(ev.target,ev.cue);continue}
+      if(ev.type==='illustPreset'){var ic=illustPreset(ev.cue);if(ic)transIllust(ic,commands.indexOf(ic),ev.duration);continue}
+      if(ev.type==='illustSet'){var ic2=illustPreset(ev.cue);if(ic2)transIllust(ic2,commands.indexOf(ic2),ev.duration);continue}
+      if(ev.type==='illustOff'){hideIllust(ev.duration);continue}
+      if(ev.type==='layer'){setLayer(ev.target,ev.value);continue}
+      if(ev.type==='visibility'){vis(ev.cmd,ev.duration);continue}
+      if(ev.type==='bounce'){bounce(ev.target);continue}
+      if(ev.type==='text'){
+        if(tx.textContent&&!tx.textContent.endsWith('\n'))tx.textContent+='\n';
+        if(fastForward){tx.textContent+=ev.value;await delay37(Math.min(95,TEXT37+String(ev.value||'').length*.8))}
+        else{
+          for(var i=0;i<ev.value.length;i++){
+            if(rt.skipTyping||fastForward){tx.textContent+=ev.value.slice(i);i=ev.value.length;break}
+            tx.textContent+=ev.value[i];await sl(20)
+          }
+        }
+        addPageLogText(ev.value);continue;
+      }
+    }
+    rt.typing=false;commitPageLog();
+    if(p.endWait){
+      if(!fastForward){rt.pageBreakWait=true;tap.style.display='block';return}
+      await delay37(PAGE37);tx.textContent='';
+    }
+    tap.style.display='none';
+    if(rt.pages&&rt.page<rt.pages.length-1){rt.page++;rt.event=0;if(fastForward)await delay37(35);await show(false);return}
+    rt.pages=null;rt.waiting=false;run();
+  };
+})();
+${'</scr'+'ipt>'}`;
+  const makePlayer37=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makePlayer37.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER_PATCH_V37+'</body></html>');
+  };
+
+  try{renderEditor()}catch(_){ }
 })();
 </script>
 </body></html>
