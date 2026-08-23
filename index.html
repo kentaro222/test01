@@ -6462,4 +6462,143 @@ ${'</scr'+'ipt>'}`;
 })();
 </script>
 
+
+<style id="tatenovel-v49-bgm-loop-audition-style">
+.bgmLoopAuditionV49{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:9px}
+.bgmLoopAuditionV49 button{min-height:42px}
+.bgmLoopAuditionStatusV49{grid-column:1/-1;font-size:10px;color:var(--muted);line-height:1.45;min-height:1.45em}
+@media(max-width:720px){.bgmLoopAuditionV49{grid-template-columns:1fr 1fr}.bgmLoopAuditionV49 button{min-height:44px}}
+</style>
+<script id="tatenovel-v49-bgm-loop-audition">
+(function(){
+  'use strict';
+  const AC49=window.AudioContext||window.webkitAudioContext;
+  let ctx49=null,src49=null,gain49=null,ticket49=0;
+  const bufferCache49=new Map();
+
+  function stopLoopAudition49(){
+    ticket49++;
+    if(src49){try{src49.stop()}catch(_){ }try{src49.disconnect()}catch(_){ }}
+    if(gain49){try{gain49.disconnect()}catch(_){ }}
+    src49=null;gain49=null;
+    const st=document.getElementById('bgmLoopAuditionStatusV49');
+    if(st&&st.dataset.playing==='1'){st.dataset.playing='0';st.textContent='停止しました';}
+    const play=document.getElementById('bgmLoopAuditionPlayV49');
+    const stop=document.getElementById('bgmLoopAuditionStopV49');
+    if(play)play.disabled=false;
+    if(stop)stop.disabled=true;
+  }
+  window.stopBgmLoopAudition49=stopLoopAudition49;
+
+  function context49(){
+    if(!AC49)return null;
+    if(!ctx49)ctx49=new AC49();
+    return ctx49;
+  }
+
+  async function buffer49(item){
+    const key=String(item?.src||'');
+    if(!key)return null;
+    if(bufferCache49.has(key))return bufferCache49.get(key);
+    const p=(async()=>{
+      const url=await assetPlayableUrl(key);
+      if(!url)return null;
+      const res=await fetch(url);
+      const ab=await res.arrayBuffer();
+      const c=context49();
+      if(!c)return null;
+      return await c.decodeAudioData(ab.slice(0));
+    })().catch(err=>{bufferCache49.delete(key);throw err});
+    bufferCache49.set(key,p);
+    return p;
+  }
+
+  async function playLoopAudition49(item){
+    stopLoopAudition49();
+    const my=++ticket49;
+    const st=document.getElementById('bgmLoopAuditionStatusV49');
+    const play=document.getElementById('bgmLoopAuditionPlayV49');
+    const stop=document.getElementById('bgmLoopAuditionStopV49');
+    if(!AC49){if(st)st.textContent='このブラウザではWeb Audioループ試聴を利用できません';return}
+    if(!item?.src){if(st)st.textContent='BGMファイルが未設定です';return}
+    if(item.loop===false){if(st)st.textContent='「ループ再生」をONにしてください';return}
+    try{
+      if(play)play.disabled=true;
+      if(st){st.dataset.playing='0';st.textContent='読み込み中…'}
+      const c=context49();
+      await c.resume();
+      const b=await buffer49(item);
+      if(my!==ticket49||!b)return;
+      const dur=Math.max(0,Number(b.duration)||0);
+      if(!dur){if(st)st.textContent='音源の長さを取得できません';if(play)play.disabled=false;return}
+      let ls=Math.max(0,Number(item.loopStart)||0);
+      if(ls>=dur){
+        if(st)st.textContent=`ループ開始 ${ls.toFixed(3)}秒 が曲末 ${dur.toFixed(3)}秒 以降です`;
+        if(play)play.disabled=false;return;
+      }
+      const normal=document.getElementById('assetAudioPreview');
+      if(normal){try{normal.pause()}catch(_){ }}
+      const s=c.createBufferSource(),g=c.createGain();
+      s.buffer=b;s.loop=true;s.loopStart=ls;s.loopEnd=dur;
+      const vol=Number.isFinite(Number(item.baseVolume))?Math.max(0,Math.min(100,Number(item.baseVolume))):100;
+      g.gain.value=vol/100;
+      s.connect(g).connect(c.destination);
+      const offset=Math.max(0,dur-3);
+      src49=s;gain49=g;
+      s.onended=()=>{if(src49===s){src49=null;gain49=null}};
+      s.start(0,offset);
+      if(stop)stop.disabled=false;
+      if(st){st.dataset.playing='1';st.textContent=`曲末${Math.min(3,dur).toFixed(1)}秒前から再生 → ${ls.toFixed(3)}秒へループ`}
+    }catch(err){
+      console.error('BGM loop audition failed',err);
+      if(st){st.dataset.playing='0';st.textContent='ループ試聴に失敗しました'}
+      if(play)play.disabled=false;
+      if(stop)stop.disabled=true;
+    }
+  }
+
+  function attach49(){
+    if(assetManagerTab!=='bgm')return;
+    const item=currentAssetItem?.();
+    const box=document.querySelector('.bgmLoopStartBox');
+    if(!item||!box||box.querySelector('.bgmLoopAuditionV49'))return;
+    const row=document.createElement('div');
+    row.className='bgmLoopAuditionV49';
+    row.innerHTML=`<button type="button" id="bgmLoopAuditionPlayV49" class="assetPick" ${item.loop===false?'disabled':''}>▶ ループ試聴</button><button type="button" id="bgmLoopAuditionStopV49" class="assetPick" disabled>■ 停止</button><div id="bgmLoopAuditionStatusV49" class="bgmLoopAuditionStatusV49">曲末の約3秒前から再生し、設定したループ開始位置へ戻ります。</div>`;
+    box.appendChild(row);
+    row.querySelector('#bgmLoopAuditionPlayV49').onclick=()=>playLoopAudition49(item);
+    row.querySelector('#bgmLoopAuditionStopV49').onclick=stopLoopAudition49;
+    const au=document.getElementById('assetAudioPreview');
+    au?.addEventListener('play',stopLoopAudition49);
+    const ls=document.getElementById('assetLoopStart');
+    ls?.addEventListener('input',()=>{
+      if(src49)stopLoopAudition49();
+      const st=document.getElementById('bgmLoopAuditionStatusV49');
+      if(st)st.textContent='開始位置を変更しました。もう一度「ループ試聴」で確認してください。';
+    });
+  }
+
+  const oldRender49=window.renderAssetManager;
+  if(typeof oldRender49==='function'){
+    window.renderAssetManager=async function(){
+      stopLoopAudition49();
+      const r=await oldRender49.apply(this,arguments);
+      attach49();
+      return r;
+    };
+  }
+
+  const oldStopAll49=window.stopAllPreviewAudio;
+  if(typeof oldStopAll49==='function'){
+    window.stopAllPreviewAudio=function(){
+      stopLoopAudition49();
+      return oldStopAll49.apply(this,arguments);
+    };
+  }
+  document.getElementById('closeAssetManager')?.addEventListener('click',stopLoopAudition49,{capture:true});
+
+  try{attach49()}catch(e){console.warn(e)}
+})();
+</script>
+
 </body></html>
