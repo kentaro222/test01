@@ -3516,14 +3516,22 @@ ${'</scr'+'ipt>'}`;
     const explicit=String(projectSettings.outputBaseName||'').trim();
     return cleanOutputBase(explicit||firstTitleLine()||'tatenovel');
   }
+  function backupStamp(date=new Date()){
+    const yy=String(date.getFullYear()%100).padStart(2,'0');
+    const mo=String(date.getMonth()+1).padStart(2,'0');
+    const dd=String(date.getDate()).padStart(2,'0');
+    const hh=String(date.getHours()).padStart(2,'0');
+    const mm=String(date.getMinutes()).padStart(2,'0');
+    return `${yy}${mo}${dd}-${hh}${mm}`;
+  }
   function syncOutputNameUI(){
     if(outputInput&&document.activeElement!==outputInput)outputInput.value=projectSettings.outputBaseName||'';
     if(outputPreview){
       const b=outputBase();
-      outputPreview.textContent=`出力: ${b}.html / ${b}.json / ${b}-script.txt`+(String(projectSettings.outputBaseName||'').trim()?'':'（タイトルから自動）');
+      outputPreview.textContent=`出力: ${b}.html / ${b}-project_YYMMDD-HHmm.json / ${b}-script_YYMMDD-HHmm.txt`+(String(projectSettings.outputBaseName||'').trim()?'':'（タイトルから自動）');
     }
   }
-  window.TateNovelOutputName={base:outputBase,sanitize:cleanOutputBase,sync:syncOutputNameUI};
+  window.TateNovelOutputName={base:outputBase,sanitize:cleanOutputBase,backupStamp,sync:syncOutputNameUI};
 
   if(outputInput){
     outputInput.value=projectSettings.outputBaseName||'';
@@ -3572,7 +3580,7 @@ ${'</scr'+'ipt>'}`;
   if(saveProjectBtn)saveProjectBtn.onclick=async()=>{
     try{
       const bundle=await portableProjectBundle();
-      download(outputBase()+'.json',JSON.stringify(bundle,null,2),'application/json');
+      download(outputBase()+'-project_'+backupStamp()+'.json',JSON.stringify(bundle,null,2),'application/json');
     }catch(e){console.error(e);alert('プロジェクトを書き出せませんでした')}
   };
 
@@ -3590,7 +3598,7 @@ ${'</scr'+'ipt>'}`;
       let body='';
       if(window.ScriptTxtIO&&typeof window.ScriptTxtIO.exportFileText==='function')body=window.ScriptTxtIO.exportFileText();
       else body='#!tatenovel-script v=1 char-anchor=2\n\n'+ScriptV1.serialize(ScriptV1.canonicalCommands());
-      download(outputBase()+'-script.txt','\uFEFF'+body,'text/plain;charset=utf-8');
+      download(outputBase()+'-script_'+backupStamp()+'.txt','\uFEFF'+body,'text/plain;charset=utf-8');
       try{status?.('Script TXTを書き出しました')}catch(_){}
     }catch(e){console.error(e);alert('Script TXTを書き出せませんでした')}
   };
@@ -6305,6 +6313,152 @@ ${'</scr'+'ipt>'}`;
 
   window.TateNovelCommandGuardV46={commandEvents:commandEvents46,guardPages:guardPages46};
   try{renderEditor?.();if(selectedIndex>=0)showVisualAt?.(selectedIndex);renderValidation?.()}catch(e){console.error('v46 refresh',e)}
+})();
+</script>
+
+
+<script id="tatenovel-v48-audio-vars">
+(function(){
+  'use strict';
+
+  function interpolateVars48(text){
+    return String(text==null?'':text).replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g,function(_,name){
+      var vars=(window.runtime&&window.runtime.vars)||{};
+      var v=vars[name];
+      return v==null?'':String(v);
+    });
+  }
+
+  if(typeof window.parseDialogue==='function'){
+    const oldParse48=window.parseDialogue;
+    window.parseDialogue=function(raw,initialSpeaker=''){
+      const pages=oldParse48.call(this,raw,initialSpeaker);
+      return (pages||[]).map(function(p){
+        if(!p||!Array.isArray(p.events))return p;
+        const q=Object.assign({},p);
+        q.events=p.events.map(function(ev){
+          if(ev&&ev.type==='text'){
+            const e=Object.assign({},ev);
+            e.value=interpolateVars48(e.value);
+            return e;
+          }
+          return ev;
+        });
+        return q;
+      });
+    };
+  }
+
+  let previewAudioEnabled48=false;
+  let allowAudioForNextStart48=false;
+  function setPreviewAudioEnabled48(on,hardStop){
+    previewAudioEnabled48=!!on;
+    if(!previewAudioEnabled48&&hardStop){
+      try{window.stopAllPreviewAudio&&window.stopAllPreviewAudio()}catch(e){console.warn(e)}
+    }
+  }
+  window.setPreviewAudioEnabled48=setPreviewAudioEnabled48;
+
+  if(typeof window.playPreviewAudio==='function'){
+    const oldPlayPreview48=window.playPreviewAudio;
+    window.playPreviewAudio=async function(c){
+      if(!previewAudioEnabled48){
+        try{
+          const resolved=(typeof window.resolveAudioCommand==='function')?window.resolveAudioCommand(c):c;
+          if(resolved&&resolved.type==='bgm'&&window.runtime)window.runtime.bgmCue=resolved.assetCue||resolved.cue||window.runtime.bgmCue||'';
+        }catch(_){ }
+        return;
+      }
+      return oldPlayPreview48.apply(this,arguments);
+    };
+  }
+
+  if(typeof window.startPreview==='function'){
+    const oldStartPreview48=window.startPreview;
+    window.startPreview=function(){
+      if(!allowAudioForNextStart48){
+        setPreviewAudioEnabled48(false,true);
+      }
+      allowAudioForNextStart48=false;
+      return oldStartPreview48.apply(this,arguments);
+    };
+  }
+
+  if(typeof window.showVisualAt==='function'){
+    const oldShowVisual48=window.showVisualAt;
+    window.showVisualAt=function(){
+      setPreviewAudioEnabled48(false,true);
+      return oldShowVisual48.apply(this,arguments);
+    };
+  }
+
+  function wireButtons48(){
+    const startBtn=document.getElementById('previewStart');
+    if(startBtn && !startBtn.dataset.v48Bound){
+      startBtn.dataset.v48Bound='1';
+      const old=startBtn.onclick;
+      startBtn.onclick=function(e){
+        allowAudioForNextStart48=true;
+        setPreviewAudioEnabled48(true,false);
+        return typeof old==='function'?old.call(this,e):undefined;
+      };
+    }
+    const fromBtn=document.getElementById('previewFromSelected');
+    if(fromBtn && !fromBtn.dataset.v48Bound){
+      fromBtn.dataset.v48Bound='1';
+      const old=fromBtn.onclick;
+      fromBtn.onclick=function(e){
+        setPreviewAudioEnabled48(true,false);
+        return typeof old==='function'?old.call(this,e):undefined;
+      };
+    }
+  }
+  wireButtons48();
+
+  const hint=document.querySelector('.left .hintBox');
+  if(hint && !hint.innerHTML.includes('{{変数名}}')){
+    hint.insertAdjacentHTML('beforeend','<br><b>{{変数名}}</b> 現在の変数値を本文へ表示（未定義は空文字）');
+  }
+
+  const PLAYER_PATCH_V48=String.raw`<script>
+(function(){
+  'use strict';
+  function iv48(text){
+    return String(text==null?'':text).replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g,function(_,name){
+      var vars=(typeof rt!=='undefined'&&rt&&rt.vars)||{};
+      var v=vars[name];
+      return v==null?'':String(v);
+    });
+  }
+  var oldPd48=pd;
+  pd=function(raw,initialSpeaker){
+    var pages=oldPd48(raw,initialSpeaker)||[];
+    return pages.map(function(p){
+      if(!p||!p.events)return p;
+      var q=Object.assign({},p);
+      q.events=p.events.map(function(ev){
+        if(ev&&ev.type==='text'){
+          var e=Object.assign({},ev);
+          e.value=iv48(e.value);
+          return e;
+        }
+        return ev;
+      });
+      return q;
+    });
+  };
+})();
+${'</scr'+'ipt>'}`;
+
+  if(typeof window.makePlayerHTML==='function'){
+    const oldMakePlayer48=window.makePlayerHTML;
+    window.makePlayerHTML=function(project,settings,catalog){
+      const h=oldMakePlayer48.call(this,project,settings,catalog);
+      return h.replace('</body></html>',PLAYER_PATCH_V48+'</body></html>');
+    };
+  }
+
+  try{wireButtons48()}catch(_){ }
 })();
 </script>
 
