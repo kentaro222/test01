@@ -6660,4 +6660,165 @@ ${'</scr'+'ipt>'}`;
 })();
 </script>
 
+
+<style id="tatenovel-v52-settings-style">
+.visualDefaultsV52{margin-top:10px}.visualDefaultsV52 .settingRowV52{margin-top:8px}.visualDefaultsV52 .toggleV52{display:flex;align-items:center;gap:8px;min-height:40px;color:var(--text);font-size:12px;font-weight:800}.visualDefaultsV52 .toggleV52 input{width:auto;margin:0}.visualDefaultsV52 .audioHint{margin-top:7px}
+</style>
+<script id="tatenovel-v52-bounce-fades">
+(function(){
+  'use strict';
+  const DEF52={bg:2,chara:1,illust:1};
+  const clamp52=(v,fallback)=>{const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):fallback};
+  const bgFade52=()=>clamp52(projectSettings?.defaultBgFade,DEF52.bg);
+  const charFade52=()=>clamp52(projectSettings?.defaultCharaFade,DEF52.chara);
+  const illFade52=()=>clamp52(projectSettings?.defaultIllustFade,DEF52.illust);
+  const autoBounce52=()=>projectSettings?.autoBounce!==false;
+
+  if(!Number.isFinite(Number(projectSettings.defaultBgFade)))projectSettings.defaultBgFade=DEF52.bg;
+  if(!Number.isFinite(Number(projectSettings.defaultCharaFade)))projectSettings.defaultCharaFade=DEF52.chara;
+  if(!Number.isFinite(Number(projectSettings.defaultIllustFade)))projectSettings.defaultIllustFade=DEF52.illust;
+  if(typeof projectSettings.autoBounce!=='boolean')projectSettings.autoBounce=true;
+
+  // Smaller conversational bounce. Manual !a etc. and automatic speaker bounce share this motion.
+  window.bounce=function(target){
+    const side=target==='speaker'?speakerSide(runtime.currentSpeaker):target;
+    const el=charEl(side);if(!el||el.classList.contains('hidden'))return;
+    el.animate([{translate:'0 0'},{translate:'0 -7px'},{translate:'0 0'}],{duration:260,easing:'ease-out'});
+  };
+
+  function pictEvents52(){
+    const out=[{type:'visibility',cmd:'-bg',duration:bgFade52()}];
+    for(const k of ['a','b','c','d'])out.push({type:'visibility',cmd:'-'+k,duration:charFade52()});
+    for(const k of ['a','b','c','d'])out.push({type:'visibility',cmd:'-illust:'+k,duration:illFade52()});
+    return out;
+  }
+  const PICT52='\uE320TNV52_PICT_DEFAULT\uE321';
+  const unique52=s=>!!s&&/^[abcd]+$/.test(s)&&new Set(s).size===s.length;
+  function prep52(raw){
+    return String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>{
+      const t=line.trim();let m;
+      if(t==='-pict')return PICT52;
+      if((m=t.match(/^([+-])bg$/)))return m[1]+'bg '+bgFade52();
+      if((m=t.match(/^([+-])([abcd]+)$/))&&unique52(m[2]))return m[1]+m[2]+' '+charFade52();
+      if((m=t.match(/^([+-])il ([abcd]+)$/))&&unique52(m[2]))return m[1]+'il '+m[2]+' '+illFade52();
+      // Audio has no project default fade. Omitted time is always a cut.
+      if((m=t.match(/^([+-])bgm$/)))return m[1]+'bgm 0';
+      return line;
+    }).join('\n');
+  }
+  const oldParse52=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    const pages=oldParse52.call(this,prep52(raw),initialSpeaker)||[];
+    for(const p of pages){
+      if(!autoBounce52())p.autoBounce=false;
+      if(!Array.isArray(p.events))continue;
+      const out=[];
+      for(const ev of p.events){
+        if(ev?.type==='text'&&ev.value===PICT52){out.push(...pictEvents52());continue}
+        out.push(ev);
+      }
+      p.events=out;
+    }
+    return pages;
+  };
+
+  // Any direct visibility call that omits a time follows the same category defaults.
+  const oldVisibility52=window.setVisibility;
+  window.setVisibility=function(cmd,duration){
+    if(duration==null){
+      const key=String(cmd||'').slice(1);
+      if(key==='bg')duration=bgFade52();
+      else if(/^[abcd]$/.test(key))duration=charFade52();
+      else if(key==='illust'||key.startsWith('illust:'))duration=illFade52();
+      else if(key==='bgm')duration=0;
+    }
+    return oldVisibility52.call(this,cmd,duration);
+  };
+
+  function renderSettings52(){
+    let box=document.querySelector('.visualDefaults');
+    if(!box){
+      const hero=document.getElementById('heroName');if(!hero)return;
+      box=document.createElement('div');box.className='visualDefaults';hero.insertAdjacentElement('afterend',box);
+    }
+    box.classList.add('visualDefaultsV52');
+    box.innerHTML=`<div class="sectionTitle">表示・会話</div>
+      <label class="toggleV52"><input id="autoBounceV52" type="checkbox" ${autoBounce52()?'checked':''}> 自動バウンス</label>
+      <div class="audioHint">話者変更時の立ち絵バウンス。OFFでも <b>!a / !b / !c / !d</b> の手動バウンスは有効です。</div>
+      <div class="settingRowV52"><label>背景の基本フェード時間</label><div class="numControl"><button type="button" class="stepBtn" data-v52-minus="defaultBgFade">−</button><input id="defaultBgFadeV52" data-v52-setting="defaultBgFade" type="number" min="0" max="10" step="0.1" value="${bgFade52()}"><span class="unit">秒</span><button type="button" class="stepBtn" data-v52-plus="defaultBgFade">＋</button></div></div>
+      <div class="settingRowV52"><label>立ち絵の基本フェード時間</label><div class="numControl"><button type="button" class="stepBtn" data-v52-minus="defaultCharaFade">−</button><input id="defaultCharaFadeV52" data-v52-setting="defaultCharaFade" type="number" min="0" max="10" step="0.1" value="${charFade52()}"><span class="unit">秒</span><button type="button" class="stepBtn" data-v52-plus="defaultCharaFade">＋</button></div></div>
+      <div class="settingRowV52"><label>イラストの基本フェード時間</label><div class="numControl"><button type="button" class="stepBtn" data-v52-minus="defaultIllustFade">−</button><input id="defaultIllustFadeV52" data-v52-setting="defaultIllustFade" type="number" min="0" max="10" step="0.1" value="${illFade52()}"><span class="unit">秒</span><button type="button" class="stepBtn" data-v52-plus="defaultIllustFade">＋</button></div></div>
+      <div class="audioHint">画像の <b>+ / -</b> で秒数を省略したときにカテゴリ別の基本時間を使います。BGM・SE・VOICEには基本フェード設定を持たせず、時間省略時は0秒です。</div>`;
+    const ab=box.querySelector('#autoBounceV52');
+    ab.onchange=()=>{projectSettings.autoBounce=!!ab.checked;saveLocal()};
+    const fallback={defaultBgFade:DEF52.bg,defaultCharaFade:DEF52.chara,defaultIllustFade:DEF52.illust};
+    box.querySelectorAll('[data-v52-setting]').forEach(inp=>{
+      const key=inp.dataset.v52Setting;
+      const apply=()=>{projectSettings[key]=clamp52(inp.value,fallback[key]);inp.value=String(projectSettings[key]);saveLocal()};
+      inp.onchange=apply;inp.oninput=()=>{const n=Number(inp.value);if(Number.isFinite(n)){projectSettings[key]=Math.max(0,Math.min(10,n));scheduleSave()}};
+    });
+    const nudge=(key,delta)=>{const inp=box.querySelector(`[data-v52-setting="${key}"]`);if(!inp)return;const n=clamp52(Number(inp.value)+delta,fallback[key]);inp.value=String(Math.round(n*10)/10);inp.dispatchEvent(new Event('change'))};
+    box.querySelectorAll('[data-v52-minus]').forEach(b=>b.onclick=()=>nudge(b.dataset.v52Minus,-.1));
+    box.querySelectorAll('[data-v52-plus]').forEach(b=>b.onclick=()=>nudge(b.dataset.v52Plus,.1));
+  }
+  renderSettings52();
+
+  const oldSync52=window.syncProjectSettingsUI;
+  window.syncProjectSettingsUI=function(){
+    oldSync52?.();
+    const vals={defaultBgFade:bgFade52(),defaultCharaFade:charFade52(),defaultIllustFade:illFade52()};
+    for(const [k,v] of Object.entries(vals)){const i=document.querySelector(`[data-v52-setting="${k}"]`);if(i&&document.activeElement!==i)i.value=String(v)}
+    const a=document.getElementById('autoBounceV52');if(a)a.checked=autoBounce52();
+  };
+
+  const newBtn52=document.getElementById('newProject');
+  if(newBtn52?.onclick){
+    const oldNew52=newBtn52.onclick;
+    newBtn52.onclick=function(e){
+      const before=String(projectSettings.projectId||'');
+      const r=oldNew52.call(this,e);
+      setTimeout(()=>{if(String(projectSettings.projectId||'')!==before){projectSettings.defaultBgFade=DEF52.bg;projectSettings.defaultCharaFade=DEF52.chara;projectSettings.defaultIllustFade=DEF52.illust;projectSettings.autoBounce=true;window.syncProjectSettingsUI?.();saveLocal()}},0);
+      return r;
+    };
+  }
+
+  // Keep the audio block explanation aligned with the new cut-by-default rule.
+  if(typeof window.fields==='function'){
+    const oldFields52=window.fields;
+    window.fields=function(c,i){
+      let h=oldFields52.apply(this,arguments);if(typeof h!=='string')return h;
+      if(['bgm','se','voice'].includes(c?.type)&&!h.includes('audioCutDefaultV52'))h+=`<div class="audioPrepareHint audioCutDefaultV52">音の + / - は時間省略時0秒（カットイン / カットアウト）。BGMだけ必要な箇所で <b>+bgm 1</b> / <b>-bgm 1</b> のように明示します。</div>`;
+      return h;
+    };
+  }
+
+  const hint52=document.querySelector('.left .hintBox');
+  if(hint52&&!hint52.innerHTML.includes('カテゴリ別の基本フェード'))hint52.insertAdjacentHTML('beforeend','<br><span style="color:var(--muted)">背景・立ち絵・イラストはカテゴリ別の基本フェードを使用。BGMは時間省略時0秒です。</span>');
+
+  const PLAYER_PATCH_V52=String.raw`<script>
+(function(){
+  'use strict';
+  var D52={bg:2,chara:1,illust:1},P52='\uE320TNV52_PICT_DEFAULT\uE321';
+  function cl52(v,f){var n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f}
+  function bf52(){return cl52(settings&&settings.defaultBgFade,D52.bg)}
+  function cf52(){return cl52(settings&&settings.defaultCharaFade,D52.chara)}
+  function inf52(){return cl52(settings&&settings.defaultIllustFade,D52.illust)}
+  function ab52(){return !settings||settings.autoBounce!==false}
+  function uq52(s){s=String(s||'');if(!s||!/^[abcd]+$/.test(s))return false;var z={};for(var i=0;i<s.length;i++){if(z[s[i]])return false;z[s[i]]=1}return true}
+  bounce=function(t){var side=t==='speaker'?(rt.currentSpeaker==='__A__'?'a':rt.currentSpeaker==='__B__'?'b':rt.currentSpeaker==='__C__'?'c':rt.currentSpeaker==='__D__'?'d':'none'):t,el=playerChar(side);if(!el||el.classList.contains('hidden'))return;el.animate([{translate:'0 0'},{translate:'0 -7px'},{translate:'0 0'}],{duration:260,easing:'ease-out'})};
+  function prep52(raw){return String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){var t=line.trim(),m;if(t==='-pict')return P52;if((m=t.match(/^([+-])bg$/)))return m[1]+'bg '+bf52();if((m=t.match(/^([+-])([abcd]+)$/))&&uq52(m[2]))return m[1]+m[2]+' '+cf52();if((m=t.match(/^([+-])il ([abcd]+)$/))&&uq52(m[2]))return m[1]+'il '+m[2]+' '+inf52();if((m=t.match(/^([+-])bgm$/)))return m[1]+'bgm 0';return line}).join('\n')}
+  function pe52(){var a=[{type:'visibility',cmd:'-bg',duration:bf52()}],k;for(k of ['a','b','c','d'])a.push({type:'visibility',cmd:'-'+k,duration:cf52()});for(k of ['a','b','c','d'])a.push({type:'visibility',cmd:'-illust:'+k,duration:inf52()});return a}
+  var oldPd52=pd;pd=function(raw,initial){var pages=oldPd52(prep52(raw),initial)||[];pages.forEach(function(p){if(!ab52())p.autoBounce=false;if(!Array.isArray(p.events))return;var out=[];p.events.forEach(function(ev){if(ev&&ev.type==='text'&&ev.value===P52){out.push.apply(out,pe52());return}out.push(ev)});p.events=out});return pages};
+  if(typeof vis==='function'){var oldVis52=vis;vis=function(cmd,duration){if(duration==null){var key=String(cmd||'').slice(1);if(key==='bg')duration=bf52();else if(/^[abcd]$/.test(key))duration=cf52();else if(key==='illust'||key.indexOf('illust:')===0)duration=inf52();else if(key==='bgm')duration=0}return oldVis52(cmd,duration)}}
+})();
+${'</scr'+'ipt>'}`;
+  if(typeof window.makePlayerHTML==='function'){
+    const oldMakePlayer52=window.makePlayerHTML;
+    window.makePlayerHTML=function(project,settings={},catalog={}){const h=oldMakePlayer52.call(this,project,settings,catalog);return h.replace('</body></html>',PLAYER_PATCH_V52+'</body></html>')};
+  }
+
+  try{saveLocal();renderEditor?.();renderValidation?.()}catch(e){console.error('v52 refresh',e)}
+})();
+</script>
+
 </body></html>
