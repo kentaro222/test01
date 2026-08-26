@@ -6715,6 +6715,9 @@ ${'</scr'+'ipt>'}`;
       const out=[];
       for(const ev of p.events){
         if(ev?.type==='text'&&ev.value===PICT52){out.push(...pictEvents52());continue}
+        // Command-only lines may carry invisible trailing spaces from mobile input.
+        // Physical whitespace is not a display line in TateNovel; use `br` for an intentional blank line.
+        if(ev?.type==='text'&&/^[ \t\u3000]+$/.test(String(ev.value??'')))continue;
         out.push(ev);
       }
       p.events=out;
@@ -6808,7 +6811,7 @@ ${'</scr'+'ipt>'}`;
   bounce=function(t){var side=t==='speaker'?(rt.currentSpeaker==='__A__'?'a':rt.currentSpeaker==='__B__'?'b':rt.currentSpeaker==='__C__'?'c':rt.currentSpeaker==='__D__'?'d':'none'):t,el=playerChar(side);if(!el||el.classList.contains('hidden'))return;el.animate([{translate:'0 0'},{translate:'0 -7px'},{translate:'0 0'}],{duration:260,easing:'ease-out'})};
   function prep52(raw){return String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){var t=line.trim(),m;if(t==='-pict')return P52;if((m=t.match(/^([+-])bg$/)))return m[1]+'bg '+bf52();if((m=t.match(/^([+-])([abcd]+)$/))&&uq52(m[2]))return m[1]+m[2]+' '+cf52();if((m=t.match(/^([+-])il ([abcd]+)$/))&&uq52(m[2]))return m[1]+'il '+m[2]+' '+inf52();if((m=t.match(/^([+-])bgm$/)))return m[1]+'bgm 0';return line}).join('\n')}
   function pe52(){var a=[{type:'visibility',cmd:'-bg',duration:bf52()}],k;for(k of ['a','b','c','d'])a.push({type:'visibility',cmd:'-'+k,duration:cf52()});for(k of ['a','b','c','d'])a.push({type:'visibility',cmd:'-illust:'+k,duration:inf52()});return a}
-  var oldPd52=pd;pd=function(raw,initial){var pages=oldPd52(prep52(raw),initial)||[];pages.forEach(function(p){if(!ab52())p.autoBounce=false;if(!Array.isArray(p.events))return;var out=[];p.events.forEach(function(ev){if(ev&&ev.type==='text'&&ev.value===P52){out.push.apply(out,pe52());return}out.push(ev)});p.events=out});return pages};
+  var oldPd52=pd;pd=function(raw,initial){var pages=oldPd52(prep52(raw),initial)||[];pages.forEach(function(p){if(!ab52())p.autoBounce=false;if(!Array.isArray(p.events))return;var out=[];p.events.forEach(function(ev){if(ev&&ev.type==='text'&&ev.value===P52){out.push.apply(out,pe52());return}if(ev&&ev.type==='text'&&/^[ \t\u3000]+$/.test(String(ev.value==null?'':ev.value)))return;out.push(ev)});p.events=out});return pages};
   if(typeof vis==='function'){var oldVis52=vis;vis=function(cmd,duration){if(duration==null){var key=String(cmd||'').slice(1);if(key==='bg')duration=bf52();else if(/^[abcd]$/.test(key))duration=cf52();else if(key==='illust'||key.indexOf('illust:')===0)duration=inf52();else if(key==='bgm')duration=0}return oldVis52(cmd,duration)}}
 })();
 ${'</scr'+'ipt>'}`;
