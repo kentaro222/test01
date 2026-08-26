@@ -3945,12 +3945,25 @@ ${'</scr'+'ipt>'}`;
     try{runtime.waitResolve?.();stopAllPreviewAudio?.();resetBlockPreview();runtime.pc=0;refreshVars?.()}catch(err){console.error(err)}
   }
 
-  async function applyTextStateSilent(c){
+  function prepAudioSilent(kind,c){
+    if(!runtime.audioPrepared||typeof runtime.audioPrepared!=='object')runtime.audioPrepared={bgm:null,se:null,voice:null};
+    runtime.audioPrepared[kind]=c?clone(c):null;
+  }
+
+  async function applyTextStateSilent(c,bgmState){
     const pages=parseDialogue(c?.text||'',runtime.currentSpeaker||c?.speaker||'');
     for(const p of pages){
       if(p.speakerChanged)runtime.currentSpeaker=p.clearSpeaker?'':p.speaker;
       for(const ev of p.events||[]){
-        if(ev.type==='visibility')setVisibility(ev.cmd,0);
+        if(ev.type==='visibility'){
+          const cmd=String(ev.cmd||''),key=cmd.slice(1);
+          if(key==='bgm'){
+            if(cmd[0]==='+')bgmState.active=runtime.audioPrepared?.bgm?clone(runtime.audioPrepared.bgm):null;
+            else bgmState.active=null;
+          }else if(key==='se'||key==='voice'){
+            // Playback is intentionally suppressed while reconstructing to the selected block.
+          }else setVisibility(ev.cmd,0);
+        }
         else if(ev.type==='layer')setCharLayerPreview(ev.target,ev.value);
         else if(ev.type==='bgPreset'){const bc=findBgPreset(ev.cue);if(bc)await transitionBgPreview(bc)}
         else if(ev.type==='bgOff')setVisibility('-bg',0);
@@ -3960,9 +3973,9 @@ ${'</scr'+'ipt>'}`;
         }
         else if(ev.type==='illustOff')await hideIllustPreview(ev.target||'all',0);
         else if(ev.type==='inlineEffect')applyEffectStateInstant(ev.cmd||{});
-        else if(ev.type==='bgmStop')await stopPreviewBgm(0);
-        else if(ev.type==='audioCue'&&ev.kind==='bgm'){
-          const ac=findAudioCue('bgm',ev.cue);if(ac){const x=clone(ac);x.fadeDuration=0;await playPreviewAudio(x)}
+        else if(ev.type==='bgmStop')bgmState.active=null;
+        else if(ev.type==='audioCue'){
+          const ac=findAudioCue(ev.kind,ev.cue);if(ac)prepAudioSilent(ev.kind,ac);
         }
       }
     }
@@ -3971,9 +3984,9 @@ ${'</scr'+'ipt>'}`;
   async function reconstructTo(target){
     target=Math.max(0,Math.min(Number(target)||0,commands.length-1));
     let pc=0,guard=0;
-    const visits=new Map();
+    const visits=new Map(),bgmState={active:null};
     while(pc<commands.length&&guard++<10000){
-      if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true}}
+      if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true,bgmActive:bgmState.active?clone(bgmState.active):null,bgmPrepared:runtime.audioPrepared?.bgm?clone(runtime.audioPrepared.bgm):null}}
       const seen=(visits.get(pc)||0)+1;visits.set(pc,seen);
       if(seen>32)return {ok:false,message:`Block ${pc+1} 付近でループを検出しました`};
       const c=commands[pc];runtime.pc=pc+1;
@@ -3984,9 +3997,10 @@ ${'</scr'+'ipt>'}`;
       else if(c.type==='var')setVar(c);
       else if(c.type==='effect')applyEffectStateInstant(c);
       else if(c.type==='bgm'){
-        if(c.action==='stop')await stopPreviewBgm(0);else{const x=clone(c);x.fadeDuration=0;await playPreviewAudio(x)}
+        if(c.action==='stop')bgmState.active=null;else prepAudioSilent('bgm',c);
       }
-      else if(c.type==='text')await applyTextStateSilent(c);
+      else if(c.type==='se'||c.type==='voice')prepAudioSilent(c.type,c);
+      else if(c.type==='text')await applyTextStateSilent(c,bgmState);
       else if(c.type==='jump'){
         const n=findLabel(jumpTarget(c));if(n<0)return {ok:false,message:`Block ${pc+1}: ジャンプ先がありません`};runtime.pc=n+1;
       }
@@ -4003,8 +4017,44 @@ ${'</scr'+'ipt>'}`;
       // wait / SE / VOICE / memo / comment / label are intentionally instantaneous or silent during reconstruction.
       pc=runtime.pc;
     }
-    if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true}}
+    if(pc===target){runtime.pc=pc;refreshVars?.();return {ok:true,bgmActive:bgmState.active?clone(bgmState.active):null,bgmPrepared:runtime.audioPrepared?.bgm?clone(runtime.audioPrepared.bgm):null}}
     return {ok:false,message:'現在のテスト経路から選択位置へ到達できません'};
+  }
+
+  function selectedStartsWithBgmOff(c){
+    if(c?.type==='bgm'&&c.action==='stop')return true;
+    if(c?.type!=='text')return false;
+    try{
+      const pages=parseDialogue(c.text||'',runtime.currentSpeaker||c.speaker||'');
+      for(const p of pages||[])for(const ev of p.events||[]){
+        if(ev?.type==='visibility'&&String(ev.cmd||'')==='-bgm')return true;
+        if(ev?.type==='bgmStop')return true;
+        if(ev?.type==='text'&&String(ev.value||'').length)return false;
+        if(ev?.type==='wait'||ev?.type==='timewait')return false;
+      }
+    }catch(_){ }
+    return false;
+  }
+
+  async function restoreSelectedBgm(r,target){
+    const active=r?.bgmActive?clone(r.bgmActive):null;
+    const prepared=r?.bgmPrepared?clone(r.bgmPrepared):null;
+    try{window.setPreviewAudioEnabled48?.(true,false)}catch(_){ }
+    if(!active){prepAudioSilent('bgm',prepared);return {restored:false,preRoll:false}}
+    prepAudioSilent('bgm',active);
+    try{
+      if(window.TateNovelBgmWebAudioV39?.supported&&typeof window.TateNovelBgmWebAudioV39.start==='function'){
+        await window.TateNovelBgmWebAudioV39.start(active,0,0);
+      }else{
+        setVisibility('+bgm',0);
+        await nativeDelay(80);
+      }
+    }catch(err){console.warn('selected BGM restore failed',err);setVisibility('+bgm',0)}
+    prepAudioSilent('bgm',prepared);
+    const preRoll=selectedStartsWithBgmOff(commands[target]);
+    window.TateNovelSelectedBgmV51={lastRestoredCue:String(active.assetCue||active.cue||''),lastPreRoll:preRoll};
+    if(preRoll){status?.('BGMを復元してフェード確認中…');await nativeDelay(700)}
+    return {restored:true,preRoll};
   }
 
   fromBtn.onclick=async e=>{
@@ -4021,6 +4071,9 @@ ${'</scr'+'ipt>'}`;
       }
       runtime.pc=target;runtime.waiting=false;runtime.ended=false;
       document.getElementById('previewText').textContent='';document.getElementById('previewSpeaker').textContent='';document.getElementById('previewChoices').innerHTML='';document.getElementById('tapHint').style.display='none';
+      // Reconstruction is over. From this point SE/VOICE/BGM belong to the actual selected test run.
+      window.__tnAudioReconstructingV35=false;
+      await restoreSelectedBgm(r,target);
       refreshVars?.();testStarting=false;setPaused(false,false);status?.(`Block ${target+1} からテスト開始`);window.run();
     }catch(err){testStarting=false;showTestError(err)}
     finally{fromBtn.disabled=false;fromBtn.textContent='▶ 選択位置から'}
@@ -5779,6 +5832,7 @@ ${'</scr'+'ipt>'}`;
   }
   window.TateNovelBgmWebAudioV39={
     get supported(){return !!AudioCtx39},get active(){return !!current39},
+    start:(prep,duration=0,offset=0)=>startWebBgm39(clone39(prep),duration,offset),
     stop:()=>hardStopWeb39(),
     get position(){return positionWebBgm39()}
   };
@@ -6186,6 +6240,7 @@ ${'</scr'+'ipt>'}`;
   function commandEvents46(value){
     const t=String(value??'');
     let m;
+    if(t==='、、')return [{type:'timewait',seconds:.5}];
     if((m=t.match(/^w +(\d+(?:\.\d+)?)$/)))return [{type:'timewait',seconds:Number(m[1])}];
     if((m=t.match(/^([+-])bgm(?: (\d+(?:\.\d+)?))?$/)))return [{type:'visibility',cmd:m[1]+'bgm',duration:m[2]==null?fade46():num46(m[2])}];
     if((m=t.match(/^([+-])(se|voice)$/)))return [{type:'visibility',cmd:m[1]+m[2],duration:0}];
@@ -6266,6 +6321,7 @@ ${'</scr'+'ipt>'}`;
   function refreshHelp46(){
     const hint=document.querySelector('.left .hintBox');
     if(!hint)return;
+    if(!hint.innerHTML.includes('、、'))hint.insertAdjacentHTML('beforeend','<br><b>、、</b> 0.5秒ウェイト（単独行のみ）');
     if(!hint.innerHTML.includes('-pict'))hint.insertAdjacentHTML('beforeend','<br><b>-pict</b> / <b>-pict 1</b> 背景＋立ち絵A〜D＋イラストA〜Dをまとめて透過<br><span style="color:var(--muted)">現在表示中の画像だけを非表示にし、準備状態は残します。非同期なので完了待ちは <b>w 1</b> のように明示します。</span>');
   }
   if(typeof window.fields==='function'){
@@ -6288,6 +6344,7 @@ ${'</scr'+'ipt>'}`;
   function ns46(s){return String(s||'').split('').sort(function(a,b){return O46.indexOf(a)-O46.indexOf(b)}).join('')}
   function n46(s){return Math.max(0,Number(s)||0)}
   function ce46(v){var t=String(v==null?'':v),m,d,out=[],slots,i,k;
+    if(t==='、、')return[{type:'timewait',seconds:.5}];
     if((m=t.match(/^w +(\d+(?:\.\d+)?)$/)))return[{type:'timewait',seconds:Number(m[1])}];
     if((m=t.match(/^([+-])bgm(?: (\d+(?:\.\d+)?))?$/)))return[{type:'visibility',cmd:m[1]+'bgm',duration:m[2]==null?fd46():n46(m[2])}];
     if((m=t.match(/^([+-])(se|voice)$/)))return[{type:'visibility',cmd:m[1]+m[2],duration:0}];
