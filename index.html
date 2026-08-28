@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v55</title>
+<title>TateNovel Studio v56</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,7 +45,7 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v55</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v56</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
 <div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>? / ？</b> 自動バウンス取消<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
@@ -6361,6 +6361,130 @@ ${'</scr'+'ipt>'}`;
     <b>[dark]</b> / <b>[light]</b> 暗転 / 明転（省略時1秒）　<b>//コメント</b> 制作コメント`;}
 
   try{saveLocal();renderEditor?.();renderValidation?.()}catch(e){console.error('v54 refresh',e)}
+})();
+</script>
+
+
+<script id="tatenovel-v56-shake-bg-autopage">
+(function(){
+  'use strict';
+  const VERSION56='v56';
+  const AUTO56='\uE560TNV56_AUTOPAGE\uE561';
+  const SH56A='\uE562TNV56_SHAKEBG:';
+  const SH56B='\uE563';
+  const shakeBgRe56=/\[shake\s+bg(?:\s+([0-9]+(?:\.[0-9]+)?))?(?:\s+([0-9]+(?:\.[0-9]+)?))?\]/gi;
+
+  document.title='TateNovel Studio '+VERSION56;
+  const title56=document.querySelector('.left h1');if(title56)title56.textContent='TateNovel Studio '+VERSION56;
+
+  // Final v56 dialogue normalization.
+  // "。。" is special only when it occupies a line by itself.
+  // [shake bg] / [shake bg duration strength] is converted to a private marker,
+  // then to the same shake event with scope="bg" after the existing parser runs.
+  function prep56(raw){
+    return String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>{
+      if(line.trim()==='。。')return AUTO56;
+      return line.replace(shakeBgRe56,(_,duration,strength)=>SH56A+(duration??'0.5')+':'+(strength??'5')+SH56B);
+    }).join('\n');
+  }
+  function textTokens56(value){
+    let s=String(value??''),out=[];
+    const pushText=t=>{if(t!=='')out.push({type:'text',value:t})};
+    while(s){
+      const ai=s.indexOf(AUTO56),si=s.indexOf(SH56A);
+      let at=-1,kind='';
+      if(ai>=0&&(si<0||ai<si)){at=ai;kind='auto'}else if(si>=0){at=si;kind='shake'}
+      if(at<0){pushText(s);break}
+      if(at>0)pushText(s.slice(0,at));
+      if(kind==='auto'){
+        out.push({__autoPage56:true});
+        s=s.slice(at+AUTO56.length);
+      }else{
+        const end=s.indexOf(SH56B,at+SH56A.length);
+        if(end<0){pushText(s.slice(at));break}
+        const spec=s.slice(at+SH56A.length,end).split(':');
+        const d=Number(spec[0]),strength=Number(spec[1]);
+        out.push({type:'inlineEffect',cmd:{effect:'shake',scope:'bg',duration:Number.isFinite(d)?Math.max(0,d):0.5,strength:Number.isFinite(strength)?strength:5}});
+        s=s.slice(end+SH56B.length);
+      }
+    }
+    return out;
+  }
+  function post56(pages){
+    const result=[];
+    for(const page0 of pages||[]){
+      const page=page0||{},baseEvents=Array.isArray(page.events)?page.events:[];
+      let events=[],first=true;
+      const emit=final=>{
+        const q=Object.assign({},page,{events,endWait:final?!!page.endWait:false});
+        if(!first){q.speakerChanged=false;q.clearSpeaker=false;q.autoBounce=false}
+        result.push(q);events=[];first=false;
+      };
+      for(const ev of baseEvents){
+        const tokens=ev?.type==='text'?textTokens56(ev.value):[ev];
+        for(const token of tokens){
+          if(token?.__autoPage56){emit(false);continue}
+          events.push(token);
+        }
+      }
+      emit(true);
+    }
+    return result;
+  }
+  const parseBefore56=window.parseDialogue;
+  window.parseDialogue=function(raw,initialSpeaker=''){
+    return post56(parseBefore56.call(this,prep56(raw),initialSpeaker)||[]);
+  };
+
+  // Background-only shake. Ordinary shake keeps using sceneArea and is unchanged.
+  const bgFx56=new Set();
+  const trackBgFx56=a=>{if(!a)return a;bgFx56.add(a);try{a.finished.finally(()=>bgFx56.delete(a)).catch(()=>{})}catch(_){}return a};
+  const cancelBgFx56=()=>{for(const a of [...bgFx56]){try{a.cancel()}catch(_){}}bgFx56.clear()};
+  const resetBefore56=window.resetBlockPreview;if(typeof resetBefore56==='function')window.resetBlockPreview=function(){cancelBgFx56();return resetBefore56.apply(this,arguments)};
+  const startBefore56=window.startPreview;if(typeof startBefore56==='function')window.startPreview=function(){cancelBgFx56();return startBefore56.apply(this,arguments)};
+  const fxBefore56=window.runEffectPreview;
+  window.runEffectPreview=function(c){
+    if(c?.effect==='shake'&&c?.scope==='bg'){
+      const bg=document.getElementById('previewBg');
+      let d=Math.max(0,Number(c?.duration)||0);if(d<=0)d=0.5;if(window.TestPlayFast?.enabled)d=0;
+      if(d>0&&bg){const px=Math.max(2,Math.min(30,(Number(c?.strength)||5)*2));trackBgFx56(bg.animate([{translate:'0 0'},{translate:`-${px}px 0`},{translate:`${px*.9}px 0`},{translate:`-${px*.6}px 0`},{translate:`${px*.35}px 0`},{translate:'0 0'}],{duration:d*1000,easing:'ease-out'}))}
+      return Promise.resolve();
+    }
+    return fxBefore56.apply(this,arguments);
+  };
+
+  // Keep the UI compact: no new editor button, only document the two concise forms.
+  const hint56=document.querySelector('.left .hintBox');
+  if(hint56){
+    hint56.innerHTML=hint56.innerHTML.replace(
+      '<b>、</b> クリック待ち　<b>、、</b> 0.5秒ウェイト　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 任意秒ウェイト',
+      '<b>、</b> クリック待ち　<b>、、</b> 0.5秒ウェイト　<b>。</b> クリック待ち＋改ページ　<b>。。</b> 待たずに改ページ　<b>w 1</b> 任意秒ウェイト'
+    );
+    if(!hint56.innerHTML.includes('[shake bg]'))hint56.insertAdjacentHTML('beforeend','<br><b>[shake]</b> シーン全体を揺らす　<b>[shake bg]</b> 背景だけ揺らす<br><span style="color:var(--muted)">時間・強さ指定: <b>[shake 0.5 5]</b> / <b>[shake bg 0.5 5]</b>。<b>。。</b> は単独行だけ特殊記法です。</span>');
+  }
+
+  // Exported game: same parser semantics and background-only effect target.
+  const PLAYER56=String.raw`<script>
+(function(){
+  'use strict';
+  var A56='\uE560TNV56_AUTOPAGE\uE561',S56A='\uE562TNV56_SHAKEBG:',S56B='\uE563';
+  var re56=/\[shake\s+bg(?:\s+([0-9]+(?:\.[0-9]+)?))?(?:\s+([0-9]+(?:\.[0-9]+)?))?\]/gi;
+  function prep56(raw){return String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){if(line.trim()==='。。')return A56;return line.replace(re56,function(_,d,s){return S56A+(d==null?'0.5':d)+':'+(s==null?'5':s)+S56B})}).join('\n')}
+  function tok56(value){var s=String(value==null?'':value),out=[];function pt(t){if(t!=='')out.push({type:'text',value:t})}while(s){var ai=s.indexOf(A56),si=s.indexOf(S56A),at=-1,k='';if(ai>=0&&(si<0||ai<si)){at=ai;k='a'}else if(si>=0){at=si;k='s'}if(at<0){pt(s);break}if(at>0)pt(s.slice(0,at));if(k==='a'){out.push({__autoPage56:true});s=s.slice(at+A56.length)}else{var end=s.indexOf(S56B,at+S56A.length);if(end<0){pt(s.slice(at));break}var z=s.slice(at+S56A.length,end).split(':'),d=Number(z[0]),st=Number(z[1]);out.push({type:'inlineEffect',cmd:{effect:'shake',scope:'bg',duration:isFinite(d)?Math.max(0,d):0.5,strength:isFinite(st)?st:5}});s=s.slice(end+S56B.length)}}return out}
+  function post56(pages){var res=[];(pages||[]).forEach(function(p0){var p=p0||{},src=Array.isArray(p.events)?p.events:[],evs=[],first=true;function emit(final){var q=Object.assign({},p,{events:evs,endWait:final?!!p.endWait:false});if(!first){q.speakerChanged=false;q.clearSpeaker=false;q.autoBounce=false}res.push(q);evs=[];first=false}src.forEach(function(ev){var ts=ev&&ev.type==='text'?tok56(ev.value):[ev];ts.forEach(function(t){if(t&&t.__autoPage56){emit(false)}else evs.push(t)})});emit(true)});return res}
+  var pdBefore56=pd;pd=function(raw,initial){return post56(pdBefore56(prep56(raw),initial)||[])};
+  var bgFx56=[];function tr56(a){if(!a)return a;bgFx56.push(a);try{a.finished.finally(function(){var i=bgFx56.indexOf(a);if(i>=0)bgFx56.splice(i,1)}).catch(function(){})}catch(e){}return a}function cx56(){bgFx56.splice(0).forEach(function(a){try{a.cancel()}catch(e){}})}
+  var resetBefore56=resetScene;resetScene=function(){cx56();return resetBefore56.apply(this,arguments)};
+  var fxBefore56=doFx;doFx=function(c){if(c&&c.effect==='shake'&&c.scope==='bg'){var d=Math.max(0,Number(c.duration)||0);if(d<=0)d=.5;if(typeof fastForward!=='undefined'&&fastForward&&d>0)d=Math.min(.18,Math.max(.09,d*.18));if(d>0&&BG){var px=Math.max(2,Math.min(30,(Number(c.strength)||5)*2));tr56(BG.animate([{translate:'0 0'},{translate:-px+'px 0'},{translate:(px*.9)+'px 0'},{translate:-(px*.6)+'px 0'},{translate:(px*.35)+'px 0'},{translate:'0 0'}],{duration:d*1000,easing:'ease-out'}))}return Promise.resolve()}return fxBefore56.apply(this,arguments)};
+})();
+${'</scr'+'ipt>'}`;
+  const makeBefore56=window.makePlayerHTML;
+  window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makeBefore56.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER56+'</body></html>');
+  };
+
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v56 refresh',e)}
 })();
 </script>
 
