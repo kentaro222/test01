@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v57</title>
+<title>TateNovel Studio v59</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,7 +45,7 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v57</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v59</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
 <div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>? / ？</b> 自動バウンス取消<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
@@ -2791,7 +2791,7 @@ ${'</scr'+'ipt>'}`;
 
   // Keep legacy storage/database keys and portable format identifiers unchanged
   // so existing projects continue to open after the product rename.
-  document.title=APP_NAME;
+  document.title='TateNovel Studio v59';
   document.documentElement.setAttribute('data-app-name',APP_NAME);
 
   // Mark new portable project backups with the producing application while
@@ -6166,7 +6166,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v54-project-text-and-defaults">
 (function(){
   'use strict';
-  const VERSION54='v54', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION54='v59', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const DEF54={bg:2,chara:1,illust:1};
   const clamp54=(v,f)=>{const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f};
   const bgFade54=()=>clamp54(projectSettings?.defaultBgFade,DEF54.bg);
@@ -6368,7 +6368,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v56-shake-bg-autopage">
 (function(){
   'use strict';
-  const VERSION56='v56';
+  const VERSION56='v59';
   const AUTO56='\uE560TNV56_AUTOPAGE\uE561';
   const SH56A='\uE562TNV56_SHAKEBG:';
   const SH56B='\uE563';
@@ -6499,7 +6499,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v57-block-off-and-image-guard">
 (function(){
   'use strict';
-  const VERSION57='v57';
+  const VERSION57='v59';
   const OFF_DIRECTIVE57='#!tatenovel-block off';
   const clone57=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
@@ -6670,30 +6670,32 @@ ${'</scr'+'ipt>'}`;
 </script>
 
 
-<script id="tatenovel-v58-leading-pagebreak-wait">
+<script id="tatenovel-v59-leading-boundary-wait">
 (function(){
   'use strict';
-  const VERSION58='v58';
+  const VERSION58='v59';
   document.title='TateNovel Studio '+VERSION58;
   const h58=document.querySelector('.left h1');if(h58)h58.textContent='TateNovel Studio '+VERSION58;
 
-  // A standalone "。" at the beginning of a text block is a page-break wait
-  // that belongs to the visual/text state produced by the preceding blocks.
-  // Keep the existing dialog visible until the click, then clear/advance normally.
-  function peelLeadingPageWait58(raw){
+  // A standalone boundary command at the beginning of a text block belongs to
+  // the dialog state produced by preceding blocks. Do not clear that dialog first.
+  // "。" = hold previous text, click, then page-break.
+  // "、" = hold previous text, click, then continue without a page-break.
+  function peelLeadingBoundary58(raw){
     const lines=String(raw??'').replace(/\r\n?/g,'\n').split('\n');
-    let waits=0;
+    let pageWaits=0,leadingComma=false;
     for(let i=0;i<lines.length;i++){
       const t=lines[i].trim();
       if(t===''||t.startsWith('//'))continue;
       if(t==='。'){
-        waits++;
+        pageWaits++;
         lines.splice(i,1);i--;
         continue;
       }
+      if(t==='、')leadingComma=true;
       break;
     }
-    return {waits,raw:lines.join('\n')};
+    return {pageWaits,leadingComma,raw:lines.join('\n')};
   }
   function holdPage58(initialSpeaker){
     return {speaker:initialSpeaker||'',speakerChanged:false,clearSpeaker:false,autoBounce:false,endWait:true,events:[],holdPrevious58:true};
@@ -6701,10 +6703,11 @@ ${'</scr'+'ipt>'}`;
 
   const parseBefore58=window.parseDialogue;
   if(typeof parseBefore58==='function')window.parseDialogue=function(raw,initialSpeaker=''){
-    const p=peelLeadingPageWait58(raw);
+    const p=peelLeadingBoundary58(raw);
     const pages=parseBefore58.call(this,p.raw,initialSpeaker)||[];
-    if(!p.waits)return pages;
-    const head=[];for(let i=0;i<p.waits;i++)head.push(holdPage58(initialSpeaker));
+    if(p.leadingComma&&pages.length)pages[0].holdPreviousComma58=true;
+    if(!p.pageWaits)return pages;
+    const head=[];for(let i=0;i<p.pageWaits;i++)head.push(holdPage58(initialSpeaker));
     return head.concat(pages);
   };
 
@@ -6717,16 +6720,21 @@ ${'</scr'+'ipt>'}`;
       if(window.TestPlayFast?.enabled)queueMicrotask(()=>{if(runtime?.pageBreakWait)advancePreview()});
       return true;
     }
+    if(!resume&&p?.holdPreviousComma58){
+      // Resume-mode intentionally skips the normal page clear. The leading comma
+      // is still the first event, so it immediately becomes the usual inner wait.
+      return await showBefore58.call(this,true);
+    }
     return await showBefore58.apply(this,arguments);
   };
 
   const PLAYER58=String.raw`<script>
 (function(){
   'use strict';
-  function peel58(raw){var lines=String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n'),waits=0;for(var i=0;i<lines.length;i++){var t=lines[i].trim();if(t===''||t.indexOf('//')===0)continue;if(t==='。'){waits++;lines.splice(i,1);i--;continue}break}return {waits:waits,raw:lines.join('\n')}}
+  function peel58(raw){var lines=String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n'),pageWaits=0,leadingComma=false;for(var i=0;i<lines.length;i++){var t=lines[i].trim();if(t===''||t.indexOf('//')===0)continue;if(t==='。'){pageWaits++;lines.splice(i,1);i--;continue}if(t==='、')leadingComma=true;break}return {pageWaits:pageWaits,leadingComma:leadingComma,raw:lines.join('\n')}}
   function hp58(initial){return {speaker:initial||'',speakerChanged:false,clearSpeaker:false,autoBounce:false,endWait:true,events:[],holdPrevious58:true}}
-  var pdBefore58=pd;pd=function(raw,initial){var p=peel58(raw),pages=pdBefore58(p.raw,initial)||[],head=[];for(var i=0;i<p.waits;i++)head.push(hp58(initial));return head.concat(pages)};
-  var showBefore58=show;show=async function(resume){var p=rt&&rt.pages&&rt.pages[rt.page];if(!resume&&p&&p.holdPrevious58){rt.typing=false;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=true;rt.event=0;tap.style.display='block';if(fastForward)setTimeout(function(){if(rt&&rt.pageBreakWait)advance()},85);return}return await showBefore58.apply(this,arguments)};
+  var pdBefore58=pd;pd=function(raw,initial){var p=peel58(raw),pages=pdBefore58(p.raw,initial)||[],head=[];if(p.leadingComma&&pages.length)pages[0].holdPreviousComma58=true;for(var i=0;i<p.pageWaits;i++)head.push(hp58(initial));return head.concat(pages)};
+  var showBefore58=show;show=async function(resume){var p=rt&&rt.pages&&rt.pages[rt.page];if(!resume&&p&&p.holdPrevious58){rt.typing=false;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=true;rt.event=0;tap.style.display='block';if(fastForward)setTimeout(function(){if(rt&&rt.pageBreakWait)advance()},85);return}if(!resume&&p&&p.holdPreviousComma58)return await showBefore58.call(this,true);return await showBefore58.apply(this,arguments)};
 })();
 ${'</scr'+'ipt>'}`;
   const makeBefore58=window.makePlayerHTML;
