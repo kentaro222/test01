@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v60</title>
+<title>TateNovel Studio v62</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,9 +45,9 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v60</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v62</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
-<div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>? / ？</b> 自動バウンス取消<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
+<div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>?a / ?b / ?c / ?d</b> バウンスなし話者変更<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
 <main class="center">
 <div class="toolbar"><button id="undoBtn">↶ Undo</button><button id="redoBtn">↷ Redo</button><button class="primary" id="newProject">新規</button><button id="importTextBlocks">テキストから追加</button><button id="openLabelSearch">ラベル検索</button><button id="collapseAll">すべて閉じる</button><button id="expandAll">すべて開く</button><button id="saveProject">プロジェクトJSON保存</button><button id="loadProject">JSON読込</button><button id="openAssetManager">素材管理</button><button class="good" id="exportGame">ゲームHTML書出し</button><input id="projectFile" type="file" accept=".json,application/json" class="hidden"></div>
@@ -2791,7 +2791,7 @@ ${'</scr'+'ipt>'}`;
 
   // Keep legacy storage/database keys and portable format identifiers unchanged
   // so existing projects continue to open after the product rename.
-  document.title='TateNovel Studio v60';
+  document.title='TateNovel Studio v62';
   document.documentElement.setAttribute('data-app-name',APP_NAME);
 
   // Mark new portable project backups with the producing application while
@@ -6166,7 +6166,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v54-project-text-and-defaults">
 (function(){
   'use strict';
-  const VERSION54='v60', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION54='v62', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const DEF54={bg:2,chara:1,illust:1};
   const clamp54=(v,f)=>{const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f};
   const bgFade54=()=>clamp54(projectSettings?.defaultBgFade,DEF54.bg);
@@ -6368,7 +6368,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v56-shake-bg-autopage">
 (function(){
   'use strict';
-  const VERSION56='v60';
+  const VERSION56='v62';
   const AUTO56='\uE560TNV56_AUTOPAGE\uE561';
   const SH56A='\uE562TNV56_SHAKEBG:';
   const SH56B='\uE563';
@@ -6499,7 +6499,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v57-block-off-and-image-guard">
 (function(){
   'use strict';
-  const VERSION57='v60';
+  const VERSION57='v62';
   const OFF_DIRECTIVE57='#!tatenovel-block off';
   const clone57=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
@@ -6666,10 +6666,10 @@ ${'</scr'+'ipt>'}`;
 </script>
 
 
-<script id="tatenovel-v60-leading-boundary-wait">
+<script id="tatenovel-v62-leading-boundary-wait">
 (function(){
   'use strict';
-  const VERSION58='v60';
+  const VERSION58='v62';
   document.title='TateNovel Studio '+VERSION58;
   const h58=document.querySelector('.left h1');if(h58)h58.textContent='TateNovel Studio '+VERSION58;
 
@@ -6743,4 +6743,159 @@ ${'</scr'+'ipt>'}`;
 })();
 </script>
 
+
+
+<style id="tatenovel-v62-placement-order-style">
+/* v62: adjustment target belongs closer to the placement preview than preview-only visibility controls. */
+#previewPanel.placementPreview #previewCharEditPicker,
+#previewPanel.placementPreview .previewPlacementControls{margin:0 0 8px}
+#previewPanel.placementPreview #previewVisualToolsV31{margin:0 0 8px}
+</style>
+<script id="tatenovel-v62-placement-order-and-hidden-guard">
+(function(){
+  'use strict';
+  const VERSION61='v62';
+  document.title='TateNovel Studio '+VERSION61;
+  const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION61;
+
+  const panel=document.getElementById('previewPanel');
+  const phone=document.getElementById('phone');
+  const bar=panel?.querySelector('.previewEditBar');
+  const picker=document.getElementById('previewCharEditPicker')||document.querySelector('.previewPlacementControls');
+  const tools=document.getElementById('previewVisualToolsV31');
+  const toggle=document.getElementById('toggleImageEdit');
+
+  function arrange61(){
+    if(!panel||!phone)return;
+    // Screen -> edit ON/OFF -> A-D adjustment target -> preview-only hide/background tools.
+    let anchor=phone;
+    if(bar){
+      if(toggle&&toggle.parentElement!==bar)bar.appendChild(toggle);
+      anchor.insertAdjacentElement('afterend',bar);anchor=bar;
+    }
+    if(picker){anchor.insertAdjacentElement('afterend',picker);anchor=picker}
+    if(tools)anchor.insertAdjacentElement('afterend',tools);
+  }
+
+  function targetElement61(){
+    const c=(typeof commands!=='undefined'&&selectedIndex>=0)?commands[selectedIndex]:null;
+    if(!c)return null;
+    if(c.type==='bg')return document.getElementById('previewBg');
+    if(c.type==='chars'){
+      const k=(typeof editTarget!=='undefined'&&editTarget?.kind==='char')?editTarget.key:(typeof charEditTargetKey!=='undefined'?charEditTargetKey:'a');
+      if(typeof charEl==='function')return charEl(k);
+      return document.getElementById(({a:'leftChar',b:'rightChar',c:'thirdChar',d:'fourthChar'})[k]||'');
+    }
+    if(c.type==='illust'){
+      const k=(typeof editTarget!=='undefined'&&editTarget?.kind==='illust')?editTarget.key:(window.illustEditTargetKey||'a');
+      if(typeof illustEl==='function')return illustEl(k);
+      return document.getElementById('previewIllust'+String(k).toUpperCase());
+    }
+    return null;
+  }
+
+  function isActuallyVisible61(el){
+    if(!el||el.classList.contains('hidden')||!el.getAttribute('src'))return false;
+    const cs=getComputedStyle(el);
+    if(cs.display==='none'||cs.visibility==='hidden'||cs.visibility==='collapse')return false;
+    const op=Number.parseFloat(cs.opacity||'1');
+    return !Number.isFinite(op)||op>0.01;
+  }
+
+  // Preview-only hide uses visibility:hidden, so opacity alone is insufficient.
+  phone?.addEventListener('pointerdown',e=>{
+    if(typeof imageEditMode==='undefined'||!imageEditMode)return;
+    const c=(typeof commands!=='undefined'&&selectedIndex>=0)?commands[selectedIndex]:null;
+    if(!c||!['bg','chars','illust'].includes(c.type))return;
+    const el=targetElement61();
+    if(isActuallyVisible61(el))return;
+    e.preventDefault();e.stopImmediatePropagation();
+    try{status?.('非表示の画像は位置調整できません。表示してから調整してください。')}catch(_){ }
+  },true);
+
+  // Older patch layers re-arrange these controls during renders/state changes.
+  const oldUpdate61=window.updatePreviewCharPicker;
+  if(typeof oldUpdate61==='function')window.updatePreviewCharPicker=function(){const r=oldUpdate61.apply(this,arguments);arrange61();return r};
+  const oldSet61=window.setImageEditMode;
+  if(typeof oldSet61==='function')window.setImageEditMode=function(on){const r=oldSet61.call(this,on);arrange61();return r};
+  const oldRender61=window.renderEditor;
+  if(typeof oldRender61==='function')window.renderEditor=function(){const r=oldRender61.apply(this,arguments);arrange61();return r};
+  toggle?.addEventListener('click',()=>setTimeout(arrange61,0));
+  arrange61();
+})();
+</script>
+
+
+
+<script id="tatenovel-v62-no-bounce-speaker-command">
+(function(){
+  'use strict';
+  const VERSION62='v62';
+  document.title='TateNovel Studio '+VERSION62;
+  const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION62;
+
+  // Canonical syntax:
+  //   ?a / ?b / ?c / ?d = change speaker to that character without the automatic bounce.
+  // Legacy standalone ? / ？ is retired and must no longer cancel a preceding speaker change.
+  const LEGACY_Q_ASCII='\uE180TNLEGACYQASCII\uE181';
+  const LEGACY_Q_WIDE ='\uE180TNLEGACYQWIDE\uE181';
+  function rewriteNoBounceSpeaker62(raw){
+    return String(raw??'').replace(/\r\n?/g,'\n').split('\n').map(line=>{
+      const t=line.trim();
+      const m=t.match(/^[?？]([abcd])$/);
+      if(m)return m[1]+'\n?'; // reuse the mature speaker-change + cancel-auto path internally
+      if(t==='?')return line.replace('?',LEGACY_Q_ASCII);
+      if(t==='？')return line.replace('？',LEGACY_Q_WIDE);
+      return line;
+    }).join('\n');
+  }
+  function restoreLegacyQuestion62(pages){
+    for(const p of pages||[])for(const ev of p?.events||[]){
+      if(ev?.type==='text'&&typeof ev.value==='string'){
+        ev.value=ev.value.split(LEGACY_Q_ASCII).join('?').split(LEGACY_Q_WIDE).join('？');
+      }
+    }
+    return pages;
+  }
+
+  const parseBefore62=window.parseDialogue;
+  if(typeof parseBefore62==='function')window.parseDialogue=function(raw,initialSpeaker=''){
+    return restoreLegacyQuestion62(parseBefore62.call(this,rewriteNoBounceSpeaker62(raw),initialSpeaker)||[]);
+  };
+
+  // Make deprecated standalone syntax visible in validation instead of silently changing old projects.
+  const validateBefore62=window.validateScenario;
+  if(typeof validateBefore62==='function')window.validateScenario=function(){
+    const r=validateBefore62.apply(this,arguments);
+    for(let i=0;i<commands.length;i++){
+      const c=commands[i];if(!c||c.disabled||c.type!=='text')continue;
+      const lines=String(c.text||'').replace(/\r\n?/g,'\n').split('\n');
+      for(const line of lines){
+        const t=line.trim();
+        if(t==='?'||t==='？'){
+          r.issues.push({level:'warn',msg:`${i+1}: 単独の「${t}」は旧バウンス取消記法です。バウンスなしで話者変更する場合は ?a / ?b / ?c / ?d を使ってください`});
+        }
+      }
+    }
+    return r;
+  };
+
+  const PLAYER62=String.raw`<script>
+(function(){
+  'use strict';
+  var QA='\uE180TNLEGACYQASCII\uE181',QW='\uE180TNLEGACYQWIDE\uE181';
+  function rw62(raw){return String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n').map(function(line){var t=line.trim(),m=t.match(/^[?？]([abcd])$/);if(m)return m[1]+'\n?';if(t==='?')return line.replace('?',QA);if(t==='？')return line.replace('？',QW);return line}).join('\n')}
+  function rs62(pages){(pages||[]).forEach(function(p){(p&&p.events||[]).forEach(function(ev){if(ev&&ev.type==='text'&&typeof ev.value==='string')ev.value=ev.value.split(QA).join('?').split(QW).join('？')})});return pages}
+  var pdBefore62=pd;pd=function(raw,initial){return rs62(pdBefore62(rw62(raw),initial)||[])};
+})();
+${'</scr'+'ipt>'}`;
+  const makeBefore62=window.makePlayerHTML;
+  if(typeof makeBefore62==='function')window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makeBefore62.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER62+'</body></html>');
+  };
+
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v62 refresh',e)}
+})();
+</script>
 </body></html>
