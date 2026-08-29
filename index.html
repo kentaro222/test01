@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v56</title>
+<title>TateNovel Studio v57</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,7 +45,7 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v56</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v57</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
 <div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>? / ？</b> 自動バウンス取消<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
@@ -6485,6 +6485,257 @@ ${'</scr'+'ipt>'}`;
   };
 
   try{renderEditor?.();renderValidation?.()}catch(e){console.error('v56 refresh',e)}
+})();
+</script>
+
+
+<style id="tatenovel-v57-block-off-style">
+.cmd.blockOff57{border-color:#665158;background:#18191f}
+.cmd.blockOff57 .cmdNum,.cmd.blockOff57 .cmdType,.cmd.blockOff57 .cmdSummary,.cmd.blockOff57 .cmdBody{opacity:.48}
+.cmd.blockOff57 .cmdType:after{content:"  OFF";color:#ffb7c1;font-size:10px;font-weight:900}
+.cmdActions .blockOffBtn57{min-width:38px;font-weight:900;color:#d7dbe3;border-color:#4c5360}
+.cmdActions .blockOffBtn57.active{background:#6c343e;color:#ffe0e5;border-color:#a15463;box-shadow:0 0 0 1px #ff758633 inset}
+</style>
+<script id="tatenovel-v57-block-off-and-image-guard">
+(function(){
+  'use strict';
+  const VERSION57='v57';
+  const OFF_DIRECTIVE57='#!tatenovel-block off';
+  const clone57=v=>v==null?v:JSON.parse(JSON.stringify(v));
+
+  document.title='TateNovel Studio '+VERSION57;
+  const h57=document.querySelector('.left h1');if(h57)h57.textContent='TateNovel Studio '+VERSION57;
+
+  // ---------- Block OFF ----------
+  // Disabled blocks remain editable/savable, but runtime execution and game export skip them.
+  function withDisabledMemo57(fn,exceptIndex=-1){
+    const changed=[];
+    for(let i=0;i<commands.length;i++){
+      const c=commands[i];
+      if(!c?.disabled||i===exceptIndex||c.type==='memo')continue;
+      changed.push([c,c.type]);c.type='memo';
+    }
+    try{return fn()}finally{for(let i=changed.length-1;i>=0;i--)changed[i][0].type=changed[i][1]}
+  }
+  async function withDisabledMemoAsync57(fn,exceptIndex=-1){
+    const changed=[];
+    for(let i=0;i<commands.length;i++){
+      const c=commands[i];
+      if(!c?.disabled||i===exceptIndex||c.type==='memo')continue;
+      changed.push([c,c.type]);c.type='memo';
+    }
+    try{return await fn()}finally{for(let i=changed.length-1;i>=0;i--)changed[i][0].type=changed[i][1]}
+  }
+
+  // Runtime labels must ignore disabled labels as well.
+  if(typeof window.findLabel==='function'){
+    window.findLabel=function(name){return commands.findIndex(c=>!c?.disabled&&c.type==='label'&&c.name===name)};
+  }
+
+  const runBefore57=window.run;
+  if(typeof runBefore57==='function')window.run=function(){const self=this,args=arguments;return withDisabledMemo57(()=>runBefore57.apply(self,args))};
+
+  // Editor still previews the selected OFF block itself so it remains editable,
+  // while earlier OFF blocks do not leak into the reconstructed still image.
+  const showBefore57=window.showVisualAt;
+  if(typeof showBefore57==='function')window.showVisualAt=function(index){const self=this,args=arguments;return withDisabledMemo57(()=>showBefore57.apply(self,args),Number(index))};
+
+  // "Start from selected" reconstructs prior state asynchronously; skip OFF blocks there too.
+  const from57=document.getElementById('previewFromSelected');
+  if(from57?.onclick){
+    const oldFrom57=from57.onclick;
+    from57.onclick=async function(e){const self=this;return await withDisabledMemoAsync57(()=>oldFrom57.call(self,e))};
+  }
+
+  // Validation ignores disabled blocks themselves. References from enabled blocks to
+  // a disabled label correctly become "target does not exist" errors.
+  const validateBefore57=window.validateScenario;
+  if(typeof validateBefore57==='function')window.validateScenario=function(){const self=this,args=arguments;return withDisabledMemo57(()=>validateBefore57.apply(self,args))};
+
+  function decorateOff57(){
+    document.querySelectorAll('#commands .cmd').forEach((el,i)=>{
+      const c=commands[i];if(!c)return;
+      const off=!!c.disabled;
+      el.classList.toggle('blockOff57',off);
+      const actions=el.querySelector('.cmdActions');if(!actions)return;
+      let b=actions.querySelector('.blockOffBtn57');
+      if(!b){b=document.createElement('button');b.type='button';b.className='blockOffBtn57';b.textContent='OFF';b.title='一時OFF：テスト・書き出しではこのブロックを実行しません';actions.insertBefore(b,actions.firstChild)}
+      b.classList.toggle('active',off);b.setAttribute('aria-pressed',off?'true':'false');b.dataset.offIndex=String(i);
+      b.onclick=e=>{
+        e.preventDefault();e.stopPropagation();
+        pushHistory?.();
+        commands[i].disabled=!commands[i].disabled;
+        if(imageEditMode&&i===selectedIndex)try{setImageEditMode(false)}catch(_){}
+        saveLocal?.();renderEditor?.();
+        try{showVisualAt?.(selectedIndex)}catch(_){}
+        try{status?.(`Block ${i+1}: ${commands[i].disabled?'OFF（実行しません）':'ON'}`)}catch(_){}
+      };
+    });
+  }
+  const renderBefore57=window.renderEditor;
+  if(typeof renderBefore57==='function')window.renderEditor=function(){const r=renderBefore57.apply(this,arguments);decorateOff57();return r};
+
+  // Script TXT carries OFF with the block itself, so moving/editing blocks does not
+  // detach the state from the intended block.
+  function preprocessOff57(raw){
+    const lines=String(raw??'').replace(/\r\n?/g,'\n').split('\n'),offCommands=[];
+    let start=0,cmdIndex=0;
+    function process(end){
+      let first=-1;
+      for(let i=start;i<end;i++)if(lines[i].trim()!==''){first=i;break}
+      const isOff=first>=0&&lines[first].trim().toLowerCase()===OFF_DIRECTIVE57;
+      if(isOff)lines[first]='';
+      let has=false;for(let i=start;i<end;i++)if(lines[i].trim()!==''){has=true;break}
+      if(has){if(isOff)offCommands.push(cmdIndex);cmdIndex++}
+    }
+    for(let i=0;i<=lines.length;i++){
+      if(i===lines.length||(i<lines.length&&lines[i].trim()==='---')){process(i);start=i+1}
+    }
+    return {raw:lines.join('\n'),offCommands};
+  }
+
+  if(window.ScriptV1){
+    const api=window.ScriptV1;
+    const oldTo57=api.toV10Command,oldFrom57=api.fromV10Command,oldCan57=api.canonicalCommands,oldSer57=api.serialize,oldParse57=api.parse;
+    if(typeof oldTo57==='function')api.toV10Command=function(c,i){const o=oldTo57.call(this,c,i);if(c?.disabled)o.disabled=true;else if(o)delete o.disabled;return o};
+    if(typeof oldFrom57==='function')api.fromV10Command=function(c){const o=oldFrom57.call(this,c);if(o)o.disabled=!!c?.disabled;return o};
+    if(typeof oldCan57==='function')api.canonicalCommands=function(){const list=oldCan57.apply(this,arguments)||[];for(let i=0;i<list.length;i++){if(commands[i]?.disabled)list[i].disabled=true;else if(list[i])delete list[i].disabled}return list};
+    if(typeof oldSer57==='function')api.serialize=function(input){
+      const list=Array.isArray(input)?input:[];
+      return list.map(c=>{const x=clone57(c)||{};const off=!!x.disabled;delete x.disabled;const body=oldSer57.call(this,[x]);return (off?OFF_DIRECTIVE57+'\n':'')+body}).join('\n\n---\n\n');
+    };
+    if(typeof oldParse57==='function')api.parse=function(raw,opts){
+      const p=preprocessOff57(raw),res=oldParse57.call(this,p.raw,opts);
+      if(Array.isArray(res?.commands))for(const i of p.offCommands)if(res.commands[i])res.commands[i].disabled=true;
+      return res;
+    };
+  }
+
+  // Project JSON keeps OFF state even though the existing V10 converter ignores unknown fields.
+  const bundleBefore57=window.portableProjectBundle;
+  if(typeof bundleBefore57==='function')window.portableProjectBundle=async function(){const b=await bundleBefore57.apply(this,arguments);if(Array.isArray(b?.commands))for(let i=0;i<b.commands.length;i++){if(commands[i]?.disabled)b.commands[i].disabled=true;else if(b.commands[i])delete b.commands[i].disabled}return b};
+  try{portableProjectBundle=window.portableProjectBundle}catch(_){}
+
+  const importBefore57=window.importPortableProject;
+  if(typeof importBefore57==='function')window.importPortableProject=async function(j){
+    const flags=Array.isArray(j?.commands)?j.commands.map(c=>!!c?.disabled):[];
+    const r=await importBefore57.apply(this,arguments);
+    for(let i=0;i<commands.length;i++)commands[i].disabled=!!flags[i];
+    saveLocal?.();return r;
+  };
+  try{importPortableProject=window.importPortableProject}catch(_){}
+
+  // Exported game omits OFF blocks entirely. Asset collection also ignores OFF-only blocks.
+  const portableBefore57=window.portableCommands||((typeof portableCommands==='function')?portableCommands:null);
+  if(typeof portableBefore57==='function'){
+    const fn=async function(){const list=await portableBefore57.apply(this,arguments);return (list||[]).filter(c=>!c?.disabled).map(c=>{const x=clone57(c);if(x)delete x.disabled;return x})};
+    window.portableCommands=fn;try{portableCommands=fn}catch(_){}
+  }
+  const gameCatalogBefore57=window.portableGameCatalog||((typeof portableGameCatalog==='function')?portableGameCatalog:null);
+  if(typeof gameCatalogBefore57==='function'){
+    const fn=async function(){const self=this,args=arguments;return await withDisabledMemoAsync57(()=>gameCatalogBefore57.apply(self,args))};
+    window.portableGameCatalog=fn;try{portableGameCatalog=fn}catch(_){}
+  }
+
+  // ---------- Image placement safety ----------
+  // Gesture editing now uses the same coordinate limits as the numeric UI.
+  const writeBefore57=window.writeTarget;
+  if(typeof writeBefore57==='function')window.writeTarget=function(x,y,scale){
+    const cx=Math.max(-100,Math.min(100,Number(x)||0)),cy=Math.max(-100,Math.min(100,Number(y)||0));
+    return writeBefore57.call(this,cx,cy,scale);
+  };
+
+  function editElement57(){
+    const c=commands[selectedIndex];if(!c)return null;
+    if(c.type==='bg')return document.getElementById('previewBg');
+    if(c.type==='chars'){const k=editTarget?.kind==='char'?editTarget.key:charEditTargetKey;return typeof charEl==='function'?charEl(k):null}
+    if(c.type==='illust'){const k=editTarget?.kind==='illust'?editTarget.key:(window.illustEditTargetKey||'a');return typeof illustEl==='function'?illustEl(k):null}
+    return null;
+  }
+  function isVisible57(el){
+    if(!el||el.classList.contains('hidden')||!el.getAttribute('src'))return false;
+    const op=Number.parseFloat(getComputedStyle(el).opacity||'1');return !Number.isFinite(op)||op>0.01;
+  }
+  const phone57=document.getElementById('phone');
+  phone57?.addEventListener('pointerdown',e=>{
+    if(!imageEditMode)return;
+    const c=commands[selectedIndex];if(!c||!['bg','chars','illust'].includes(c.type))return;
+    const el=editElement57();if(isVisible57(el))return;
+    e.preventDefault();e.stopImmediatePropagation();
+    try{status?.('非表示の画像は位置調整できません。表示してから調整してください。')}catch(_){}
+  },true);
+
+  try{saveLocal?.();renderEditor?.();renderValidation?.()}catch(e){console.error('v57 refresh',e)}
+})();
+</script>
+
+
+<script id="tatenovel-v58-leading-pagebreak-wait">
+(function(){
+  'use strict';
+  const VERSION58='v58';
+  document.title='TateNovel Studio '+VERSION58;
+  const h58=document.querySelector('.left h1');if(h58)h58.textContent='TateNovel Studio '+VERSION58;
+
+  // A standalone "。" at the beginning of a text block is a page-break wait
+  // that belongs to the visual/text state produced by the preceding blocks.
+  // Keep the existing dialog visible until the click, then clear/advance normally.
+  function peelLeadingPageWait58(raw){
+    const lines=String(raw??'').replace(/\r\n?/g,'\n').split('\n');
+    let waits=0;
+    for(let i=0;i<lines.length;i++){
+      const t=lines[i].trim();
+      if(t===''||t.startsWith('//'))continue;
+      if(t==='。'){
+        waits++;
+        lines.splice(i,1);i--;
+        continue;
+      }
+      break;
+    }
+    return {waits,raw:lines.join('\n')};
+  }
+  function holdPage58(initialSpeaker){
+    return {speaker:initialSpeaker||'',speakerChanged:false,clearSpeaker:false,autoBounce:false,endWait:true,events:[],holdPrevious58:true};
+  }
+
+  const parseBefore58=window.parseDialogue;
+  if(typeof parseBefore58==='function')window.parseDialogue=function(raw,initialSpeaker=''){
+    const p=peelLeadingPageWait58(raw);
+    const pages=parseBefore58.call(this,p.raw,initialSpeaker)||[];
+    if(!p.waits)return pages;
+    const head=[];for(let i=0;i<p.waits;i++)head.push(holdPage58(initialSpeaker));
+    return head.concat(pages);
+  };
+
+  const showBefore58=window.showPreviewDialoguePage;
+  if(typeof showBefore58==='function')window.showPreviewDialoguePage=async function(resume=false){
+    const p=(runtime?.textPages||[])[runtime?.pageIndex||0];
+    if(!resume&&p?.holdPrevious58){
+      runtime.typing=false;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=true;runtime.eventIndex=0;
+      document.getElementById('tapHint').style.display='block';
+      if(window.TestPlayFast?.enabled)queueMicrotask(()=>{if(runtime?.pageBreakWait)advancePreview()});
+      return true;
+    }
+    return await showBefore58.apply(this,arguments);
+  };
+
+  const PLAYER58=String.raw`<script>
+(function(){
+  'use strict';
+  function peel58(raw){var lines=String(raw==null?'':raw).replace(/\r\n?/g,'\n').split('\n'),waits=0;for(var i=0;i<lines.length;i++){var t=lines[i].trim();if(t===''||t.indexOf('//')===0)continue;if(t==='。'){waits++;lines.splice(i,1);i--;continue}break}return {waits:waits,raw:lines.join('\n')}}
+  function hp58(initial){return {speaker:initial||'',speakerChanged:false,clearSpeaker:false,autoBounce:false,endWait:true,events:[],holdPrevious58:true}}
+  var pdBefore58=pd;pd=function(raw,initial){var p=peel58(raw),pages=pdBefore58(p.raw,initial)||[],head=[];for(var i=0;i<p.waits;i++)head.push(hp58(initial));return head.concat(pages)};
+  var showBefore58=show;show=async function(resume){var p=rt&&rt.pages&&rt.pages[rt.page];if(!resume&&p&&p.holdPrevious58){rt.typing=false;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=true;rt.event=0;tap.style.display='block';if(fastForward)setTimeout(function(){if(rt&&rt.pageBreakWait)advance()},85);return}return await showBefore58.apply(this,arguments)};
+})();
+${'</scr'+'ipt>'}`;
+  const makeBefore58=window.makePlayerHTML;
+  if(typeof makeBefore58==='function')window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makeBefore58.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER58+'</body></html>');
+  };
+
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v58 refresh',e)}
 })();
 </script>
 
