@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v66</title>
+<title>TateNovel Studio v67</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,7 +45,7 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v66</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v67</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
 <div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>?a / ?b / ?c / ?d</b> バウンスなし話者変更<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
@@ -1020,7 +1020,8 @@ ${'</scr'+'ipt>'}`;
       order,
       flip:!!c?.[k+'Flip'],
       hidden:!!c?.[k+'StartHidden'],
-      fade:c?.[k+'FadeDuration']===''||c?.[k+'FadeDuration']==null?null:Math.max(0,Number(c[k+'FadeDuration'])||0)
+      fade:c?.[k+'FadeDuration']===''||c?.[k+'FadeDuration']==null?null:Math.max(0,Number(c[k+'FadeDuration'])||0),
+      dark:Number(c?.[k+'Dark'])||0
     };
   }
 
@@ -1037,7 +1038,8 @@ ${'</scr'+'ipt>'}`;
       layer:String(c?.[k+'LayerMode']??(legacyA?c?.layerMode:'front'))==='behind'?'behind':'front',
       order:clampOrder(c?.[k+'Order']??DEFAULT_ORDER[k]),
       hidden:!!(c?.[k+'StartHidden']??(legacyA?c?.startHidden:false)),
-      fade:(c?.[k+'FadeDuration']??c?.fadeDuration)==null?null:Math.max(0,Number(c?.[k+'FadeDuration']??c?.fadeDuration)||0)
+      fade:(c?.[k+'FadeDuration']??c?.fadeDuration)==null?null:Math.max(0,Number(c?.[k+'FadeDuration']??c?.fadeDuration)||0),
+      dark:Number(c?.[k+'Dark'])||0
     };
   }
 
@@ -1102,6 +1104,7 @@ ${'</scr'+'ipt>'}`;
           o[k+'Layer']=5-o[k+'Order'];
           o[k+'StartHidden']=!!s?.hidden;
           o[k+'FadeDuration']=s?.fade==null?null:Math.max(0,Number(s.fade)||0);
+          o[k+'Dark']=s?Number(s.dark)||0:0;
         });
         return o;
       }
@@ -1117,6 +1120,7 @@ ${'</scr'+'ipt>'}`;
           o[k+'Order']=s?clampOrder(s.order):DEFAULT_ORDER[k];
           o[k+'FadeDuration']=(s?.fade??c.fade)==null?null:Math.max(0,Number(s?.fade??c.fade)||0);
           o[k+'StartHidden']=!!s?.hidden;
+          o[k+'Dark']=s?Number(s.dark)||0:0;
         });
         return o;
       }
@@ -1214,6 +1218,7 @@ ${'</scr'+'ipt>'}`;
             if(cleanNum(s.scale,100)!==100)a.push('scale='+cleanNum(s.scale,100));
             if(cleanNum(s.x,0)!==0)a.push('x='+cleanNum(s.x,0));
             if(cleanNum(s.y,0)!==0)a.push('y='+cleanNum(s.y,0));
+            if(cleanNum(s.dark,0)!==0)a.push('dark='+cleanNum(s.dark,0));
             if(clampOrder(s.order)!==DEFAULT_ORDER[k])a.push('order='+clampOrder(s.order));
             if(s.flip)a.push('flip=true');
             if(s.hidden)a.push('hidden=true');
@@ -1234,6 +1239,7 @@ ${'</scr'+'ipt>'}`;
             if(cleanNum(s.scale,100)!==100)a.push('scale='+cleanNum(s.scale,100));
             if(cleanNum(s.x,0)!==0)a.push('x='+cleanNum(s.x,0));
             if(cleanNum(s.y,0)!==0)a.push('y='+cleanNum(s.y,0));
+            if(cleanNum(s.dark,0)!==0)a.push('dark='+cleanNum(s.dark,0));
             if(s.fade!=null)a.push('fade='+Math.max(0,Number(s.fade)||0));
             if(s.hidden)a.push('hidden=true');
             rows.push(k+(a.length?' '+a.join(' '):''));
@@ -1436,10 +1442,10 @@ ${'</scr'+'ipt>'}`;
           if(seen.has(k)){diagnostics.push({severity:'error',code:'DUP_SLOT',message:`立ち絵${k.toUpperCase()}が重複しています`,line:startLine+j,column:1,blockIndex});continue}
           seen.add(k);
           if(String(row[0]||'').toLowerCase()==='off'){slots[k]=null;continue}
-          const rr=[k,...row],a=attrMap(rr,1,['cue','name','scale','x','y','order','flip','hidden','fade'],startLine+j,diagnostics,blockIndex);
+          const rr=[k,...row],a=attrMap(rr,1,['cue','name','scale','x','y','dark','order','flip','hidden','fade'],startLine+j,diagnostics,blockIndex);
           const order=clampOrder(a.order??DEFAULT_ORDER[k]);
           if(a.order!=null&&Number(a.order)!==order)diagnostics.push({severity:'error',code:'ORDER_RANGE',message:'重なり順 order は1〜4の整数です',line:startLine+j,column:1,blockIndex});
-          slots[k]={cue:String(a.cue??''),name:String(a.name??''),scale:numAttr(a.scale,100),x:numAttr(a.x,0),y:numAttr(a.y,0),order,flip:boolAttr(a.flip,false),hidden:boolAttr(a.hidden,false),fade:a.fade==null?null:Math.max(0,numAttr(a.fade,0))};
+          slots[k]={cue:String(a.cue??''),name:String(a.name??''),scale:numAttr(a.scale,100),x:numAttr(a.x,0),y:numAttr(a.y,0),dark:numAttr(a.dark,0),order,flip:boolAttr(a.flip,false),hidden:boolAttr(a.hidden,false),fade:a.fade==null?null:Math.max(0,numAttr(a.fade,0))};
         }
         SLOT_KEYS_V10.forEach(k=>{if(!seen.has(k))slots[k]=null});
         add({id:commandId(),type:'chars',slots},block,startLine,startLine+lines.length-1);
@@ -1453,12 +1459,12 @@ ${'</scr'+'ipt>'}`;
           if(seen.has(k)){diagnostics.push({severity:'error',code:'DUP_SLOT',message:`イラスト${k.toUpperCase()}が重複しています`,line:startLine+j,column:1,blockIndex});continue}
           seen.add(k);
           if(String(row[0]||'').toLowerCase()==='off'){slots[k]=null;continue}
-          const rr=[k,...row],a=attrMap(rr,1,['cue','scale','x','y','layer','order','fade','hidden'],startLine+j,diagnostics,blockIndex);
+          const rr=[k,...row],a=attrMap(rr,1,['cue','scale','x','y','dark','layer','order','fade','hidden'],startLine+j,diagnostics,blockIndex);
           const layer=a.layer==null?'front':String(a.layer);
           if(!['front','behind'].includes(layer))diagnostics.push({severity:'error',code:'LAYER_VALUE',message:'イラスト layer は front または behind です',line:startLine+j,column:1,blockIndex});
           const order=clampOrder(a.order??DEFAULT_ORDER[k]);
           if(a.order!=null&&Number(a.order)!==order)diagnostics.push({severity:'error',code:'ORDER_RANGE',message:'重なり順 order は1〜4の整数です',line:startLine+j,column:1,blockIndex});
-          slots[k]={cue:String(a.cue??''),scale:numAttr(a.scale,100),x:numAttr(a.x,0),y:numAttr(a.y,0),layer:layer==='behind'?'behind':'front',order,fade:(a.fade??head.fade)==null?null:Math.max(0,numAttr(a.fade??head.fade,0)),hidden:boolAttr(a.hidden,false)};
+          slots[k]={cue:String(a.cue??''),scale:numAttr(a.scale,100),x:numAttr(a.x,0),y:numAttr(a.y,0),dark:numAttr(a.dark,0),layer:layer==='behind'?'behind':'front',order,fade:(a.fade??head.fade)==null?null:Math.max(0,numAttr(a.fade??head.fade,0)),hidden:boolAttr(a.hidden,false)};
         }
         SLOT_KEYS_V10.forEach(k=>{if(!seen.has(k))slots[k]=null});
         add({id:commandId(),type:'illust',slots},block,startLine,startLine+lines.length-1);
@@ -2791,7 +2797,7 @@ ${'</scr'+'ipt>'}`;
 
   // Keep legacy storage/database keys and portable format identifiers unchanged
   // so existing projects continue to open after the product rename.
-  document.title='TateNovel Studio v66';
+  document.title='TateNovel Studio v67';
   document.documentElement.setAttribute('data-app-name',APP_NAME);
 
   // Mark new portable project backups with the producing application while
@@ -6166,7 +6172,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v54-project-text-and-defaults">
 (function(){
   'use strict';
-  const VERSION54='v66', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION54='v67', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const DEF54={bg:2,chara:1,illust:1};
   const clamp54=(v,f)=>{const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f};
   const bgFade54=()=>clamp54(projectSettings?.defaultBgFade,DEF54.bg);
@@ -6368,7 +6374,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v56-shake-bg-autopage">
 (function(){
   'use strict';
-  const VERSION56='v66';
+  const VERSION56='v67';
   const AUTO56='\uE560TNV56_AUTOPAGE\uE561';
   const SH56A='\uE562TNV56_SHAKEBG:';
   const SH56B='\uE563';
@@ -6499,7 +6505,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v57-block-off-and-image-guard">
 (function(){
   'use strict';
-  const VERSION57='v66';
+  const VERSION57='v67';
   const OFF_DIRECTIVE57='#!tatenovel-block off';
   const clone57=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
@@ -6669,7 +6675,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v63-leading-boundary-wait">
 (function(){
   'use strict';
-  const VERSION58='v66';
+  const VERSION58='v67';
   document.title='TateNovel Studio '+VERSION58;
   const h58=document.querySelector('.left h1');if(h58)h58.textContent='TateNovel Studio '+VERSION58;
 
@@ -6754,7 +6760,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v63-placement-order-and-hidden-guard">
 (function(){
   'use strict';
-  const VERSION61='v66';
+  const VERSION61='v67';
   document.title='TateNovel Studio '+VERSION61;
   const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION61;
 
@@ -6830,7 +6836,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v63-no-bounce-speaker-command">
 (function(){
   'use strict';
-  const VERSION62='v66';
+  const VERSION62='v67';
   document.title='TateNovel Studio '+VERSION62;
   const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION62;
 
@@ -6909,7 +6915,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v63-bg-autoshow-and-persistent-vars">
 (function(){
   'use strict';
-  const VERSION63='v66', clone63=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION63='v67', clone63=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const PVAR_PREFIX63='__TNPVAR63__';
   document.title='TateNovel Studio '+VERSION63;
   const h63=document.querySelector('.left h1');if(h63)h63.textContent='TateNovel Studio '+VERSION63;
@@ -7121,7 +7127,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v64-speaker-display-defer">
 (function(){
   'use strict';
-  const VERSION64='v66';
+  const VERSION64='v67';
   document.title='TateNovel Studio '+VERSION64;
   const h64=document.querySelector('.left h1');if(h64)h64.textContent='TateNovel Studio '+VERSION64;
 
@@ -7325,17 +7331,17 @@ ${'</scr'+'ipt>'}`;
 </script>
 
 
-<style id="tatenovel-v66-asset-confirm-illust-dark-style">
+<style id="tatenovel-v67-asset-confirm-illust-dark-style">
 /* V66: explicit asset-setting commit + stable material preview anchor. */
 .assetCommitBar{position:sticky;top:0;z-index:18;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px -2px 12px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#171c25f2;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .assetCommitState{flex:1 1 180px;font-size:11px;color:var(--muted);line-height:1.45}.assetCommitState.dirty{color:#ffe1a3;font-weight:800}
 .assetCommitBar button{border:1px solid var(--line);background:#252b36;color:#fff;border-radius:9px;padding:8px 10px;font-weight:900}.assetCommitBar button.primary{background:var(--accent);color:#10141e;border-color:transparent}.assetCommitBar button:disabled{opacity:.45;cursor:default}
 @media(max-width:720px){.assetCommitBar{top:58px}.assetCommitBar button{min-height:44px}.assetCommitState{flex:1 1 100%}}
 </style>
-<script id="tatenovel-v66-asset-confirm-illust-dark">
+<script id="tatenovel-v67-asset-confirm-illust-dark">
 (function(){
   'use strict';
-  const VERSION66='v66', clone66=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION66='v67', clone66=v=>v==null?v:JSON.parse(JSON.stringify(v));
   document.title='TateNovel Studio '+VERSION66;
   const h1=document.querySelector('.left h1');if(h1)h1.textContent='TateNovel Studio '+VERSION66;
 
@@ -7506,8 +7512,190 @@ ${'</scr'+'ipt>'}`;
   const make66=window.makePlayerHTML;
   if(typeof make66==='function')window.makePlayerHTML=function(project,settings={},catalog={}){const html=make66.call(this,project,settings,catalog);return html.replace('</body></html>',PLAYER66+'</body></html>')};
 
-  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v66 refresh',e)}
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v67 refresh',e)}
 })();
 </script>
 
+
+<style id="tatenovel-v67-scene-adjust-style">
+.sceneAdjustHint67{margin-top:8px;padding:7px 9px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:10px;line-height:1.5}
+</style>
+<script id="tatenovel-v67-scene-adjust">
+(function(){
+  'use strict';
+  const VERSION67='v67',K67=['a','b','c','d'];
+  document.title='TateNovel Studio '+VERSION67;
+  const h67=document.querySelector('.left h1');if(h67)h67.textContent='TateNovel Studio '+VERSION67;
+  const n67=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n:d};
+  const adj67=v=>Math.max(-100,Math.min(100,n67(v,0)));
+  const finalDark67=(base,add)=>Math.max(0,Math.min(100,n67(base,0)+adj67(add)));
+  const mode67=(c,k)=>{const m=String(c?.[k+'PatchMode']||'');if(['keep','set','off'].includes(m))return m;const q=String(c?.[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')};
+  const asset67=(kind,cue)=>(assetCatalog?.[kind]||[]).find(a=>String(a?.cue||'')===String(cue||''))||null;
+
+  // Existing projects have no scene darkness: zero means material basic darkness only.
+  for(const c of commands||[])if(c&&['chars','illust'].includes(c.type))for(const k of K67)if(!Number.isFinite(Number(c[k+'Dark'])))c[k+'Dark']=0;
+  const default67=window.defaultCommand;
+  if(typeof default67==='function')window.defaultCommand=function(type){const c=default67.apply(this,arguments);if(c&&['chars','illust'].includes(c.type))for(const k of K67)c[k+'Dark']=0;return c};
+  try{defaultCommand=window.defaultCommand}catch(_){ }
+
+  // Builder UI: per-slot additional darkness, symmetrical for characters and illustrations.
+  const fields67=window.fields;
+  if(typeof fields67==='function')window.fields=function(c,i){
+    let h=fields67.apply(this,arguments);if(typeof h!=='string')return h;
+    if(c&&['chars','illust'].includes(c.type)){
+      for(const k of K67){
+        if(h.includes(`data-f="${k}Dark"`))continue;
+        const marker=`<label>重なり順</label><select data-i="${i}" data-f="${k}Order">`;
+        if(h.includes(marker)){
+          const ctl=`<label>追加暗さ（素材の基本暗さへ加算）</label>${numCtl(i,k+'Dark',c[k+'Dark']??0,-100,100,5,'%')}`;
+          h=h.replace(marker,ctl+marker);
+        }
+      }
+    }
+    if(c?.type==='text'&&!h.includes('sceneAdjustHint67')){
+      h+=`<div class="sceneAdjustHint67"><b>素材基本値＋場面補正</b>：<br>[chara a 識別名 dark=30] / [il a 識別名 dark=30]<br>[bgm 識別名 volume=50] / [se 識別名 volume=50] / [voice 識別名 volume=50]<br>dark は素材の基本暗さへ加算、volume は素材の基本音量へ倍率で適用します。</div>`;
+    }
+    return h;
+  };
+  try{fields=window.fields}catch(_){ }
+
+  function charFilter67(k,state){
+    const e=typeof charEl==='function'?charEl(k):null,s=state||runtime?.charState?.[k]||runtime?.charPrepared?.[k];if(!e||!s?.cue)return;
+    const a=asset67('chara',s.cue),d=finalDark67(a?.baseDark,s.dark);e.style.filter=`brightness(${1-d/100})`;
+  }
+  function illFilter67(k,state){
+    const e=typeof illustEl==='function'?illustEl(k):null,s=state||runtime?.illustState?.[k];if(!e||!s?.cue)return;
+    const a=asset67('illust',s.cue),d=finalDark67(a?.baseDark,s.dark);e.style.filter=`brightness(${1-d/100})`;
+  }
+  function refreshFilters67(){for(const k of K67){charFilter67(k);illFilter67(k)}}
+
+  const applyChars67=window.applyChars;
+  if(typeof applyChars67==='function')window.applyChars=function(c){
+    const r=applyChars67.apply(this,arguments);
+    for(const k of K67)if(mode67(c,k)==='set'&&runtime?.charPrepared?.[k]){runtime.charPrepared[k].dark=adj67(c[k+'Dark']);if(runtime.chars)runtime.chars[k+'Dark']=adj67(c[k+'Dark'])}
+    return r;
+  };
+  try{applyChars=window.applyChars}catch(_){ }
+
+  const setChara67=window.setCharaPreview;
+  if(typeof setChara67==='function')window.setCharaPreview=function(k,cue,darkOverride){
+    const before=runtime?.charPreparedDirty?.[k]?runtime?.charPrepared?.[k]:runtime?.charState?.[k],carry=adj67(before?.dark);
+    const r=setChara67.call(this,k,cue);
+    if(runtime?.charPrepared?.[k])runtime.charPrepared[k].dark=darkOverride==null?carry:adj67(darkOverride);
+    return r;
+  };
+  try{setCharaPreview=window.setCharaPreview}catch(_){ }
+
+  const applyIll67=window.applyIllust;
+  if(typeof applyIll67==='function')window.applyIllust=function(c){
+    const targets=c?._partialIllustTarget?[c._partialIllustTarget]:K67,carry={};for(const k of targets)carry[k]=adj67(runtime?.illustState?.[k]?.dark);
+    const r=applyIll67.apply(this,arguments);
+    for(const k of targets){const s=runtime?.illustState?.[k];if(!s)continue;const explicit=Number.isFinite(Number(c?.[k+'Dark']));s.dark=explicit?adj67(c[k+'Dark']):(c?._partialIllustTarget?carry[k]:0);illFilter67(k,s)}
+    return r;
+  };
+  try{applyIllust=window.applyIllust}catch(_){ }
+  const transIll67=window.transitionIllustPreview;
+  if(typeof transIll67==='function')window.transitionIllustPreview=async function(){const r=await transIll67.apply(this,arguments);refreshFilters67();return r};
+  try{transitionIllustPreview=window.transitionIllustPreview}catch(_){ }
+
+  // Final +/- rendering pass: prepared character commit creates the new element synchronously.
+  const vis67=window.setVisibility;
+  if(typeof vis67==='function')window.setVisibility=function(cmd,duration){const r=vis67.apply(this,arguments);const key=String(cmd||'').slice(1);if(K67.includes(key)||key==='all'||key==='scene')for(const k of K67)charFilter67(k);if(key==='illust'||key==='scene'||key.startsWith('illust:'))for(const k of K67)illFilter67(k);return r};
+  try{setVisibility=window.setVisibility}catch(_){ }
+
+  // Inline image preparation with optional scene darkness. Omitting dark preserves the slot value.
+  const inline67=window.inlineEv;
+  if(typeof inline67==='function')window.inlineEv=function(line){
+    const out=[],re=/\[([^\]]+)\]/g;let last=0,m;const pt=t=>{if(t!=='')out.push({type:'text',value:t})};
+    while((m=re.exec(String(line??'')))){
+      pt(String(line??'').slice(last,m.index));const p=m[1].trim().split(/\s+/),kind=(p.shift()||'').toLowerCase();let handled=false;
+      if(kind==='chara'){
+        const target=(p.shift()||'').toLowerCase(),cue=p.shift()||'';if(K67.includes(target)&&cue){let dark=null;for(const q of p){const z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dark=adj67(z[1])}out.push({type:'charaSet',target,cue,dark});handled=true}
+      }else if(kind==='il'){
+        let target=(p.shift()||'').toLowerCase(),cue='',duration=null,dark=null;
+        if(K67.includes(target)){cue=p.shift()||'';for(const q of p){const z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dark=adj67(z[1]);else if(duration==null&&Number.isFinite(Number(q)))duration=Math.max(0,Number(q))}if(cue.toLowerCase()==='off')out.push({type:'illustOff',target,duration:duration==null?1:duration});else if(cue)out.push({type:'illustSet',target,cue,duration,dark});else handled=false;handled=!!cue}
+        else if(target==='all'){cue=(p.shift()||'').toLowerCase();for(const q of p)if(duration==null&&Number.isFinite(Number(q)))duration=Math.max(0,Number(q));if(cue==='off'){out.push({type:'illustOff',target:'all',duration:duration==null?1:duration});handled=true}}
+        else if(target){cue=target;target='a';for(const q of p){const z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dark=adj67(z[1]);else if(duration==null&&Number.isFinite(Number(q)))duration=Math.max(0,Number(q))}if(cue.toLowerCase()==='off')out.push({type:'illustOff',target:'all',duration:duration==null?1:duration});else out.push({type:'illustSet',target,cue,duration,dark});handled=true}
+      }
+      if(!handled){const extra=inline67(m[0]);if(extra.length===1&&extra[0]?.type==='text'&&extra[0]?.value===m[0])pt(m[0]);else out.push(...extra)}
+      last=re.lastIndex;
+    }
+    pt(String(line??'').slice(last));return out;
+  };
+  try{inlineEv=window.inlineEv}catch(_){ }
+
+  const sp67=()=>document.getElementById('previewSpeaker'),tx67=()=>document.getElementById('previewText'),tap67=()=>document.getElementById('tapHint');
+  const hasText67=ev=>ev?.type==='text'&&String(ev.value??'').length>0;
+  function first67(events,start=0){for(let i=Math.max(0,Number(start)||0);i<(events||[]).length;i++){const ev=events[i];if(ev?.type==='text'&&String(ev.value??'').length===0)continue;return ev||null}return null}
+  function showSp67(){const e=sp67();if(e)e.textContent=displaySpeaker(runtime.currentSpeaker)}function hideSp67(){const e=sp67();if(e)e.textContent=''}
+  function fast67(){if(!window.TestPlayFast?.enabled)return;queueMicrotask(()=>{if(!window.TestPlayFast?.enabled||document.querySelector('#previewChoices button')||!runtime?.waiting)return;if(runtime.innerWait||runtime.pageBreakWait)advancePreview()})}
+  window.showPreviewDialoguePage=async function(resume=false){
+    const p=(runtime.textPages||[])[runtime.pageIndex];if(!p)return false;
+    if(!resume&&p.holdPrevious58){runtime.typing=false;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=true;runtime.eventIndex=0;tap67().style.display='block';fast67();return true}
+    const holdComma=!resume&&p.holdPreviousComma58,effectiveResume=resume||holdComma;
+    if(p.speakerChanged)runtime.currentSpeaker=p.clearSpeaker?'':p.speaker;highlightSpeaker(runtime.currentSpeaker);const out=tx67(),sp=sp67();if(!effectiveResume){out.textContent='';runtime.eventIndex=0}
+    if(holdComma){if(sp)sp.textContent=displaySpeaker(runtime.currentSpeaker)}else if(runtime.speakerPendingText64){const next=first67(p.events,runtime.eventIndex);if(hasText67(next)){showSp67();runtime.speakerPendingText64=false}else hideSp67()}else showSp67();
+    if(!effectiveResume&&p.speakerChanged){await sleep(160);if(p.autoBounce)bounce('speaker')}runtime.typing=true;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=false;tap67().style.display='none';
+    for(;runtime.eventIndex<p.events.length;runtime.eventIndex++){const ev=p.events[runtime.eventIndex];
+      if(ev.type==='wait'){runtime.eventIndex++;runtime.typing=false;runtime.innerWait=true;tap67().style.display='block';fast67();return true}
+      if(ev.type==='timewait'){runtime.typing=false;tap67().style.display='none';await waitSeconds(ev.seconds);runtime.typing=true;runtime.skipTyping=false;continue}
+      if(ev.type==='inlineEffect'){runEffectPreview(ev.cmd);continue}
+      if(ev.type==='audioCue'){const ac=findAudioCue(ev.kind,ev.cue);if(ac)playPreviewAudio(ac);continue}
+      if(ev.type==='bgmStop'){stopPreviewBgm(ev.duration);continue}
+      if(ev.type==='bgPreset'){const bc=findBgPreset(ev.cue);if(bc)await transitionBgPreview(bc,ev.duration);continue}
+      if(ev.type==='bgOff'){hideBgPreview();continue}
+      if(ev.type==='charaSet'){setCharaPreview(ev.target,ev.cue,ev.dark);continue}
+      if(ev.type==='illustSet'||ev.type==='illustPreset'){const target=K67.includes(ev.target)?ev.target:'a',ic=findIllustPreset(ev.cue,target);if(ic){const carry=adj67(runtime?.illustState?.[target]?.dark);ic[target+'Dark']=ev.dark==null?carry:adj67(ev.dark);transitionIllustPreview(ic,ev.duration)}continue}
+      if(ev.type==='illustOff'){hideIllustPreview(ev.target||'all',ev.duration);continue}
+      if(ev.type==='layer'){setCharLayerPreview(ev.target,ev.value);continue}
+      if(ev.type==='visibility'){setVisibility(ev.cmd,ev.duration);continue}
+      if(ev.type==='bounce'){bounce(ev.target);continue}
+      if(ev.type==='text'){const value=String(ev.value??'');if(value.length&&runtime.speakerPendingText64){showSp67();runtime.speakerPendingText64=false}if(out.textContent&&!out.textContent.endsWith('\n'))out.textContent+='\n';for(let ci=0;ci<value.length;ci++){if(runtime.skipTyping){out.textContent+=value.slice(ci);ci=value.length;break}out.textContent+=value[ci];await sleep(20)}}
+    }
+    runtime.typing=false;if(p.endWait){runtime.pageBreakWait=true;tap67().style.display='block';fast67();return true}tap67().style.display='none';if(runtime.textPages&&runtime.pageIndex<runtime.textPages.length-1){runtime.speakerPendingText64=true;runtime.pageIndex++;runtime.eventIndex=0;await window.showPreviewDialoguePage(false);status();return true}runtime.textPages=null;runtime.pageIndex=0;runtime.eventIndex=0;runtime.waiting=false;run();return true;
+  };
+  try{showPreviewDialoguePage=window.showPreviewDialoguePage}catch(_){ }
+
+  // Selected-position / still reconstruction: retain scene dark overrides too.
+  const instant67=window.applyDialogueStateInstant;
+  if(typeof instant67==='function')window.applyDialogueStateInstant=function(c,showText=false){
+    const pages=parseDialogue(c?.text||'',runtime.currentSpeaker||c?.speaker||''),cd={},id={},ct=new Set(),it=new Set();
+    for(const k of K67){cd[k]=adj67((runtime?.charPreparedDirty?.[k]?runtime?.charPrepared?.[k]:runtime?.charState?.[k])?.dark);id[k]=adj67(runtime?.illustState?.[k]?.dark)}
+    for(const p of pages||[])for(const ev of p.events||[]){if(ev.type==='charaSet'&&K67.includes(ev.target)){ct.add(ev.target);if(ev.dark!=null)cd[ev.target]=adj67(ev.dark)}if((ev.type==='illustSet'||ev.type==='illustPreset')){let k=K67.includes(ev.target)?ev.target:'a';it.add(k);if(ev.dark!=null)id[k]=adj67(ev.dark)}}
+    const r=instant67.apply(this,arguments);for(const k of ct){const s=runtime?.charPreparedDirty?.[k]?runtime?.charPrepared?.[k]:runtime?.charState?.[k];if(s)s.dark=cd[k]}for(const k of it){if(runtime?.illustState?.[k])runtime.illustState[k].dark=id[k]}refreshFilters67();return r;
+  };
+
+  const showAt67=window.showVisualAt;
+  if(typeof showAt67==='function')window.showVisualAt=function(index){const r=showAt67.apply(this,arguments),c=commands?.[index];if(c?.type==='chars')for(const k of K67)if(mode67(c,k)==='set')charFilter67(k,{cue:c[k+'Cue'],dark:adj67(c[k+'Dark'])});if(c?.type==='illust')for(const k of K67)if(mode67(c,k)==='set')illFilter67(k,{cue:c[k+'Cue'],dark:adj67(c[k+'Dark'])});return r};
+
+  const restore67=window.restoreState;
+  if(typeof restore67==='function')window.restoreState=function(){const r=restore67.apply(this,arguments);refreshFilters67();return r};
+
+  // Explain the pre-existing audio multiplier semantics in audio blocks.
+  const fieldsAudio67=window.fields;
+  window.fields=function(c,i){let h=fieldsAudio67.apply(this,arguments);if(c&&['bgm','se','voice'].includes(c.type)&&typeof h==='string'&&!h.includes('audioMultiplier67'))h+=`<div class="audioHint audioMultiplier67">音量は素材管理の「基本音量」に対する倍率です。例：基本80% × volume 50% = 40%。文章内でも [${c.type} 識別名 volume=50] と指定できます。</div>`;return h};
+  try{fields=window.fields}catch(_){ }
+
+  const hint67=document.querySelector('.left .hintBox');if(hint67&&!hint67.textContent.includes('dark=30'))hint67.insertAdjacentHTML('beforeend','<br><b>[chara a 識別名 dark=30]</b> 立ち絵準備＋追加暗さ　<b>[il a 識別名 dark=30]</b> イラスト準備＋追加暗さ<br><b>[bgm 識別名 volume=50]</b> / <b>[se 識別名 volume=50]</b> / <b>[voice 識別名 volume=50]</b> 素材基本音量への倍率');
+
+  const PLAYER67=String.raw`<script>
+(function(){
+  'use strict';
+  var K67=['a','b','c','d'];function n67(v,d){var n=Number(v);return isFinite(n)?n:(d||0)}function a67(v){return Math.max(-100,Math.min(100,n67(v,0)))}function fd67(base,add){return Math.max(0,Math.min(100,n67(base,0)+a67(add)))}function md67(c,k){var m=String(c&&c[k+'PatchMode']||'');if(m==='keep'||m==='set'||m==='off')return m;var q=String(c&&c[k+'Cue']||'');return q==='__off__'?'off':(q?'set':'keep')}
+  function cf67(k,s){var e=playerChar(k),st=s||(rt&&rt.charState&&rt.charState[k])||(rt&&rt.charPrepared&&rt.charPrepared[k]);if(!e||!st||!st.cue)return;var a=catFind('chara',st.cue),d=fd67(a&&a.baseDark,st.dark);e.style.filter='brightness('+(1-d/100)+')'}
+  function ie67(k,s){var e=document.getElementById('ILLUST_'+k.toUpperCase())||(k==='a'?document.getElementById('ILLUST'):null),st=s||(rt&&rt.illustState&&rt.illustState[k]);if(!e||!st||!st.cue)return;var a=catFind('illust',st.cue),d=fd67(a&&a.baseDark,st.dark);e.style.filter='brightness('+(1-d/100)+')'}function rf67(){K67.forEach(function(k){cf67(k);ie67(k)})}
+  var chars67=chars;chars=function(c,idx){var r=chars67.apply(this,arguments);K67.forEach(function(k){if(md67(c,k)==='set'&&rt.charPrepared&&rt.charPrepared[k])rt.charPrepared[k].dark=a67(c[k+'Dark'])});return r};
+  var set67=setChara;setChara=function(k,cue,dark){var before=rt&&rt.charPreparedDirty&&rt.charPreparedDirty[k]?rt.charPrepared[k]:(rt&&rt.charState&&rt.charState[k]),carry=a67(before&&before.dark),r=set67.call(this,k,cue);if(rt&&rt.charPrepared&&rt.charPrepared[k])rt.charPrepared[k].dark=dark==null?carry:a67(dark);return r};
+  var ill67=illust;illust=function(c,idx){var targets=c&&c._partialIllustTarget?[c._partialIllustTarget]:K67,carry={};targets.forEach(function(k){carry[k]=a67(rt&&rt.illustState&&rt.illustState[k]&&rt.illustState[k].dark)});var r=ill67.apply(this,arguments);targets.forEach(function(k){var st=rt&&rt.illustState&&rt.illustState[k];if(!st)return;var explicit=isFinite(Number(c&&c[k+'Dark']));st.dark=explicit?a67(c[k+'Dark']):(c&&c._partialIllustTarget?carry[k]:0);ie67(k,st)});return r};
+  var vis67=vis;vis=function(cmd,dur){var r=vis67.apply(this,arguments),key=String(cmd||'').slice(1);if(K67.indexOf(key)>=0||key==='all'||key==='scene')K67.forEach(function(k){cf67(k)});if(key==='illust'||key==='scene'||key.indexOf('illust:')===0)K67.forEach(function(k){ie67(k)});return r};
+  var in67=inlineEv;inlineEv=function(line){var src=String(line==null?'':line),out=[],re=/\[([^\]]+)\]/g,last=0,m;function pt(t){if(t!=='')out.push({type:'text',value:t})}while((m=re.exec(src))){pt(src.slice(last,m.index));var p=m[1].trim().split(/\s+/),kind=(p.shift()||'').toLowerCase(),handled=false;if(kind==='chara'){var target=(p.shift()||'').toLowerCase(),cue=p.shift()||'',dark=null;if(K67.indexOf(target)>=0&&cue){p.forEach(function(q){var z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dark=a67(z[1])});out.push({type:'charaSet',target:target,cue:cue,dark:dark});handled=true}}else if(kind==='il'){var target2=(p.shift()||'').toLowerCase(),cue2='',du=null,dk=null;if(K67.indexOf(target2)>=0){cue2=p.shift()||'';p.forEach(function(q){var z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dk=a67(z[1]);else if(du==null&&isFinite(Number(q)))du=Math.max(0,Number(q))});if(cue2.toLowerCase()==='off')out.push({type:'illustOff',target:target2,duration:du==null?1:du});else if(cue2)out.push({type:'illustSet',target:target2,cue:cue2,duration:du,dark:dk});handled=!!cue2}else if(target2==='all'){cue2=(p.shift()||'').toLowerCase();p.forEach(function(q){if(du==null&&isFinite(Number(q)))du=Math.max(0,Number(q))});if(cue2==='off'){out.push({type:'illustOff',target:'all',duration:du==null?1:du});handled=true}}else if(target2){cue2=target2;target2='a';p.forEach(function(q){var z=q.match(/^dark=(-?\d+(?:\.\d+)?)$/i);if(z)dk=a67(z[1]);else if(du==null&&isFinite(Number(q)))du=Math.max(0,Number(q))});if(cue2.toLowerCase()==='off')out.push({type:'illustOff',target:'all',duration:du==null?1:du});else out.push({type:'illustSet',target:'a',cue:cue2,duration:du,dark:dk});handled=true}}if(!handled){var ex=in67(m[0]);if(ex.length===1&&ex[0]&&ex[0].type==='text'&&ex[0].value===m[0])pt(m[0]);else Array.prototype.push.apply(out,ex)}last=re.lastIndex}pt(src.slice(last));return out};
+  function hs67(){sp.textContent=nameOf(rt.currentSpeaker)}function hd67(){sp.textContent=''}function ht67(ev){return ev&&ev.type==='text'&&String(ev.value==null?'':ev.value).length>0}function fs67(events,start){for(var i=Math.max(0,Number(start)||0);i<(events||[]).length;i++){var ev=events[i];if(ev&&ev.type==='text'&&String(ev.value==null?'':ev.value).length===0)continue;return ev||null}return null}function dl67(ms){return new Promise(function(r){setTimeout(r,Math.max(0,ms|0))})}var PAGE67=135,CLICK67=85,TEXT67=55;
+  show=async function(resume){resume=!!resume;var p=rt.pages&&rt.pages[rt.page];if(!p)return;if(!resume&&p.holdPrevious58){rt.typing=false;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=true;rt.event=0;tap.style.display='block';if(fastForward)setTimeout(function(){if(rt&&rt.pageBreakWait)advance()},CLICK67);return}var hc=!resume&&p.holdPreviousComma58,er=resume||hc;if(p.speakerChanged)rt.currentSpeaker=p.clearSpeaker?'':p.speaker;if(!er){tx.textContent='';rt.event=0;startPageLog();checkpointPage()}if(hc)hs67();else if(rt.speakerPendingText64){var nx=fs67(p.events,rt.event);if(ht67(nx)){hs67();rt.speakerPendingText64=false}else hd67()}else hs67();if(!er&&p.speakerChanged){await(fastForward?dl67(35):sl(160));if(p.autoBounce)bounce('speaker')}rt.typing=true;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=false;tap.style.display='none';for(;rt.event<p.events.length;rt.event++){var ev=p.events[rt.event];if(ev.type==='wait'){if(fastForward){await dl67(CLICK67);continue}rt.event++;rt.typing=false;rt.innerWait=true;tap.style.display='block';return}if(ev.type==='timewait'){rt.typing=false;tap.style.display='none';await waitSec(ev.seconds);rt.typing=true;rt.skipTyping=false;continue}if(ev.type==='inlineEffect'){doFx(ev.cmd);continue}if(ev.type==='audioCue'){var ac=audioCue(ev.kind,ev.cue);if(ac)playAud(ac,commands.indexOf(ac));continue}if(ev.type==='bgmStop'){stopBgm(ev.duration);continue}if(ev.type==='bgPreset'){var bc=bgPreset(ev.cue);if(bc)await transBg(bc,commands.indexOf(bc),ev.duration);continue}if(ev.type==='bgOff'){hideBg();continue}if(ev.type==='charaSet'){setChara(ev.target,ev.cue,ev.dark);continue}if(ev.type==='illustSet'||ev.type==='illustPreset'){var k=K67.indexOf(ev.target)>=0?ev.target:'a',tok=k+'::'+ev.cue,ic=illustPreset(tok);if(ic){var carry=a67(rt&&rt.illustState&&rt.illustState[k]&&rt.illustState[k].dark);ic[k+'Dark']=ev.dark==null?carry:a67(ev.dark);transIllust(ic,commands.indexOf(ic),ev.duration)}continue}if(ev.type==='illustOff'){hideIllust({target:ev.target||'all',duration:ev.duration});continue}if(ev.type==='layer'){setLayer(ev.target,ev.value);continue}if(ev.type==='visibility'){vis(ev.cmd,ev.duration);continue}if(ev.type==='bounce'){bounce(ev.target);continue}if(ev.type==='text'){var value=String(ev.value==null?'':ev.value);if(value.length&&rt.speakerPendingText64){hs67();rt.speakerPendingText64=false}if(tx.textContent&&!tx.textContent.endsWith('\n'))tx.textContent+='\n';if(fastForward){tx.textContent+=value;await dl67(Math.min(95,TEXT67+value.length*.8))}else{for(var j=0;j<value.length;j++){if(rt.skipTyping||fastForward){tx.textContent+=value.slice(j);j=value.length;break}tx.textContent+=value[j];await sl(20)}}addPageLogText(value);continue}}rt.typing=false;commitPageLog();if(p.endWait){if(!fastForward){rt.pageBreakWait=true;tap.style.display='block';return}await dl67(PAGE67);tx.textContent='';rt.speakerPendingText64=true}tap.style.display='none';if(rt.pages&&rt.page<rt.pages.length-1){rt.speakerPendingText64=true;rt.page++;rt.event=0;if(fastForward)await dl67(35);await show(false);return}rt.pages=null;rt.waiting=false;run()};
+  var rs67=restoreState;restoreState=function(){var r=rs67.apply(this,arguments);rf67();return r};
+})();
+${'</scr'+'ipt>'}`;
+  const make67=window.makePlayerHTML;if(typeof make67==='function')window.makePlayerHTML=function(project,settings={},catalog={}){const html=make67.call(this,project,settings,catalog);return html.replace('</body></html>',PLAYER67+'</body></html>')};
+  try{saveLocal?.();renderEditor?.();renderValidation?.();if(selectedIndex>=0)showVisualAt?.(selectedIndex)}catch(e){console.error('v67 refresh',e)}
+})();
+</script>
 </body></html>
