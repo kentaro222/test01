@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Studio v62</title>
+<title>TateNovel Studio v64</title>
 <style>
 :root{--chara-bottom:46%;--chara-height:56%;--bg:#111318;--panel:#1b1f27;--panel2:#252b36;--line:#363e4c;--text:#f7f8fb;--muted:#a2acbd;--accent:#93aaff;--danger:#ff7586;--ok:#7fe0af}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -45,7 +45,7 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <body>
 <div class="app">
 <aside class="left">
-<h1>TateNovel Studio v62</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
+<h1>TateNovel Studio v64</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
 <div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
 <div class="sectionTitle">会話記法</div><div class="hintBox"><b>、</b> クリック待ち　<b>。</b> クリック待ち＋改ページ　<b>w 1</b> 1秒ウェイト<br><b>a / b / c / d</b> キャラA〜Dへ話者変更　<b>p</b> 主人公・プレイヤー名へ話者変更<br><b>!a / !b / !c / !d</b> 手動バウンス（！も可）　<b>?a / ?b / ?c / ?d</b> バウンスなし話者変更<br><b>@名前 / ＠名前</b> 任意の話者へ変更　<b>@ / ＠</b> 話者名を消す<br><span style="color:var(--muted)">文章ブロック末尾では自動待機しません。次ブロックへそのまま進みます。話者変更が来た時点で本文があれば、クリック待ちなしで改ページして話者を切り替えます。</span><br><b>-a / -b / -c / -d / -bg / -all / -scene / -il</b> フェードアウト（例: <b>-scene 1.5</b> / <b>-il0.5</b>）<br><b>+a / +b / +c / +d / +bg / +all / +scene / +il</b> フェードイン（例: <b>+scene0.5</b> / <b>+il 0.5</b>）<br><span style="color:var(--muted)">表示/透明化の時間は省略時1秒。秒数は空白あり・なしの両方に対応。</span><br><b>[layer a 4]</b> Aのレイヤーを4（手前）に変更（1＝奥 / 4＝手前）<br><b>-all / +all</b> 立ち絵A〜Dだけをまとめて非表示 / 表示　<b>-scene / +scene</b> 背景＋立ち絵A〜D＋イラストをまとめて非表示 / 表示　<b>-il / +il</b> イラストだけを非表示 / 表示<br><b>[bg 識別名]</b> 登録背景を表示　<b>[bg off]</b> 背景を画面から外す<br><b>[chara a 識別名]</b> Aの画像を登録立ち絵へ差し替え　<b>[chara a off]</b> Aを画面から外す<br><b>[il 識別名]</b> イラスト表示　<b>[il off]</b> イラスト非表示<br><span style="color:var(--muted)">-a / -bg などは「透明化」、[chara a off] / [bg off] は「画面から外す」です。</span><br><b>//コメント / // コメント</b> 制作コメント（ゲーム実行時は無視）</div>
 </aside>
@@ -2791,7 +2791,7 @@ ${'</scr'+'ipt>'}`;
 
   // Keep legacy storage/database keys and portable format identifiers unchanged
   // so existing projects continue to open after the product rename.
-  document.title='TateNovel Studio v62';
+  document.title='TateNovel Studio v64';
   document.documentElement.setAttribute('data-app-name',APP_NAME);
 
   // Mark new portable project backups with the producing application while
@@ -6166,7 +6166,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v54-project-text-and-defaults">
 (function(){
   'use strict';
-  const VERSION54='v62', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const VERSION54='v64', K54=['a','b','c','d'], clone54=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const DEF54={bg:2,chara:1,illust:1};
   const clamp54=(v,f)=>{const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f};
   const bgFade54=()=>clamp54(projectSettings?.defaultBgFade,DEF54.bg);
@@ -6368,7 +6368,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v56-shake-bg-autopage">
 (function(){
   'use strict';
-  const VERSION56='v62';
+  const VERSION56='v64';
   const AUTO56='\uE560TNV56_AUTOPAGE\uE561';
   const SH56A='\uE562TNV56_SHAKEBG:';
   const SH56B='\uE563';
@@ -6499,7 +6499,7 @@ ${'</scr'+'ipt>'}`;
 <script id="tatenovel-v57-block-off-and-image-guard">
 (function(){
   'use strict';
-  const VERSION57='v62';
+  const VERSION57='v64';
   const OFF_DIRECTIVE57='#!tatenovel-block off';
   const clone57=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
@@ -6666,10 +6666,10 @@ ${'</scr'+'ipt>'}`;
 </script>
 
 
-<script id="tatenovel-v62-leading-boundary-wait">
+<script id="tatenovel-v63-leading-boundary-wait">
 (function(){
   'use strict';
-  const VERSION58='v62';
+  const VERSION58='v64';
   document.title='TateNovel Studio '+VERSION58;
   const h58=document.querySelector('.left h1');if(h58)h58.textContent='TateNovel Studio '+VERSION58;
 
@@ -6745,16 +6745,16 @@ ${'</scr'+'ipt>'}`;
 
 
 
-<style id="tatenovel-v62-placement-order-style">
-/* v62: adjustment target belongs closer to the placement preview than preview-only visibility controls. */
+<style id="tatenovel-v63-placement-order-style">
+/* v63: adjustment target belongs closer to the placement preview than preview-only visibility controls. */
 #previewPanel.placementPreview #previewCharEditPicker,
 #previewPanel.placementPreview .previewPlacementControls{margin:0 0 8px}
 #previewPanel.placementPreview #previewVisualToolsV31{margin:0 0 8px}
 </style>
-<script id="tatenovel-v62-placement-order-and-hidden-guard">
+<script id="tatenovel-v63-placement-order-and-hidden-guard">
 (function(){
   'use strict';
-  const VERSION61='v62';
+  const VERSION61='v64';
   document.title='TateNovel Studio '+VERSION61;
   const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION61;
 
@@ -6827,10 +6827,10 @@ ${'</scr'+'ipt>'}`;
 
 
 
-<script id="tatenovel-v62-no-bounce-speaker-command">
+<script id="tatenovel-v63-no-bounce-speaker-command">
 (function(){
   'use strict';
-  const VERSION62='v62';
+  const VERSION62='v64';
   document.title='TateNovel Studio '+VERSION62;
   const h=document.querySelector('.left h1');if(h)h.textContent='TateNovel Studio '+VERSION62;
 
@@ -6895,7 +6895,433 @@ ${'</scr'+'ipt>'}`;
     return html.replace('</body></html>',PLAYER62+'</body></html>');
   };
 
-  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v62 refresh',e)}
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v63 refresh',e)}
 })();
 </script>
+
+
+<style id="tatenovel-v63-bg-autoshow-pvar-style">
+.bgRunMode63,.varScope63{margin-top:10px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#121720}
+.bgRunMode63 .audioHint,.varScope63 .audioHint{margin-top:7px}
+.pvarBadge63{display:inline-block;margin-left:5px;padding:1px 5px;border:1px solid #536079;border-radius:999px;font-size:9px;color:#d9e2ff;vertical-align:1px}
+.playerMetaDanger63{margin-top:18px;padding-top:14px;border-top:1px solid #333}
+</style>
+<script id="tatenovel-v63-bg-autoshow-and-persistent-vars">
+(function(){
+  'use strict';
+  const VERSION63='v64', clone63=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const PVAR_PREFIX63='__TNPVAR63__';
+  document.title='TateNovel Studio '+VERSION63;
+  const h63=document.querySelector('.left h1');if(h63)h63.textContent='TateNovel Studio '+VERSION63;
+
+  // ---------------- Background block: prepare only / prepare + show ----------------
+  const bgDefault63=()=>{const n=Number(projectSettings?.defaultBgFade);return Number.isFinite(n)?Math.max(0,n):2};
+  const bgShowDuration63=c=>{const v=c?.bgShowDuration;if(v===''||v==null)return bgDefault63();const n=Number(v);return Number.isFinite(n)?Math.max(0,n):bgDefault63()};
+  for(const c of commands){
+    if(c?.type==='bg'){
+      if(c.bgShowMode!=='show')c.bgShowMode='prepare';
+      if(!Object.prototype.hasOwnProperty.call(c,'bgShowDuration'))c.bgShowDuration=null;
+    }
+    if(c?.type==='var'&&!c.varScope)c.varScope='normal';
+  }
+
+  const defaultBefore63=window.defaultCommand;
+  if(typeof defaultBefore63==='function')window.defaultCommand=function(type){
+    const c=defaultBefore63.apply(this,arguments);
+    if(c?.type==='bg'){c.bgShowMode='prepare';c.bgShowDuration=null}
+    if(c?.type==='var')c.varScope='normal';
+    return c;
+  };
+  try{defaultCommand=window.defaultCommand}catch(_){ }
+
+  const summaryBefore63=window.summary;
+  if(typeof summaryBefore63==='function')window.summary=function(c){
+    const base=summaryBefore63.apply(this,arguments);
+    if(c?.type==='bg'&&c.bgShowMode==='show')return `${base} / 表示 ${c.bgShowDuration===''||c.bgShowDuration==null?'基本':Math.max(0,Number(c.bgShowDuration)||0)+'秒'}`;
+    if(c?.type==='var'&&c.varScope==='persistent')return `周回 ${base}`;
+    return base;
+  };
+  try{summary=window.summary}catch(_){ }
+
+  const fieldsBefore63=window.fields;
+  if(typeof fieldsBefore63==='function')window.fields=function(c,i){
+    let html=fieldsBefore63.apply(this,arguments);if(typeof html!=='string')return html;
+    if(c?.type==='bg'){
+      const show=c.bgShowMode==='show';
+      html+=`<div class="bgRunMode63"><label>ブロック動作</label><select data-i="${i}" data-f="bgShowMode"><option value="prepare" ${show?'':'selected'}>準備のみ</option><option value="show" ${show?'selected':''}>準備して表示</option></select>${show?`<label>表示フェード時間（空欄＝背景基本フェード ${bgDefault63()}秒）</label>${optionalNumCtl(i,'bgShowDuration',c.bgShowDuration,0,10,0.1,'秒',bgDefault63())}`:''}<div class="audioHint">「準備して表示」は Script 上の <b>[bg …]</b> → <b>+bg</b> と同じ動作です。表示開始後は待たずに次の命令へ進みます。</div></div>`;
+    }
+    if(c?.type==='var'){
+      const pv=c.varScope==='persistent';
+      html=`<div class="varScope63"><label>変数の種類</label><select data-i="${i}" data-f="varScope"><option value="normal" ${pv?'':'selected'}>通常変数</option><option value="persistent" ${pv?'selected':''}>周回変数</option></select><div class="audioHint">周回変数はゲームの「はじめから」やロードでも保持され、明示的な周回データ初期化まで残ります。Scriptでは <b>[pvar …]</b> として保存します。</div></div>`+html;
+    }
+    return html;
+  };
+  try{fields=window.fields}catch(_){ }
+
+  function wireModeRerender63(){
+    document.querySelectorAll('select[data-f="bgShowMode"],select[data-f="varScope"]').forEach(el=>{
+      if(el.dataset.v63wired)return;el.dataset.v63wired='1';
+      const old=el.onchange;
+      el.onchange=function(e){old?.call(this,e);selectedIndex=+this.dataset.i;renderEditor?.();try{showVisualAt?.(selectedIndex)}catch(_){ }};
+    });
+  }
+  const renderBefore63=window.renderEditor;
+  if(typeof renderBefore63==='function')window.renderEditor=function(){const r=renderBefore63.apply(this,arguments);wireModeRerender63();return r};
+  try{renderEditor=window.renderEditor}catch(_){ }
+
+  const transBgBefore63=window.transitionBgPreview;
+  if(typeof transBgBefore63==='function')window.transitionBgPreview=async function(c){
+    const r=await transBgBefore63.apply(this,arguments);
+    if(c?.bgShowMode==='show')try{setVisibility('+bg',bgShowDuration63(c))}catch(e){console.error('bg auto show',e)}
+    return r;
+  };
+  try{transitionBgPreview=window.transitionBgPreview}catch(_){ }
+
+  const applyBgBefore63=window.applyBg;
+  if(typeof applyBgBefore63==='function')window.applyBg=function(c){
+    const r=applyBgBefore63.apply(this,arguments);
+    if(c?.bgShowMode==='show')try{setVisibility('+bg',0)}catch(_){ }
+    return r;
+  };
+  try{applyBg=window.applyBg}catch(_){ }
+
+  // ---------------- Builder preview persistent variables ----------------
+  // Preview persistence is intentionally session-only; exported games persist to localStorage.
+  const previewPvars63=window.__tnPreviewPvars63||(window.__tnPreviewPvars63={});
+  const isPvar63=c=>!!c&&(c.varScope==='persistent'||c.persistent===true);
+  function injectPreviewPvars63(){if(runtime?.vars)for(const [k,v] of Object.entries(previewPvars63))runtime.vars[k]=v}
+  const setVarBefore63=window.setVar;
+  if(typeof setVarBefore63==='function')window.setVar=function(c){
+    if(!isPvar63(c))return setVarBefore63.apply(this,arguments);
+    const name=String(c?.name||'');if(!name)return;
+    const v=parseVal(c.value),cur=previewPvars63[name];
+    if(c.op==='=')previewPvars63[name]=v;
+    else if(c.op==='+')previewPvars63[name]=(Number(cur)||0)+(Number(v)||0);
+    else if(c.op==='-')previewPvars63[name]=(Number(cur)||0)-(Number(v)||0);
+    runtime.vars[name]=previewPvars63[name];
+  };
+  try{setVar=window.setVar}catch(_){ }
+
+  const resetBefore63=window.resetBlockPreview;
+  if(typeof resetBefore63==='function')window.resetBlockPreview=function(){const r=resetBefore63.apply(this,arguments);injectPreviewPvars63();return r};
+  const runBefore63=window.run;
+  if(typeof runBefore63==='function')window.run=function(){injectPreviewPvars63();return runBefore63.apply(this,arguments)};
+  try{run=window.run}catch(_){ }
+
+  // ---------------- Script TXT ----------------
+  function pvarCompat63(raw){
+    return String(raw??'').replace(/\[pvar\s+("(?:\\.|[^"\\])*"|[^\s\]]+)/gi,(all,tok)=>{
+      if(tok.startsWith('"')){try{return '[var '+JSON.stringify(PVAR_PREFIX63+JSON.parse(tok))}catch(_){return all}}
+      return '[var '+PVAR_PREFIX63+tok;
+    });
+  }
+  function markPvars63(list){for(const c of list||[]){if(c?.type==='var'&&String(c.name||'').startsWith(PVAR_PREFIX63)){c.name=String(c.name).slice(PVAR_PREFIX63.length);c.persistent=true}}return list||[]}
+  function collapseBgShow63(list){
+    const out=[];
+    for(let i=0;i<(list||[]).length;i++){
+      const c=list[i],n=list[i+1];
+      if(c?.type==='bg'&&n?.type==='text'&&!!c.disabled===!!n.disabled&&!n.speaker&&(!n.side||n.side==='none')){
+        const src=String(n.source??n.text??'').trim(),m=src.match(/^\+bg(?: ([0-9]+(?:\.[0-9]+)?))?$/);
+        if(m){const x=clone63(c);x.showAfterPrepare=true;x.showDuration=m[1]==null?null:Math.max(0,Number(m[1])||0);out.push(x);i++;continue}
+      }
+      out.push(c);
+    }
+    return out;
+  }
+
+  if(window.ScriptV1){
+    const api=window.ScriptV1;
+    const oldParse63=api.parse,oldSer63=api.serialize,oldCan63=api.canonicalCommands,oldTo63=api.toV10Command,oldFrom63=api.fromV10Command,oldApply63=api.apply;
+    if(typeof oldParse63==='function')api.parse=function(raw,opts){const res=oldParse63.call(this,pvarCompat63(raw),opts);if(Array.isArray(res?.commands))res.commands=collapseBgShow63(markPvars63(res.commands));return res};
+    if(typeof oldTo63==='function')api.toV10Command=function(c,i){const o=oldTo63.call(this,c,i);if(o&&c?.type==='var'&&isPvar63(c))o.persistent=true;if(o&&c?.type==='bg'&&c.bgShowMode==='show'){o.showAfterPrepare=true;o.showDuration=c.bgShowDuration===''||c.bgShowDuration==null?null:Math.max(0,Number(c.bgShowDuration)||0)}return o};
+    if(typeof oldFrom63==='function')api.fromV10Command=function(c){const base=c?.type==='var'?oldFrom63.call(this,c):oldFrom63.call(this,c);if(base&&c?.type==='var'&&c.persistent)base.varScope='persistent';if(base&&c?.type==='bg'){base.bgShowMode=c.showAfterPrepare?'show':'prepare';base.bgShowDuration=c.showAfterPrepare?(c.showDuration==null?null:Math.max(0,Number(c.showDuration)||0)):null}return base};
+    if(typeof oldCan63==='function')api.canonicalCommands=function(){const list=oldCan63.apply(this,arguments)||[],byId=new Map(commands.map(c=>[c?.id,c]));for(let i=0;i<list.length;i++){const src=byId.get(list[i]?.id)||commands[i];if(src?.type==='var'&&isPvar63(src))list[i].persistent=true;if(src?.type==='bg'&&src.bgShowMode==='show'){list[i].showAfterPrepare=true;list[i].showDuration=src.bgShowDuration===''||src.bgShowDuration==null?null:Math.max(0,Number(src.bgShowDuration)||0)}}return list};
+    if(typeof oldSer63==='function')api.serialize=function(input){
+      const expanded=[];
+      for(const orig of Array.isArray(input)?input:[]){
+        const c=clone63(orig)||{};
+        if(c.type==='var'&&(c.persistent||c.varScope==='persistent')){c.name=PVAR_PREFIX63+String(c.name||'');delete c.persistent;c.varScope='normal';expanded.push(c);continue}
+        if(c.type==='bg'&&(c.showAfterPrepare||c.bgShowMode==='show')){
+          const off=!!c.disabled,d=(c.showDuration??c.bgShowDuration);delete c.showAfterPrepare;delete c.showDuration;delete c.bgShowMode;delete c.bgShowDuration;expanded.push(c);
+          expanded.push({type:'text',side:'none',speaker:'',source:d===''||d==null?'+bg':'+bg '+Math.max(0,Number(d)||0),disabled:off});continue;
+        }
+        expanded.push(c);
+      }
+      let text=oldSer63.call(this,expanded);
+      text=text.replace(/\[var (?=(?:"?)__TNPVAR63__)/g,'[pvar ').split(PVAR_PREFIX63).join('');
+      return text;
+    };
+    if(typeof oldApply63==='function')api.apply=function(raw){
+      const parsed=api.parse(raw,{previousCommands:api.canonicalCommands()});
+      if(!parsed?.ok){try{oldApply63.call(this,pvarCompat63(raw))}catch(_){ }return parsed}
+      const compat=pvarCompat63(raw);const base=oldApply63.call(this,compat);if(base?.ok===false)return parsed;
+      commands=(parsed.commands||[]).map(c=>api.fromV10Command(c));
+      selectedIndex=Math.max(-1,Math.min(selectedIndex,commands.length-1));saveLocal?.();renderEditor?.();startPreview?.();renderValidation?.();return parsed;
+    };
+  }
+
+  // ---------------- Project JSON ----------------
+  const bundleBefore63=window.portableProjectBundle||((typeof portableProjectBundle==='function')?portableProjectBundle:null);
+  if(typeof bundleBefore63==='function'){
+    const fn=async function(){const b=await bundleBefore63.apply(this,arguments);if(Array.isArray(b?.commands)){const byId=new Map(commands.map(c=>[c?.id,c]));for(let i=0;i<b.commands.length;i++){const src=byId.get(b.commands[i]?.id)||commands[i],dst=b.commands[i];if(src?.type==='var'&&isPvar63(src))dst.persistent=true;if(src?.type==='bg'&&src.bgShowMode==='show'){dst.showAfterPrepare=true;dst.showDuration=src.bgShowDuration===''||src.bgShowDuration==null?null:Math.max(0,Number(src.bgShowDuration)||0)}}}return b};
+    window.portableProjectBundle=fn;try{portableProjectBundle=fn}catch(_){ }
+  }
+  const importBefore63=window.importPortableProject||((typeof importPortableProject==='function')?importPortableProject:null);
+  if(typeof importBefore63==='function'){
+    const fn=async function(j){const meta=(j?.commands||[]).map(c=>({id:c?.id,persistent:!!c?.persistent,show:!!c?.showAfterPrepare,d:c?.showDuration}));const r=await importBefore63.apply(this,arguments);const byId=new Map(meta.map(x=>[x.id,x]));for(let i=0;i<commands.length;i++){const m=byId.get(commands[i]?.id)||meta[i];if(commands[i]?.type==='var')commands[i].varScope=m?.persistent?'persistent':'normal';if(commands[i]?.type==='bg'){commands[i].bgShowMode=m?.show?'show':'prepare';commands[i].bgShowDuration=m?.show?(m.d==null?null:Math.max(0,Number(m.d)||0)):null}}saveLocal?.();renderEditor?.();return r};
+    window.importPortableProject=fn;try{importPortableProject=fn}catch(_){ }
+  }
+
+  // Collision is deliberately invalid: one name must belong to one persistence scope.
+  const validateBefore63=window.validateScenario;
+  if(typeof validateBefore63==='function')window.validateScenario=function(){
+    const r=validateBefore63.apply(this,arguments)||{issues:[]};r.issues=Array.isArray(r.issues)?r.issues:[];
+    const normal=new Set(),persistent=new Set();
+    for(const c of commands){if(c?.disabled||c?.type!=='var'||!String(c.name||'').trim())continue;(isPvar63(c)?persistent:normal).add(String(c.name).trim())}
+    for(const n of persistent)if(normal.has(n))r.issues.push({level:'error',msg:`変数「${n}」が通常変数と周回変数の両方で使われています。どちらか一方に統一してください`});
+    return r;
+  };
+
+  const hint63=document.querySelector('.left .hintBox');if(hint63&&!hint63.innerHTML.includes('[pvar'))hint63.insertAdjacentHTML('beforeend','<br><b>[pvar 周回数 += 1]</b> 周回変数。はじめから／ロードでも値を維持し、条件分岐や {{変数名}} から通常変数と同じ名前で参照できます。');
+
+  // ---------------- Exported player ----------------
+  const PLAYER63=String.raw`<script>
+(function(){
+  'use strict';
+  var PKEY63='verticalNovelPersistentVarsV1:'+GAME_KEY,pvars63={};
+  function cp63(v){return v==null?v:JSON.parse(JSON.stringify(v))}
+  try{var q63=JSON.parse(localStorage.getItem(PKEY63)||'{}');if(q63&&typeof q63==='object'&&!Array.isArray(q63))pvars63=q63}catch(e){pvars63={}}
+  function isp63(c){return !!c&&(c.persistent===true||c.varScope==='persistent')}
+  function names63(){var z={};(commands||[]).forEach(function(c){if(c&&c.type==='var'&&isp63(c)&&c.name)z[String(c.name)]=1});return z}
+  function savep63(){try{localStorage.setItem(PKEY63,JSON.stringify(pvars63))}catch(e){}}
+  function sync63(){if(!rt||!rt.vars)return;Object.keys(pvars63).forEach(function(k){rt.vars[k]=pvars63[k]})}
+  function pv63(v){if(v==='true')return true;if(v==='false')return false;if(v!==''&&!Number.isNaN(Number(v)))return Number(v);return v}
+  var freshBefore63=fresh;fresh=function(){var x=freshBefore63();x.vars=Object.assign({},pvars63,x.vars||{});return x};
+  var svBefore63=sv;sv=function(c){if(!isp63(c))return svBefore63(c);var name=String(c.name||''),v=pv63(c.value),cur=pvars63[name];if(!name)return;if(c.op==='=')pvars63[name]=v;else if(c.op==='+')pvars63[name]=(Number(cur)||0)+(Number(v)||0);else if(c.op==='-')pvars63[name]=(Number(cur)||0)-(Number(v)||0);savep63();if(rt&&rt.vars)rt.vars[name]=pvars63[name]};
+  var runBefore63=run;run=function(){sync63();return runBefore63.apply(this,arguments)};
+  var transBgBefore63=transBg;transBg=async function(c,idx){var r=await transBgBefore63.apply(this,arguments);if(c&&c.bgShowMode==='show'){var d=c.bgShowDuration;if(d===''||d==null)d=(settings&&Number.isFinite(Number(settings.defaultBgFade)))?Math.max(0,Number(settings.defaultBgFade)):2;else d=Math.max(0,Number(d)||0);vis('+bg',d)}return r};
+
+  // Persistent progress is included in the save-backup file, but not in individual save slots.
+  async function export63(){try{var backup={format:'vertical-novel-save',version:1,gameKey:GAME_KEY,gameTitle:settings.gameTitle||'',exportedAt:Date.now(),persistentVars:cp63(pvars63),auto:await readSave(AUTO_KEY),slots:{}};for(var i=1;i<=SLOT_COUNT;i++)backup.slots[i]=await readSave(slotKey(i));var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=((settings.gameTitle||'novel-game').replace(/[\\/:*?"<>|\\r\\n]+/g,'_')||'novel-game')+'-save.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)}catch(e){console.error(e);alert('セーブデータを書き出せませんでした')}}
+  async function import63(file){try{var j=JSON.parse(await file.text());if(j&&j.format!=='vertical-novel-save'||Number(j&&j.version)!==1)throw new Error('format');if(j.gameKey&&j.gameKey!==GAME_KEY){alert('このゲーム用のセーブデータではありません');return}await putSaveRecord(AUTO_KEY,j.auto||null);for(var i=1;i<=SLOT_COUNT;i++)await putSaveRecord(slotKey(i),j.slots&&((j.slots[i])||(j.slots[String(i)]))||null);if(j.persistentVars&&typeof j.persistentVars==='object'&&!Array.isArray(j.persistentVars)){pvars63=cp63(j.persistentVars)||{};savep63();sync63()}checkpoint=null;await renderSlots();await updateContinue();alert('セーブデータを読み込みました')}catch(e){console.error(e);alert('セーブデータを読み込めませんでした')}}
+  var ex=document.getElementById('exportSaves'),im=document.getElementById('importSaves'),fi=document.getElementById('saveBackupFile');if(ex)ex.onclick=export63;if(im)im.onclick=function(){fi&&fi.click()};if(fi)fi.onchange=async function(e){var f=e.target.files&&e.target.files[0];if(f)await import63(f);e.target.value=''};
+
+  var panel=document.querySelector('#settingsOv .panel');if(panel&&!document.getElementById('resetPersistent63')){var box=document.createElement('div');box.className='actions playerMetaDanger63';box.innerHTML='<button id="resetPersistent63" class="danger" type="button">周回データを初期化</button>';panel.appendChild(box);box.querySelector('button').onclick=function(){if(!confirm('周回変数をすべて初期化します。セーブスロットは削除しません。よろしいですか？'))return;var n=names63();pvars63={};try{localStorage.removeItem(PKEY63)}catch(e){};if(rt&&rt.vars)Object.keys(n).forEach(function(k){delete rt.vars[k]});alert('周回データを初期化しました')}}
+  sync63();
+})();
+${'</scr'+'ipt>'}`;
+  const makeBefore63=window.makePlayerHTML;
+  if(typeof makeBefore63==='function')window.makePlayerHTML=function(project,settings={},catalog={}){const html=makeBefore63.call(this,project,settings,catalog);return html.replace('</body></html>',PLAYER63+'</body></html>')};
+
+  try{saveLocal?.();renderEditor?.();renderValidation?.()}catch(e){console.error('v63 refresh',e)}
+})();
+</script>
+
+
+<script id="tatenovel-v64-speaker-display-defer">
+(function(){
+  'use strict';
+  const VERSION64='v64';
+  document.title='TateNovel Studio '+VERSION64;
+  const h64=document.querySelector('.left h1');if(h64)h64.textContent='TateNovel Studio '+VERSION64;
+
+  const speaker64=()=>document.getElementById('previewSpeaker');
+  const text64=()=>document.getElementById('previewText');
+  const tap64=()=>document.getElementById('tapHint');
+  const hasText64=ev=>ev?.type==='text'&&String(ev.value??'').length>0;
+  function firstSignificant64(events,start=0){
+    for(let i=Math.max(0,Number(start)||0);i<(events||[]).length;i++){
+      const ev=events[i];
+      if(ev?.type==='text'&&String(ev.value??'').length===0)continue;
+      return ev||null;
+    }
+    return null;
+  }
+  function renderSpeaker64(){const el=speaker64();if(el)el.textContent=displaySpeaker(runtime.currentSpeaker)}
+  function hideSpeaker64(){const el=speaker64();if(el)el.textContent=''}
+  function scheduleFast64(){
+    if(!window.TestPlayFast?.enabled)return;
+    queueMicrotask(()=>{
+      if(!window.TestPlayFast?.enabled||document.querySelector('#previewChoices button')||!runtime?.waiting)return;
+      if(runtime.innerWait||runtime.pageBreakWait)advancePreview();
+    });
+  }
+
+  // Final dialogue runner: page-break state never alters currentSpeaker. It only
+  // suppresses the speaker DOM while the new page is still executing non-text events.
+  window.showPreviewDialoguePage=async function(resume=false){
+    const p=(runtime.textPages||[])[runtime.pageIndex];
+    if(!p)return false;
+
+    // v58/v59 leading standalone boundary behavior stays intact.
+    if(!resume&&p.holdPrevious58){
+      runtime.typing=false;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=true;runtime.eventIndex=0;
+      tap64().style.display='block';
+      scheduleFast64();
+      return true;
+    }
+    const holdComma=!resume&&p.holdPreviousComma58;
+    const effectiveResume=resume||holdComma;
+
+    if(p.speakerChanged)runtime.currentSpeaker=p.clearSpeaker?'':p.speaker;
+    highlightSpeaker(runtime.currentSpeaker);
+    const out=text64(), sp=speaker64();
+    if(!effectiveResume){out.textContent='';runtime.eventIndex=0}
+
+    // Do not blank an immediately-starting text page: restore/keep the speaker before
+    // the browser can paint, avoiding a one-frame disappearance.
+    if(holdComma){
+      if(sp)sp.textContent=displaySpeaker(runtime.currentSpeaker);
+    }else if(runtime.speakerPendingText64){
+      const next=firstSignificant64(p.events,runtime.eventIndex);
+      if(hasText64(next)){
+        renderSpeaker64();
+        runtime.speakerPendingText64=false;
+      }else hideSpeaker64();
+    }else renderSpeaker64();
+
+    if(!effectiveResume&&p.speakerChanged){await sleep(160);if(p.autoBounce)bounce('speaker')}
+    runtime.typing=true;runtime.skipTyping=false;runtime.innerWait=false;runtime.pageBreakWait=false;
+    tap64().style.display='none';
+
+    for(;runtime.eventIndex<p.events.length;runtime.eventIndex++){
+      const ev=p.events[runtime.eventIndex];
+      if(ev.type==='wait'){
+        runtime.eventIndex++;runtime.typing=false;runtime.innerWait=true;tap64().style.display='block';scheduleFast64();return true;
+      }
+      if(ev.type==='timewait'){
+        runtime.typing=false;tap64().style.display='none';await waitSeconds(ev.seconds);runtime.typing=true;runtime.skipTyping=false;continue;
+      }
+      if(ev.type==='inlineEffect'){runEffectPreview(ev.cmd);continue}
+      if(ev.type==='audioCue'){const ac=findAudioCue(ev.kind,ev.cue);if(ac)playPreviewAudio(ac);continue}
+      if(ev.type==='bgmStop'){stopPreviewBgm(ev.duration);continue}
+      if(ev.type==='bgPreset'){const bc=findBgPreset(ev.cue);if(bc)await transitionBgPreview(bc,ev.duration);continue}
+      if(ev.type==='bgOff'){hideBgPreview();continue}
+      if(ev.type==='charaSet'){setCharaPreview(ev.target,ev.cue);continue}
+      if(ev.type==='illustSet'){const ic=findIllustPreset(ev.cue,ev.target);if(ic)transitionIllustPreview(ic,ev.duration);continue}
+      if(ev.type==='illustPreset'){const ic=findIllustPreset(ev.cue,ev.target);if(ic)transitionIllustPreview(ic,ev.duration);continue}
+      if(ev.type==='illustOff'){hideIllustPreview(ev.target||'all',ev.duration);continue}
+      if(ev.type==='layer'){setCharLayerPreview(ev.target,ev.value);continue}
+      if(ev.type==='visibility'){setVisibility(ev.cmd,ev.duration);continue}
+      if(ev.type==='bounce'){bounce(ev.target);continue}
+      if(ev.type==='text'){
+        const value=String(ev.value??'');
+        if(value.length&&runtime.speakerPendingText64){renderSpeaker64();runtime.speakerPendingText64=false}
+        if(out.textContent&&!out.textContent.endsWith('\n'))out.textContent+='\n';
+        for(let ci=0;ci<value.length;ci++){
+          if(runtime.skipTyping){out.textContent+=value.slice(ci);ci=value.length;break}
+          out.textContent+=value[ci];await sleep(20)
+        }
+      }
+    }
+    runtime.typing=false;
+    if(p.endWait){runtime.pageBreakWait=true;tap64().style.display='block';scheduleFast64();return true}
+    tap64().style.display='none';
+    if(runtime.textPages&&runtime.pageIndex<runtime.textPages.length-1){
+      // Any real page transition starts a new "no body text yet" interval. If the
+      // next page begins with text, showPreviewDialoguePage restores the speaker
+      // synchronously and no flicker is visible.
+      runtime.speakerPendingText64=true;
+      runtime.pageIndex++;runtime.eventIndex=0;await window.showPreviewDialoguePage(false);status();return true;
+    }
+    runtime.textPages=null;runtime.pageIndex=0;runtime.eventIndex=0;runtime.waiting=false;run();return true;
+  };
+
+  // A clicked "。" may leave the text block entirely. Carry the pending flag across
+  // following standalone effect/wait/background/audio blocks until real body text starts.
+  const advanceBefore64=window.advancePreview;
+  if(typeof advanceBefore64==='function')window.advancePreview=function(){
+    const crosses=!!(runtime?.pageBreakWait&&!runtime?.timedWait&&!runtime?.effectBusy&&!runtime?.typing);
+    if(crosses)runtime.speakerPendingText64=true;
+    return advanceBefore64.apply(this,arguments);
+  };
+  const runBefore64=window.run;
+  if(typeof runBefore64==='function')window.run=function(){
+    if(runtime?.speakerPendingText64){
+      const c=commands?.[runtime.pc];
+      // A text command gets the no-flicker decision inside the page runner. For any
+      // other command, blank now; synchronous metadata commands can still reach text
+      // and restore before the next paint.
+      if(c&&c.type!=='text')hideSpeaker64();
+    }
+    return runBefore64.apply(this,arguments);
+  };
+
+  const startBefore64=window.startPreview;
+  if(typeof startBefore64==='function')window.startPreview=function(){const r=startBefore64.apply(this,arguments);if(runtime)runtime.speakerPendingText64=false;return r};
+  const resetBefore64=window.resetBlockPreview;
+  if(typeof resetBefore64==='function')window.resetBlockPreview=function(){const r=resetBefore64.apply(this,arguments);if(runtime)runtime.speakerPendingText64=false;return r};
+
+  const PLAYER64=String.raw`<script>
+(function(){
+  'use strict';
+  function hasText64(ev){return ev&&ev.type==='text'&&String(ev.value==null?'':ev.value).length>0}
+  function first64(events,start){for(var i=Math.max(0,Number(start)||0);i<(events||[]).length;i++){var ev=events[i];if(ev&&ev.type==='text'&&String(ev.value==null?'':ev.value).length===0)continue;return ev||null}return null}
+  function showSpeaker64(){sp.textContent=nameOf(rt.currentSpeaker)}
+  function hideSpeaker64(){sp.textContent=''}
+  function delay64(ms){return new Promise(function(r){setTimeout(r,Math.max(0,ms|0))})}
+  var PAGE64=135,CLICK64=85,TEXT64=55;
+
+  show=async function(resume){
+    resume=!!resume;
+    var p=rt.pages&&rt.pages[rt.page];if(!p)return;
+    if(!resume&&p.holdPrevious58){rt.typing=false;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=true;rt.event=0;tap.style.display='block';if(fastForward)setTimeout(function(){if(rt&&rt.pageBreakWait)advance()},CLICK64);return}
+    var holdComma=!resume&&p.holdPreviousComma58,effectiveResume=resume||holdComma;
+    if(p.speakerChanged)rt.currentSpeaker=p.clearSpeaker?'':p.speaker;
+    if(!effectiveResume){tx.textContent='';rt.event=0;startPageLog();checkpointPage()}
+    if(holdComma){showSpeaker64()}
+    else if(rt.speakerPendingText64){var n=first64(p.events,rt.event);if(hasText64(n)){showSpeaker64();rt.speakerPendingText64=false}else hideSpeaker64()}
+    else showSpeaker64();
+    if(!effectiveResume&&p.speakerChanged){await (fastForward?delay64(35):sl(160));if(p.autoBounce)bounce('speaker')}
+    rt.typing=true;rt.skipTyping=false;rt.innerWait=false;rt.pageBreakWait=false;tap.style.display='none';
+    for(;rt.event<p.events.length;rt.event++){
+      var ev=p.events[rt.event];
+      if(ev.type==='wait'){
+        if(fastForward){await delay64(CLICK64);continue}
+        rt.event++;rt.typing=false;rt.innerWait=true;tap.style.display='block';return;
+      }
+      if(ev.type==='timewait'){rt.typing=false;tap.style.display='none';await waitSec(ev.seconds);rt.typing=true;rt.skipTyping=false;continue}
+      if(ev.type==='inlineEffect'){doFx(ev.cmd);continue}
+      if(ev.type==='audioCue'){var ac=audioCue(ev.kind,ev.cue);if(ac)playAud(ac,commands.indexOf(ac));continue}
+      if(ev.type==='bgmStop'){stopBgm(ev.duration);continue}
+      if(ev.type==='bgPreset'){var bc=bgPreset(ev.cue);if(bc)await transBg(bc,commands.indexOf(bc),ev.duration);continue}
+      if(ev.type==='bgOff'){hideBg();continue}
+      if(ev.type==='charaSet'){setChara(ev.target,ev.cue);continue}
+      if(ev.type==='illustPreset'){var ic=illustPreset(ev.cue);if(ic)transIllust(ic,commands.indexOf(ic),ev.duration);continue}
+      if(ev.type==='illustSet'){var ic2=illustPreset(ev.cue);if(ic2)transIllust(ic2,commands.indexOf(ic2),ev.duration);continue}
+      if(ev.type==='illustOff'){hideIllust(ev.duration);continue}
+      if(ev.type==='layer'){setLayer(ev.target,ev.value);continue}
+      if(ev.type==='visibility'){vis(ev.cmd,ev.duration);continue}
+      if(ev.type==='bounce'){bounce(ev.target);continue}
+      if(ev.type==='text'){
+        var value=String(ev.value==null?'':ev.value);
+        if(value.length&&rt.speakerPendingText64){showSpeaker64();rt.speakerPendingText64=false}
+        if(tx.textContent&&!tx.textContent.endsWith('\n'))tx.textContent+='\n';
+        if(fastForward){tx.textContent+=value;await delay64(Math.min(95,TEXT64+value.length*.8))}
+        else{for(var i=0;i<value.length;i++){if(rt.skipTyping||fastForward){tx.textContent+=value.slice(i);i=value.length;break}tx.textContent+=value[i];await sl(20)}}
+        addPageLogText(value);continue;
+      }
+    }
+    rt.typing=false;commitPageLog();
+    if(p.endWait){if(!fastForward){rt.pageBreakWait=true;tap.style.display='block';return}await delay64(PAGE64);tx.textContent='';rt.speakerPendingText64=true}
+    tap.style.display='none';
+    if(rt.pages&&rt.page<rt.pages.length-1){rt.speakerPendingText64=true;rt.page++;rt.event=0;if(fastForward)await delay64(35);await show(false);return}
+    rt.pages=null;rt.waiting=false;run();
+  };
+
+  var advanceBefore64=advance;advance=function(){var crosses=!!(rt&&rt.pageBreakWait&&!rt.timedWait&&!rt.effectBusy&&!rt.typing);if(crosses)rt.speakerPendingText64=true;return advanceBefore64.apply(this,arguments)};
+  var runBefore64=run;run=function(){if(rt&&rt.speakerPendingText64){var c=commands&&commands[rt.pc];if(c&&c.type!=='text')hideSpeaker64()}return runBefore64.apply(this,arguments)};
+  var freshBefore64=fresh;fresh=function(){var x=freshBefore64.apply(this,arguments);x.speakerPendingText64=false;return x};
+})();
+${'</scr'+'ipt>'}`;
+  const makeBefore64=window.makePlayerHTML;
+  if(typeof makeBefore64==='function')window.makePlayerHTML=function(project,settings={},catalog={}){
+    const html=makeBefore64.call(this,project,settings,catalog);
+    return html.replace('</body></html>',PLAYER64+'</body></html>');
+  };
+
+  try{renderEditor?.();renderValidation?.()}catch(e){console.error('v64 refresh',e)}
+})();
+</script>
+
 </body></html>
