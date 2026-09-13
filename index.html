@@ -46,10 +46,10 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <div class="app">
 <aside class="left">
 <h1>TateNovel Studio v69</h1><div class="sub">スマホ中心の縦型ノベル制作環境</div>
-<div class="sectionTitle">ゲーム</div><label>タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea><div class="sectionTitle">書き出し</div><label>出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub" style="margin-top:6px">空欄の場合はゲームタイトルから自動生成します。</div><div class="sectionTitle">主人公・プレイヤー</div><label>名前（文章内の <b>p</b> で使用）</label><input id="heroName" value="">
+<div class="basicSettingsRailNote">作品情報や表示の基本値は、上部の「基本設定」から変更できます。</div>
 </aside>
 <main class="center">
-<div class="toolbar"><button id="undoBtn">↶ Undo</button><button id="redoBtn">↷ Redo</button><button class="primary" id="newProject">新規</button><button id="importTextBlocks">テキストから追加</button><button id="openLabelSearch">ラベル検索</button><button id="collapseAll">すべて閉じる</button><button id="expandAll">すべて開く</button><button id="saveProject">プロジェクトJSON保存</button><button id="loadProject">JSON読込</button><button id="openCommandReference">コマンド表</button><button id="openAssetManager">素材管理</button><button class="good" id="exportGame">ゲームHTML書出し</button><input id="projectFile" type="file" accept=".json,application/json" class="hidden"></div>
+<div class="toolbar"><button id="undoBtn">↶ Undo</button><button id="redoBtn">↷ Redo</button><button class="primary" id="newProject">新規</button><button id="importTextBlocks">テキストから追加</button><button id="openLabelSearch">ラベル検索</button><button id="collapseAll">すべて閉じる</button><button id="expandAll">すべて開く</button><button id="saveProject">プロジェクトJSON保存</button><button id="loadProject">JSON読込</button><button id="openBasicSettings">基本設定</button><button id="openCommandReference">コマンド表</button><button id="openAssetManager">素材管理</button><button class="good" id="exportGame">ゲームHTML書出し</button><input id="projectFile" type="file" accept=".json,application/json" class="hidden"></div>
 <div class="sub" style="margin:-4px 0 10px">素材は内部の素材台帳から参照します。プロジェクトJSON保存は素材・メモ・コメントを含む完全バックアップ、Script TXTはシナリオだけのUTF-8テキストです。</div><div id="validationBox" class="validation ok">シナリオ検証: 問題なし</div><div id="commands" class="commandList"></div>
 </main>
 <aside class="right preview-home" id="previewHome">
@@ -65,6 +65,11 @@ body.assetModalOpen{overflow:hidden;touch-action:none}.assetModal,.assetPanel,.a
 <div class="scrollNav"><button id="scrollTopBtn" title="一番上へ">⇈ 上</button><button id="scrollBottomBtn" title="一番下へ">⇊ 下</button></div>
 <div id="scriptImportOverlay" class="scriptOverlay hidden"><div class="scriptPanel"><h2>テキストからブロック追加</h2><div class="sub">単独行の <b>---</b> で文章ブロックを分割。<b>[label 名前]</b> でラベル、<b>[end]</b> でENDブロックを挿入します。<b>//コメント</b> と <b>// コメント</b> は両方コメントとして扱います。独立したコメントはメモブロック、文章に続くコメントは文章ブロック内に保持します。現在選択中ブロックの直後に追加します。</div><textarea id="scriptImportText"></textarea><div class="scriptActions"><button id="scriptImportCancel">キャンセル</button><button id="scriptImportRun" class="primary">ブロック化して追加</button></div></div></div>
 <div id="labelSearchOverlay" class="scriptOverlay hidden"><div class="scriptPanel labelSearchPanel"><h2>ラベル検索</h2><div class="sub">ラベル名を入力するか、一覧から選ぶとそのブロックへ移動します。</div><input id="labelSearchInput" type="search" placeholder="ラベル名を検索" autocomplete="off"><div id="labelSearchResults" class="labelSearchResults"></div><div class="scriptActions"><button id="labelSearchClose">閉じる</button></div></div></div>
+<div id="basicSettingsModal" class="assetModal basicSettingsModal" aria-hidden="true"><div class="assetPanel basicSettingsPanel" role="dialog" aria-modal="true" aria-labelledby="basicSettingsTitle"><div class="assetHeader"><div><h2 id="basicSettingsTitle">基本設定</h2><div class="sub" style="margin:0">作品全体で共通する設定をまとめて変更できます。</div></div><button id="closeBasicSettings" class="miniBtn">閉じる</button></div><div class="basicSettingsBody">
+<div class="basicSettingsSection"><div class="basicSettingsSectionTitle">ゲーム</div><label for="gameTitle">タイトル（改行可）</label><textarea id="gameTitle" rows="2"></textarea></div>
+<div class="basicSettingsSection"><div class="basicSettingsSectionTitle">主人公・プレイヤー</div><label for="heroName">名前（文章内の <b>p</b> で使用）</label><input id="heroName" value=""></div>
+<div class="basicSettingsSection basicSettingsOutput"><div class="basicSettingsSectionTitle">書き出し</div><label for="outputBaseName">出力ファイル名（拡張子不要）</label><input id="outputBaseName" value=""><div id="outputNamePreview" class="sub basicSettingsOutputPreview">空欄の場合はゲームタイトルから自動生成します。</div></div>
+</div></div></div>
 <div id="commandRefModal" class="assetModal commandRefModal" aria-hidden="true"><div class="assetPanel commandRefPanel" role="dialog" aria-modal="true" aria-labelledby="commandRefTitle"><div class="assetHeader"><div><h2 id="commandRefTitle">コマンド早見表</h2><div class="sub" style="margin:0">文章ブロック内で使える記法を種類別に確認できます。</div></div><button id="closeCommandReference" class="miniBtn">閉じる</button></div><div class="commandRefTools"><button type="button" id="commandRefExpandAll">すべて開く</button><button type="button" id="commandRefCollapseAll">すべて閉じる</button></div><div class="commandReference">
 <details class="commandRefGroup" open><summary>進行・話者</summary><div class="commandRefRows">
 <div class="commandRefRow"><code>、</code><span class="commandRefDesc">クリック待ち</span></div>
@@ -130,7 +135,7 @@ let commands=loadLocal()||[];
 let runtime={pc:0,vars:{},bg:'',chars:null,waiting:false,textPages:null,pageIndex:0,eventIndex:0,currentSpeaker:'',typing:false,skipTyping:false,innerWait:false,pageBreakWait:false,timedWait:false,waitResolve:null,effectBusy:false,charVisible:{a:true,b:true,c:true,d:true},charLayer:{a:4,b:3,c:2,d:1},charCue:{a:'',b:'',c:'',d:''},charOff:{a:false,b:false,c:false,d:false},bgVisible:true,bgOff:false,darkened:false,camera:{scale:100,x:50,y:50},illustCue:'',illustVisible:false,bgmIndex:-1,bgmTime:0,ended:false};
 let editTarget=null; let charEditTargetKey='a'; let gesture=null; let imageEditMode=false; let zoomTargetMode=false; let mobilePreviewOpen=false;
 let selectedIndex=commands.length?commands.length-1:-1;
-let collapsed=new Set();
+let collapsed=new Set(commands.map((_,i)=>i));
 const HISTORY_LIMIT=100;
 let undoStack=[];
 let redoStack=[];
@@ -8261,6 +8266,36 @@ window.TateNovelV70=Object.assign({},window.TateNovelV70||{}, {phase:3, renderPi
     parseDialogueLayers:()=>window.getParseDialogueLayersV70?window.getParseDialogueLayersV70():[],
     scriptV1Layers:()=>window.getScriptV1LayersV70?window.getScriptV1LayersV70():{}
   });
+})();
+</script>
+
+<style id="tatenovel-v70-basic-settings-style">
+.basicSettingsRailNote{margin-top:18px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#121720;color:var(--muted);font-size:11px;line-height:1.6}
+.basicSettingsPanel{width:min(680px,94vw);max-height:min(88vh,820px);overflow:auto}
+.basicSettingsBody{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.basicSettingsSection{border:1px solid var(--line);border-radius:12px;background:#11161e;padding:12px 14px}
+.basicSettingsSectionTitle{font-size:13px;font-weight:900;color:#e6ebf6;margin-bottom:8px}
+.basicSettingsSection label{margin-top:0}
+.basicSettingsSection .visualDefaults{margin-top:14px;margin-bottom:0;padding-top:13px;border-top:1px solid var(--line)}
+.basicSettingsSection .visualDefaults .sectionTitle{margin-top:0}
+.basicSettingsOutputPreview{margin:7px 0 0}
+body.basicSettingsModalOpen{overflow:hidden}
+@media(max-width:720px){.basicSettingsPanel{width:100%;height:100dvh;max-height:none;border:0;border-radius:0;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));overflow:auto}.basicSettingsBody{gap:10px}.basicSettingsSection{padding:12px}.basicSettingsRailNote{display:none}}
+</style>
+<script id="tatenovel-v70-basic-settings">
+(function(){
+  'use strict';
+  const modal=document.getElementById('basicSettingsModal');
+  const openBtn=document.getElementById('openBasicSettings');
+  const closeBtn=document.getElementById('closeBasicSettings');
+  if(!modal||!openBtn||!closeBtn)return;
+  function open(){modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('basicSettingsModalOpen');setTimeout(()=>closeBtn.focus(),0)}
+  function close(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('basicSettingsModalOpen');openBtn.focus()}
+  openBtn.addEventListener('click',open);
+  closeBtn.addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
+  window.BasicSettingsV70={open,close};
 })();
 </script>
 
